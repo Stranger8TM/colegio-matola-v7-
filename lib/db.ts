@@ -1,3 +1,13 @@
+import { PrismaClient } from "@prisma/client"
+
+declare global {
+  var prisma: PrismaClient | undefined
+}
+
+export const db = globalThis.prisma || new PrismaClient()
+
+if (process.env.NODE_ENV !== "production") globalThis.prisma = db
+
 // Simulação de banco de dados para o portal do aluno e painel de professores
 // Em um ambiente de produção, isso seria substituído por um banco de dados real
 

@@ -1,0 +1,242 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  role           Role      @default(STUDENT)
+  adminType      AdminType? // Tipo de administrador (se role for ADMIN)
+  
+  // Campos específicos para estudantes
+  class          String?
+  grade          String?
+  
+  // Campos específicos para professores
+  subject        String?
+  bio            String?
+  
+  // Campos comuns
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  accounts       Account[]
+  sessions       Session[]
+  materials      Material[]
+  notifications  Notification[]
+  grades         Grade[]
+  tasks          Task[]
+  
+  // Relações para administradores
+  classesManaged Class[]
+  disciplinesCreated Discipline[]
+  schedules      Schedule[]
+  exams          Exam[]
+  financialRecords FinancialRecord[]
+  systemLogs     SystemLog[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum AdminType {
+  SUPREME      // Admin Supremo - acesso total
+  GENERAL      // Admin Geral - acesso total
+  PEDAGOGICAL  // Coordenador pedagógico - acesso acadêmico
+  SECRETARY    // Secretaria - cadastros e documentação
+  TECHNICAL    // TI/Admin técnico - configurações do sistema
+}
+
+// Modelos para materiais didáticos
+model Material {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  subject     String
+  fileUrl     String
+  uploadDate  DateTime @default(now())
+  teacherId   String
+  classTarget String
+  
+  teacher     User     @relation(fields: [teacherId], references: [id])
+}
+
+// Modelos para tarefas
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+  userId      String
+  
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+// Modelos para notificações
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  date        DateTime @default(now())
+  teacherId   String
+  teacherName String
+  targetClass String?  // null significa para todas as turmas
+  isRead      Boolean  @default(false)
+  
+  teacher     User     @relation(fields: [teacherId], references: [id])
+}
+
+// Modelos para notas
+model Grade {
+  id          String   @id @default(cuid())
+  studentId   String
+  studentName String
+  subject     String
+  teacherId   String
+  value       Float
+  term        String
+  date        DateTime @default(now())
+  comments    String?
+  
+  teacher     User     @relation(fields: [teacherId], references: [id])
+}
+
+// Modelos para administração acadêmica
+model Class {
+  id          String   @id @default(cuid())
+  name        String
+  grade       String
+  year        Int
+  adminId     String
+  
+  admin       User     @relation(fields: [adminId], references: [id])
+  students    StudentClass[]
+  schedules   Schedule[]
+  exams       Exam[]
+}
+
+model StudentClass {
+  id          String   @id @default(cuid())
+  studentId   String
+  classId     String
+  
+  class       Class    @relation(fields: [classId], references: [id])
+}
+
+model Discipline {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdById String
+  
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  schedules   Schedule[]
+  exams       Exam[]
+}
+
+model Schedule {
+  id          String   @id @default(cuid())
+  classId     String
+  disciplineId String
+  teacherId   String?
+  dayOfWeek   Int      // 1-7 (segunda a domingo)
+  startTime   String
+  endTime     String
+  adminId     String
+  
+  class       Class    @relation(fields: [classId], references: [id])
+  discipline  Discipline @relation(fields: [disciplineId], references: [id])
+  admin       User     @relation(fields: [adminId], references: [id])
+}
+
+model Exam {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  classId     String
+  disciplineId String
+  adminId     String
+  
+  class       Class    @relation(fields: [classId], references: [id])
+  discipline  Discipline @relation(fields: [disciplineId], references: [id])
+  admin       User     @relation(fields: [adminId], references: [id])
+}
+
+// Modelos para administração financeira
+model FinancialRecord {
+  id          String   @id @default(cuid())
+  studentId   String?
+  type        String   // mensalidade, taxa, multa, etc.
+  amount      Float
+  dueDate     DateTime?
+  paymentDate DateTime?
+  status      String   // pendente, pago, atrasado, etc.
+  description String?
+  adminId     String
+  
+  admin       User     @relation(fields: [adminId], references: [id])
+}
+
+// Modelos para logs do sistema
+model SystemLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  details     String?
+  ipAddress   String?
+  timestamp   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id])
+}

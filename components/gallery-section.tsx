@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 import { X } from "lucide-react"
 
 // Categorias da galeria conforme solicitado
-const categories = ["Nosso Colégio", "Finalistas", "Cultura", "Informática e Tecnologia", "Momentos"]
+const categories = ["Nosso Colégio", "Finalistas", "Cultura", "Informática e Tecnologia", "Momentos", "Xadrez"]
 
 // Imagens da galeria organizadas por categoria
 const galleryImages = [
@@ -94,6 +94,32 @@ const galleryImages = [
     src: "/gallery-momentos-2.jpg",
     alt: "Atividade ao ar livre com alunos",
     category: "Momentos",
+  },
+  // Novas imagens do campeonato de xadrez
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%283%29.jpg-erNTWXgCr3QsqLWfBleiLrbFdIlybl.jpeg",
+    alt: "Menina concentrada jogando xadrez em torneio escolar",
+    category: "Xadrez",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%281%29.jpg-G4A4gVrMeCBNslDymsqf5mNXXxUtwo.jpeg",
+    alt: "Dois alunos segurando peças grandes de xadrez",
+    category: "Xadrez",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%284%29.jpg-btgay9SDBGfuYV2tSpjAMBSlrIENEW.jpeg",
+    alt: "Menina de uniforme amarelo jogando xadrez em torneio",
+    category: "Xadrez",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%282%29.jpg-cH213qLG5gbHaRMayT8SJpajRApSA3.jpeg",
+    alt: "Aluno concentrado analisando jogada de xadrez",
+    category: "Xadrez",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%285%29.jpg-ZVI4VCGOlqkGFUzOpJ4N64og44501R.jpeg",
+    alt: "Professor orientando alunos durante torneio de xadrez",
+    category: "Xadrez",
   },
 ]
 
@@ -208,7 +234,7 @@ export default function GallerySection() {
               />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white">
                 <p className="font-medium text-lg">{filteredImages[selectedImage].alt}</p>
-                <p className="text-sm text-gray-300">{filteredImages[selectedImage].category}</p>
+                <p className="text-sm text-gray-300">{filteredImages[selectedImage]}</p>
               </div>
             </div>
           </div>

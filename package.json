@@ -66,8 +66,15 @@
     "react-native": "latest",
     "three": "latest",
     "@react-three/fiber": "latest",
+    "prisma": "latest",
+    "@auth/core": "latest",
+    "nodemailer": "latest",
+    "@prisma/client": "latest",
+    "next-auth": "latest",
     "framer-motion": "latest",
-    "@react-three/drei": "latest"
+    "@react-three/drei": "latest",
+    "bcryptjs": "latest",
+    "@next-auth/prisma-adapter": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
