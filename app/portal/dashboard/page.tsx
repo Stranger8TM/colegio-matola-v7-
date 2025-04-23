@@ -18,6 +18,7 @@ import {
   BarChart,
   CheckCircle,
   Bell,
+  BrainCircuit,
 } from "lucide-react"
 import Link from "next/link"
 import {
@@ -29,6 +30,7 @@ import {
   getGradesByStudent,
 } from "@/lib/db"
 import type { Notification } from "@/lib/db"
+import AdvancedChatbot from "@/components/advanced-chatbot"
 
 // Simulando autenticação - em um ambiente real, isso seria feito com autenticação adequada
 const currentUser = getUserById("1")
@@ -40,6 +42,7 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [grades, setGrades] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const [chatbotType, setChatbotType] = useState<"simple" | "advanced">("simple")
 
   useEffect(() => {
     if (currentUser) {
@@ -174,7 +177,7 @@ export default function Dashboard() {
                     onClick={() => setActiveTab("chatbot")}
                   >
                     <MessageSquare className="mr-2 h-5 w-5" />
-                    Chatbot IA
+                    Assistente Virtual
                   </Button>
                   <Button
                     variant={activeTab === "configuracoes" ? "default" : "ghost"}
@@ -614,11 +617,42 @@ export default function Dashboard() {
             {activeTab === "chatbot" && (
               <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
-                  <CardTitle>Chatbot IA</CardTitle>
-                  <CardDescription>Tire suas dúvidas com nosso assistente virtual</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Assistente Virtual</CardTitle>
+                      <CardDescription>Tire suas dúvidas com nosso assistente virtual</CardDescription>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Escolha o tipo de assistente:</span>
+                      <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        <button
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            chatbotType === "simple"
+                              ? "bg-blue-800 text-white"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => setChatbotType("simple")}
+                        >
+                          <MessageSquare className="h-4 w-4 inline mr-1" />
+                          Simples
+                        </button>
+                        <button
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            chatbotType === "advanced"
+                              ? "bg-blue-800 text-white"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => setChatbotType("advanced")}
+                        >
+                          <BrainCircuit className="h-4 w-4 inline mr-1" />
+                          Avançado
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <ChatbotInterface />
+                  {chatbotType === "simple" ? <ChatbotInterface /> : <AdvancedChatbot />}
                 </CardContent>
               </Card>
             )}

@@ -9,10 +9,12 @@ import CTASection from "@/components/cta-section"
 import FeedbackSection from "@/components/feedback-section"
 import AIAssistantSection from "@/components/ai-assistant-section"
 import Footer from "@/components/footer"
+import IntroAnimationWrapper from "@/components/intro-animation-wrapper"
 
 export default function Home() {
   return (
     <main className="min-h-screen">
+      <IntroAnimationWrapper />
       <Navbar />
       <HeroSection />
       <StatisticsSection />

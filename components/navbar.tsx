@@ -6,7 +6,7 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Moon, Sun, Menu, X, Phone, ChevronDown } from "lucide-react"
 
-// Atualizar o array menuItems para incluir o Painel de Professores
+// Atualizar o array menuItems para mudar "Painel de Professores" para "Painel"
 const menuItems = [
   {
     name: "Home",
@@ -34,8 +34,8 @@ const menuItems = [
     path: "/portal",
   },
   {
-    name: "Painel de Professores",
-    path: "/professores",
+    name: "Painel",
+    path: "/painel",
   },
   {
     name: "Contacto",
