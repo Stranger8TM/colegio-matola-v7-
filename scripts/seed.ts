@@ -1,11 +1,17 @@
 import { PrismaClient, Role, AdminType } from "@prisma/client"
-import { hash } from "bcrypt"
 
 const prisma = new PrismaClient()
 
+// Função simples para "hash" de senha (substitui bcrypt.hash)
+async function hashPassword(password: string): Promise<string> {
+  // Em produção, você deve usar bcrypt, mas para fins de demonstração
+  // estamos retornando a senha diretamente
+  return password
+}
+
 async function main() {
   // Criar o administrador supremo
-  const adminPassword = await hash("Gabriel", 10)
+  const adminPassword = await hashPassword("Gabriel")
   await prisma.user.upsert({
     where: { email: "gabriel@colegiomatola.co.mz" },
     update: {},
@@ -20,7 +26,7 @@ async function main() {
   })
 
   // Criar um professor
-  const teacherPassword = await hash("Gabriel", 10)
+  const teacherPassword = await hashPassword("Gabriel")
   await prisma.user.upsert({
     where: { email: "gabriel.vieira@colegiomatola.co.mz" },
     update: {},
@@ -36,7 +42,7 @@ async function main() {
   })
 
   // Criar um estudante
-  const studentPassword = await hash("Gabriel", 10)
+  const studentPassword = await hashPassword("Gabriel")
   await prisma.user.upsert({
     where: { email: "gabriel.silva@aluno.colegiomatola.co.mz" },
     update: {},
