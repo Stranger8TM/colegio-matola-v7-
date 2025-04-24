@@ -1,244 +1,200 @@
-"use client"
-
-import { useState } from "react"
 import Image from "next/image"
-import { motion } from "framer-motion"
-import { X } from "lucide-react"
-
-// Categorias da galeria conforme solicitado
-const categories = ["Nosso Colégio", "Finalistas", "Cultura", "Informática e Tecnologia", "Momentos", "Xadrez"]
-
-// Imagens da galeria organizadas por categoria
-const galleryImages = [
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%2810%29.jpg-92ZvRMQZT3rb6QK76LnvEqocA6w6rj.jpeg",
-    alt: "Refeitório do colégio com mesas e bancos laranja",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%281%29.jpg-PTHHuwhDkpOT26jn9urVlorMWOY10e.jpeg",
-    alt: "Berçário com camas infantis e decoração colorida",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%289%29.jpg-tfmWkgoC22VUlUavCXPtNI07cKWrOe.jpeg",
-    alt: "Sala de descanso infantil com decoração de árvore",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%284%29.jpg-Z26vQP95rejo4qWjEucwVwmQ8wRJUU.jpeg",
-    alt: "Corredor com quadros de pontos turísticos mundiais",
-    category: "Cultura",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%286%29.jpg-AW4dpVszTS6olBGzEDrg7FxM5ffEd1.jpeg",
-    alt: "Biblioteca com mesas e estantes de livros",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%285%29.jpg-gz6YswteTIL3LzuoolcX2ipvDOSQgT.jpeg",
-    alt: "Sala de estudos com mesas e cadeiras verdes",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%287%29.jpg-Do5TcvdtaxKrkLBBQztFcnVIFm52yX.jpeg",
-    alt: "Ginásio poliesportivo coberto",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%288%29.jpg-uQD4AZdCnCAhb8JvGg9C4kFeIrhSRZ.jpeg",
-    alt: "Cesta de basquete no ginásio",
-    category: "Nosso Colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%283%29.jpg-jvcvYomNVXFSMasZM5TWbAulHGVl8J.jpeg",
-    alt: "Laboratório de ciências com banquetas e equipamentos",
-    category: "Informática e Tecnologia",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%282%29.jpg-tK9dPECcPaWVM7NlHSzglUJMgnTOMt.jpeg",
-    alt: "Modelo anatômico de olho no laboratório",
-    category: "Informática e Tecnologia",
-  },
-  {
-    src: "/gallery-finalistas-1.jpg",
-    alt: "Cerimônia de formatura dos finalistas",
-    category: "Finalistas",
-  },
-  {
-    src: "/gallery-finalistas-2.jpg",
-    alt: "Alunos finalistas com diplomas",
-    category: "Finalistas",
-  },
-  {
-    src: "/gallery-cultura-1.jpg",
-    alt: "Apresentação cultural dos alunos",
-    category: "Cultura",
-  },
-  {
-    src: "/gallery-cultura-2.jpg",
-    alt: "Festival cultural da escola",
-    category: "Cultura",
-  },
-  {
-    src: "/gallery-informatica-1.jpg",
-    alt: "Laboratório de informática",
-    category: "Informática e Tecnologia",
-  },
-  {
-    src: "/gallery-momentos-1.jpg",
-    alt: "Celebração do Dia da Criança",
-    category: "Momentos",
-  },
-  {
-    src: "/gallery-momentos-2.jpg",
-    alt: "Atividade ao ar livre com alunos",
-    category: "Momentos",
-  },
-  // Novas imagens do campeonato de xadrez
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%283%29.jpg-erNTWXgCr3QsqLWfBleiLrbFdIlybl.jpeg",
-    alt: "Menina concentrada jogando xadrez em torneio escolar",
-    category: "Xadrez",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%281%29.jpg-G4A4gVrMeCBNslDymsqf5mNXXxUtwo.jpeg",
-    alt: "Dois alunos segurando peças grandes de xadrez",
-    category: "Xadrez",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%284%29.jpg-btgay9SDBGfuYV2tSpjAMBSlrIENEW.jpeg",
-    alt: "Menina de uniforme amarelo jogando xadrez em torneio",
-    category: "Xadrez",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%282%29.jpg-cH213qLG5gbHaRMayT8SJpajRApSA3.jpeg",
-    alt: "Aluno concentrado analisando jogada de xadrez",
-    category: "Xadrez",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%285%29.jpg-ZVI4VCGOlqkGFUzOpJ4N64og44501R.jpeg",
-    alt: "Professor orientando alunos durante torneio de xadrez",
-    category: "Xadrez",
-  },
-]
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function GallerySection() {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null)
-  const [filter, setFilter] = useState("Nosso Colégio")
-
-  const filteredImages = filter === "Todos" ? galleryImages : galleryImages.filter((img) => img.category === filter)
-
   return (
-    <section className="py-24 bg-white dark:bg-gray-800">
+    <section className="py-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 px-4 py-1 rounded-full text-sm font-medium mb-4"
-          >
-            <span className="flex h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-2"></span>
-            Nossa Galeria
-          </motion.div>
-
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-blue-900 dark:text-blue-400 mb-4"
-          >
-            Conheça Nosso Colégio em Imagens
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
-          >
-            Explore as instalações, eventos e momentos especiais do Colégio Privado da Matola através da nossa galeria
-            de imagens.
-          </motion.p>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Nossa Galeria</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Conheça nossas instalações e atividades através de nossa galeria de fotos
+          </p>
         </div>
 
-        {/* Filtros */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map((category, index) => (
-            <motion.button
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              viewport={{ once: true }}
-              onClick={() => setFilter(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                filter === category
-                  ? "bg-blue-800 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-              }`}
-            >
-              {category}
-            </motion.button>
-          ))}
-        </div>
-
-        {/* Galeria */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredImages.map((image, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.03 }}
-              className="relative overflow-hidden rounded-2xl cursor-pointer group h-64"
-              onClick={() => setSelectedImage(index)}
-            >
-              <div className="h-full w-full relative">
-                <Image src={image.src || "/placeholder.svg"} alt={image.alt} fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <span className="inline-block px-3 py-1 bg-blue-800 rounded-full text-xs font-medium mb-2">
-                    {image.category}
-                  </span>
-                  <p className="font-medium">{image.alt}</p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="/gallery-1.jpg"
+                  alt="Biblioteca"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
               </div>
-            </motion.div>
-          ))}
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Biblioteca Moderna</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Nossa biblioteca conta com mais de 10.000 livros e espaços de estudo.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="/gallery-2.jpg"
+                  alt="Laboratório"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Laboratório de Ciências</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Equipamentos modernos para aulas práticas de química, física e biologia.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="/gallery-3.jpg"
+                  alt="Sala de Informática"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Sala de Informática</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Computadores de última geração para aulas de informática e programação.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%283%29.jpg-erNTWXgCr3QsqLWfBleiLrbFdIlybl.jpeg"
+                  alt="Campeonato de Xadrez"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Campeonato de Xadrez</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Nossos alunos participam de competições de xadrez, desenvolvendo raciocínio lógico e estratégia.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%281%29.jpg-G4A4gVrMeCBNslDymsqf5mNXXxUtwo.jpeg"
+                  alt="Peças de Xadrez Gigantes"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Xadrez Gigante</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Atividades lúdicas com peças de xadrez gigantes para estimular o interesse pelo jogo.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%284%29.jpg-btgay9SDBGfuYV2tSpjAMBSlrIENEW.jpeg"
+                  alt="Torneio de Xadrez"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Torneio Interclasses</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Competições entre turmas promovem o espírito esportivo e a concentração.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%282%29.jpg-cH213qLG5gbHaRMayT8SJpajRApSA3.jpeg"
+                  alt="Alunos jogando xadrez"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Concentração e Estratégia</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  O xadrez ajuda nossos alunos a desenvolverem foco e pensamento estratégico.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%285%29.jpg-ZVI4VCGOlqkGFUzOpJ4N64og44501R.jpeg"
+                  alt="Professor ensinando xadrez"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Mentoria e Ensino</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Professores dedicados ensinam técnicas avançadas de xadrez para nossos alunos.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative h-64 w-full">
+                <Image
+                  src="/gallery-4.jpg"
+                  alt="Quadra Esportiva"
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1">Quadra Poliesportiva</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  Espaço para prática de diversos esportes e atividades físicas.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Modal de visualização */}
-        {selectedImage !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
-            <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors"
-            >
-              <X className="h-8 w-8" />
-            </button>
-
-            <div className="relative max-w-4xl w-full max-h-[80vh]">
-              <Image
-                src={filteredImages[selectedImage].src || "/placeholder.svg"}
-                alt={filteredImages[selectedImage].alt}
-                width={1200}
-                height={800}
-                className="object-contain max-h-[80vh] w-auto mx-auto"
-              />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white">
-                <p className="font-medium text-lg">{filteredImages[selectedImage].alt}</p>
-                <p className="text-sm text-gray-300">{filteredImages[selectedImage]}</p>
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="flex justify-center mt-8">
+          <Button variant="outline" className="mr-2">
+            <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
+          </Button>
+          <Button variant="outline">
+            Próximo <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </section>
   )
