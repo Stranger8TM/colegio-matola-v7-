@@ -1,8 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { AuthGuard } from "@/components/auth-guard"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,93 +18,66 @@ import {
   BarChart,
   CheckCircle,
   Bell,
+  BrainCircuit,
 } from "lucide-react"
-import AdvancedAIChatbot from "@/components/advanced-ai-chatbot"
+import Link from "next/link"
+import {
+  getUserById,
+  getMaterials,
+  getTasks,
+  getNotifications,
+  markNotificationAsRead,
+  getGradesByStudent,
+} from "@/lib/db"
+import type { Notification } from "@/lib/db"
+import AdvancedChatbot from "@/components/advanced-chatbot"
+
+// Simulando autenticação - em um ambiente real, isso seria feito com autenticação adequada
+const currentUser = getUserById("1")
+const materials = getMaterials()
+const tasks = getTasks()
 
 export default function Dashboard() {
-  // Usamos o AuthGuard para proteger esta página
-  return (
-    <AuthGuard role="STUDENT">
-      <DashboardContent />
-    </AuthGuard>
-  )
-}
-
-function DashboardContent() {
-  const { data: session } = useSession()
-  const user = session?.user
-
   const [activeTab, setActiveTab] = useState("perfil")
-  const [notifications, setNotifications] = useState<any[]>([])
-  const [materials, setMaterials] = useState<any[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
   const [grades, setGrades] = useState<any[]>([])
-  const [tasks, setTasks] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [chatbotType, setChatbotType] = useState<"simple" | "advanced">("simple")
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Carregar dados do usuário
-    const fetchUserData = async () => {
-      try {
-        // Em um ambiente real, estas seriam chamadas de API para o backend
-        // Aqui estamos simulando com dados estáticos
+    if (currentUser) {
+      // Carregar notificações
+      const userNotifications = getNotifications(currentUser.class)
+      setNotifications(userNotifications)
 
-        // Carregar notificações
-        const response = await fetch("/api/notifications")
-        const notificationsData = await response.json()
-        setNotifications(notificationsData)
-        setUnreadCount(notificationsData.filter((n: any) => !n.isRead).length)
+      // Contar notificações não lidas
+      const unread = userNotifications.filter((n) => !n.isRead).length
+      setUnreadCount(unread)
 
-        // Carregar materiais
-        const materialsResponse = await fetch("/api/materials")
-        const materialsData = await materialsResponse.json()
-        setMaterials(materialsData)
-
-        // Carregar notas
-        const gradesResponse = await fetch("/api/grades")
-        const gradesData = await gradesResponse.json()
-        setGrades(gradesData)
-
-        // Carregar tarefas
-        const tasksResponse = await fetch("/api/tasks")
-        const tasksData = await tasksResponse.json()
-        setTasks(tasksData)
-
-        setLoading(false)
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error)
-        setLoading(false)
-      }
+      // Carregar notas
+      const userGrades = getGradesByStudent(currentUser.id)
+      setGrades(userGrades)
     }
-
-    if (user) {
-      fetchUserData()
-    }
-  }, [user])
+  }, [])
 
   // Função para marcar notificação como lida
-  const handleMarkAsRead = async (id: string) => {
-    try {
-      const response = await fetch(`/api/notifications/${id}/read`, {
-        method: "PUT",
-      })
-
-      if (response.ok) {
-        setNotifications(notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)))
-        setUnreadCount((prev) => prev - 1)
-      }
-    } catch (error) {
-      console.error("Erro ao marcar notificação como lida:", error)
+  const handleMarkAsRead = (id: string) => {
+    const updated = markNotificationAsRead(id)
+    if (updated) {
+      setNotifications(notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)))
+      setUnreadCount((prev) => prev - 1)
     }
   }
 
-  if (loading) {
+  if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800 mx-auto mb-4"></div>
-          <p className="text-gray-700 dark:text-gray-300">Carregando...</p>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Acesso Negado</h1>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">Você precisa estar logado para acessar esta página.</p>
+          <Button asChild>
+            <Link href="/portal">Voltar para o Login</Link>
+          </Button>
         </div>
       </div>
     )
@@ -123,12 +94,12 @@ function DashboardContent() {
             <Card className="sticky top-24 border-0 shadow-lg rounded-2xl overflow-hidden">
               <CardHeader className="text-center bg-gradient-to-r from-blue-800 to-blue-700 dark:from-blue-900 dark:to-blue-800 text-white p-6">
                 <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-white">
-                  <AvatarImage src={user?.image || "/placeholder.svg?height=200&width=200"} alt={user?.name || ""} />
-                  <AvatarFallback className="bg-blue-600">{user?.name?.charAt(0) || "U"}</AvatarFallback>
+                  <AvatarImage src={currentUser.profileImage || "/placeholder.svg"} alt={currentUser.name} />
+                  <AvatarFallback className="bg-blue-600">{currentUser.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-white">{user?.name}</CardTitle>
+                <CardTitle className="text-white">{currentUser.name}</CardTitle>
                 <CardDescription className="text-blue-100">
-                  {user?.class} - Turma {user?.grade}
+                  {currentUser.class} - Turma {currentUser.grade}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -242,11 +213,15 @@ function DashboardContent() {
                       <div className="md:w-1/3">
                         <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 text-center">
                           <Avatar className="w-32 h-32 mx-auto mb-4 border-4 border-white dark:border-gray-700">
-                            <AvatarImage src={user?.image || "/placeholder.svg"} alt={user?.name} />
-                            <AvatarFallback className="bg-blue-600 text-3xl">{user?.name?.charAt(0)}</AvatarFallback>
+                            <AvatarImage src={currentUser.profileImage || "/placeholder.svg"} alt={currentUser.name} />
+                            <AvatarFallback className="bg-blue-600 text-3xl">
+                              {currentUser.name.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
-                          <h3 className="text-xl font-bold text-blue-900 dark:text-blue-400 mb-1">{user?.name}</h3>
-                          <p className="text-gray-500 dark:text-gray-400 mb-4">{user?.email}</p>
+                          <h3 className="text-xl font-bold text-blue-900 dark:text-blue-400 mb-1">
+                            {currentUser.name}
+                          </h3>
+                          <p className="text-gray-500 dark:text-gray-400 mb-4">{currentUser.email}</p>
                           <Button variant="outline" className="w-full">
                             Alterar Foto
                           </Button>
@@ -261,7 +236,7 @@ function DashboardContent() {
                             </label>
                             <input
                               type="text"
-                              defaultValue={user?.name}
+                              defaultValue={currentUser.name}
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             />
                           </div>
@@ -271,7 +246,7 @@ function DashboardContent() {
                             </label>
                             <input
                               type="text"
-                              defaultValue={user?.username}
+                              defaultValue={currentUser.username}
                               readOnly
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                             />
@@ -282,7 +257,7 @@ function DashboardContent() {
                             </label>
                             <input
                               type="email"
-                              defaultValue={user?.email}
+                              defaultValue={currentUser.email}
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                             />
                           </div>
@@ -292,7 +267,7 @@ function DashboardContent() {
                             </label>
                             <input
                               type="text"
-                              defaultValue={user?.class}
+                              defaultValue={currentUser.class}
                               readOnly
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                             />
@@ -647,10 +622,37 @@ function DashboardContent() {
                       <CardTitle>Assistente Virtual</CardTitle>
                       <CardDescription>Tire suas dúvidas com nosso assistente virtual</CardDescription>
                     </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Escolha o tipo de assistente:</span>
+                      <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                        <button
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            chatbotType === "simple"
+                              ? "bg-blue-800 text-white"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => setChatbotType("simple")}
+                        >
+                          <MessageSquare className="h-4 w-4 inline mr-1" />
+                          Simples
+                        </button>
+                        <button
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            chatbotType === "advanced"
+                              ? "bg-blue-800 text-white"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                          }`}
+                          onClick={() => setChatbotType("advanced")}
+                        >
+                          <BrainCircuit className="h-4 w-4 inline mr-1" />
+                          Avançado
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <AdvancedAIChatbot />
+                  {chatbotType === "simple" ? <ChatbotInterface /> : <AdvancedChatbot />}
                 </CardContent>
               </Card>
             )}

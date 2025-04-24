@@ -1,37 +1,3 @@
-/**
- * Serviço de banco de dados
- * Desenvolvido por Gabriel Vieira
- */
-
-import { prisma } from "./prisma"
-
-// Verificar se estamos no lado do servidor
-const isServer = typeof window === "undefined"
-
-// Exportar funções que usam o Prisma Client apenas no servidor
-export const db = {
-  // Função para verificar se o código está sendo executado no servidor
-  isServer: () => isServer,
-
-  // Funções que usam o Prisma Client
-  user: {
-    // Estas funções só serão executadas no servidor
-    getById: async (id: string) => {
-      if (!isServer) throw new Error("Esta função só pode ser executada no servidor")
-      return prisma.user.findUnique({ where: { id } })
-    },
-    // Adicione outras funções conforme necessário
-  },
-  // Adicione outros modelos conforme necessário
-}
-
-// Exportar uma função para verificar se o código está sendo executado no servidor
-export function ensureServer() {
-  if (!isServer) {
-    throw new Error("Esta função só pode ser executada no servidor")
-  }
-}
-
 // Simulação de banco de dados para o portal do aluno e painel de professores
 // Em um ambiente de produção, isso seria substituído por um banco de dados real
 

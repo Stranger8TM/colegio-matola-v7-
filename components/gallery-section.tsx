@@ -6,70 +6,100 @@ import { motion } from "framer-motion"
 import { X } from "lucide-react"
 
 // Categorias da galeria conforme solicitado
-const categories = ["Todos", "Nosso Colégio", "Finalistas", "Cultura", "Informática e Tecnologia", "Momentos", "Xadrez"]
+const categories = ["Nosso Colégio", "Finalistas", "Cultura", "Informática e Tecnologia", "Momentos"]
 
 // Imagens da galeria organizadas por categoria
 const galleryImages = [
   {
-    src: "/gallery-1.jpg",
-    alt: "Biblioteca do colégio com mesas e estantes de livros",
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%2810%29.jpg-92ZvRMQZT3rb6QK76LnvEqocA6w6rj.jpeg",
+    alt: "Refeitório do colégio com mesas e bancos laranja",
     category: "Nosso Colégio",
   },
   {
-    src: "/gallery-2.jpg",
-    alt: "Laboratório de ciências com equipamentos modernos",
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%281%29.jpg-PTHHuwhDkpOT26jn9urVlorMWOY10e.jpeg",
+    alt: "Berçário com camas infantis e decoração colorida",
     category: "Nosso Colégio",
   },
   {
-    src: "/gallery-3.jpg",
-    alt: "Sala de informática com computadores",
-    category: "Informática e Tecnologia",
-  },
-  {
-    src: "/gallery-4.jpg",
-    alt: "Quadra poliesportiva coberta",
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%289%29.jpg-tfmWkgoC22VUlUavCXPtNI07cKWrOe.jpeg",
+    alt: "Sala de descanso infantil com decoração de árvore",
     category: "Nosso Colégio",
   },
   {
-    src: "/gallery-5.jpg",
-    alt: "Apresentação cultural dos alunos",
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%284%29.jpg-Z26vQP95rejo4qWjEucwVwmQ8wRJUU.jpeg",
+    alt: "Corredor com quadros de pontos turísticos mundiais",
     category: "Cultura",
   },
   {
-    src: "/gallery-6.jpg",
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%286%29.jpg-AW4dpVszTS6olBGzEDrg7FxM5ffEd1.jpeg",
+    alt: "Biblioteca com mesas e estantes de livros",
+    category: "Nosso Colégio",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%285%29.jpg-gz6YswteTIL3LzuoolcX2ipvDOSQgT.jpeg",
+    alt: "Sala de estudos com mesas e cadeiras verdes",
+    category: "Nosso Colégio",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%287%29.jpg-Do5TcvdtaxKrkLBBQztFcnVIFm52yX.jpeg",
+    alt: "Ginásio poliesportivo coberto",
+    category: "Nosso Colégio",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%288%29.jpg-uQD4AZdCnCAhb8JvGg9C4kFeIrhSRZ.jpeg",
+    alt: "Cesta de basquete no ginásio",
+    category: "Nosso Colégio",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%283%29.jpg-jvcvYomNVXFSMasZM5TWbAulHGVl8J.jpeg",
+    alt: "Laboratório de ciências com banquetas e equipamentos",
+    category: "Informática e Tecnologia",
+  },
+  {
+    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%282%29.jpg-tK9dPECcPaWVM7NlHSzglUJMgnTOMt.jpeg",
+    alt: "Modelo anatômico de olho no laboratório",
+    category: "Informática e Tecnologia",
+  },
+  {
+    src: "/gallery-finalistas-1.jpg",
     alt: "Cerimônia de formatura dos finalistas",
     category: "Finalistas",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%283%29.jpg-erNTWXgCr3QsqLWfBleiLrbFdIlybl.jpeg",
-    alt: "Menina concentrada jogando xadrez em torneio escolar",
-    category: "Xadrez",
+    src: "/gallery-finalistas-2.jpg",
+    alt: "Alunos finalistas com diplomas",
+    category: "Finalistas",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%281%29.jpg-G4A4gVrMeCBNslDymsqf5mNXXxUtwo.jpeg",
-    alt: "Dois alunos segurando peças grandes de xadrez",
-    category: "Xadrez",
+    src: "/gallery-cultura-1.jpg",
+    alt: "Apresentação cultural dos alunos",
+    category: "Cultura",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%284%29.jpg-btgay9SDBGfuYV2tSpjAMBSlrIENEW.jpeg",
-    alt: "Menina de uniforme amarelo jogando xadrez em torneio",
-    category: "Xadrez",
+    src: "/gallery-cultura-2.jpg",
+    alt: "Festival cultural da escola",
+    category: "Cultura",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%282%29.jpg-cH213qLG5gbHaRMayT8SJpajRApSA3.jpeg",
-    alt: "Aluno concentrado analisando jogada de xadrez",
-    category: "Xadrez",
+    src: "/gallery-informatica-1.jpg",
+    alt: "Laboratório de informática",
+    category: "Informática e Tecnologia",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/xadres%20%285%29.jpg-ZVI4VCGOlqkGFUzOpJ4N64og44501R.jpeg",
-    alt: "Professor orientando alunos durante torneio de xadrez",
-    category: "Xadrez",
+    src: "/gallery-momentos-1.jpg",
+    alt: "Celebração do Dia da Criança",
+    category: "Momentos",
+  },
+  {
+    src: "/gallery-momentos-2.jpg",
+    alt: "Atividade ao ar livre com alunos",
+    category: "Momentos",
   },
 ]
 
 export default function GallerySection() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
-  const [filter, setFilter] = useState("Todos")
+  const [filter, setFilter] = useState("Nosso Colégio")
 
   const filteredImages = filter === "Todos" ? galleryImages : galleryImages.filter((img) => img.category === filter)
 

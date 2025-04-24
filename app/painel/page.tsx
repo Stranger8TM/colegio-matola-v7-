@@ -4,121 +4,135 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { motion } from "framer-motion"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Lock, ShieldAlert } from "lucide-react"
 
 export default function PainelPage() {
   const router = useRouter()
-  const [code, setCode] = useState("")
+  const [accessCode, setAccessCode] = useState("")
   const [error, setError] = useState("")
-  const [step, setStep] = useState(1) // 1: código de acesso, 2: escolha do painel
-  const [panelType, setPanelType] = useState("professores") // professores ou admin
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
+    setError("")
 
-    if (step === 1) {
-      if (code === "Gabriel") {
-        setError("")
-        setStep(2)
+    // Verificar o código de acesso
+    setTimeout(() => {
+      if (accessCode === "Gabriel") {
+        router.push("/professores")
       } else {
-        setError("Código de acesso inválido")
+        setError("Código de acesso inválido. Tente novamente.")
       }
-    } else {
-      // Redirecionar para o painel escolhido
-      if (panelType === "professores") {
-        router.push("/professores/dashboard")
-      } else {
-        router.push("/admin")
-      }
-    }
+      setIsLoading(false)
+    }, 1000)
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-md w-full"
-        >
-          <Card className="border-0 shadow-xl rounded-2xl overflow-hidden">
-            <CardContent className="p-0">
-              <div className="bg-gradient-to-r from-blue-800 to-blue-700 p-6 text-center">
-                <Image
-                  src="/logo.png"
-                  alt="Colégio Privado da Matola"
-                  width={80}
-                  height={80}
-                  className="mx-auto mb-4"
-                />
-                <h1 className="text-2xl font-bold text-white mb-2">
-                  {step === 1 ? "Acesso Restrito" : "Escolha o Painel"}
-                </h1>
-                <p className="text-blue-100 text-sm">
-                  {step === 1
-                    ? "Digite o código de acesso para continuar"
-                    : "Selecione o tipo de painel que deseja acessar"}
-                </p>
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar />
+
+      <div className="container mx-auto px-4 py-32">
+        <div className="max-w-md mx-auto">
+          <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
+            <CardHeader className="text-center bg-gradient-to-r from-blue-800 to-blue-700 dark:from-blue-900 dark:to-blue-800 text-white p-6">
+              <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShieldAlert className="h-8 w-8 text-white" />
               </div>
+              <CardTitle className="text-white text-2xl">Área Restrita</CardTitle>
+              <CardDescription className="text-blue-100">
+                Esta área é exclusiva para professores e administradores
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-6">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 text-yellow-800 dark:text-yellow-300">
+                  <p className="text-sm">
+                    Para acessar o painel, você precisa inserir o código de acesso fornecido pela administração.
+                  </p>
+                </div>
 
-              <div className="p-6">
-                <form onSubmit={handleSubmit}>
-                  {step === 1 ? (
-                    <>
-                      <div className="mb-4">
-                        <Label htmlFor="code">Código de Acesso</Label>
-                        <Input
-                          id="code"
-                          type="password"
-                          value={code}
-                          onChange={(e) => setCode(e.target.value)}
-                          placeholder="Digite o código de acesso"
-                          className="mt-1"
-                        />
-                        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="accessCode"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                      Código de Acesso
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-gray-400" />
                       </div>
+                      <input
+                        type="password"
+                        id="accessCode"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        className="w-full pl-10 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="Digite o código de acesso"
+                        required
+                      />
+                    </div>
+                  </div>
 
-                      <Button type="submit" className="w-full bg-blue-800 hover:bg-blue-700">
-                        Verificar
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <RadioGroup value={panelType} onValueChange={setPanelType}>
-                          <div className="flex items-center space-x-2 mb-3">
-                            <RadioGroupItem value="professores" id="professores" />
-                            <Label htmlFor="professores" className="cursor-pointer">
-                              Painel de Professores
-                            </Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="admin" id="admin" />
-                            <Label htmlFor="admin" className="cursor-pointer">
-                              Painel de Administradores
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-
-                      <Button type="submit" className="w-full bg-blue-800 hover:bg-blue-700">
-                        Acessar
-                      </Button>
-                    </>
+                  {error && (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-red-800 dark:text-red-300 text-sm">
+                      {error}
+                    </div>
                   )}
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-800 hover:bg-blue-700 text-white py-3 rounded-xl"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Verificando...
+                      </>
+                    ) : (
+                      "Acessar Painel"
+                    )}
+                  </Button>
                 </form>
+
+                <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                  <p>
+                    Se você é professor e não possui o código de acesso, entre em contato com a administração da escola.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
-    </div>
+
+      <Footer />
+    </main>
   )
 }
