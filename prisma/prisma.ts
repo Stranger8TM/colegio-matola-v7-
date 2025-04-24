@@ -1,15 +1,25 @@
+/**
+ * Configuração do Prisma Client
+ * Desenvolvido por Gabriel Vieira
+ */
+
 import { PrismaClient } from "@prisma/client"
 
-const prismaClientSingleton = () => {
-  return new PrismaClient()
+// Declarar o prisma global
+declare global {
+  var prisma: PrismaClient | undefined
 }
 
-type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>
+// Criar uma instância do PrismaClient
+let prisma: PrismaClient
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientSingleton | undefined
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient()
+} else {
+  if (!global.prisma) {
+    global.prisma = new PrismaClient()
+  }
+  prisma = global.prisma
 }
 
-export const prisma = globalForPrisma.prisma ?? prismaClientSingleton()
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+export default prisma

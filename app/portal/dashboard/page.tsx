@@ -20,9 +20,8 @@ import {
   BarChart,
   CheckCircle,
   Bell,
-  BrainCircuit,
 } from "lucide-react"
-import AdvancedChatbot from "@/components/advanced-chatbot"
+import AdvancedAIChatbot from "@/components/advanced-ai-chatbot"
 
 export default function Dashboard() {
   // Usamos o AuthGuard para proteger esta página
@@ -648,37 +647,10 @@ function DashboardContent() {
                       <CardTitle>Assistente Virtual</CardTitle>
                       <CardDescription>Tire suas dúvidas com nosso assistente virtual</CardDescription>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Escolha o tipo de assistente:</span>
-                      <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                        <button
-                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                            chatbotType === "simple"
-                              ? "bg-blue-800 text-white"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                          }`}
-                          onClick={() => setChatbotType("simple")}
-                        >
-                          <MessageSquare className="h-4 w-4 inline mr-1" />
-                          Simples
-                        </button>
-                        <button
-                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                            chatbotType === "advanced"
-                              ? "bg-blue-800 text-white"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                          }`}
-                          onClick={() => setChatbotType("advanced")}
-                        >
-                          <BrainCircuit className="h-4 w-4 inline mr-1" />
-                          Avançado
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                  {chatbotType === "simple" ? <ChatbotInterface /> : <AdvancedChatbot />}
+                  <AdvancedAIChatbot />
                 </CardContent>
               </Card>
             )}

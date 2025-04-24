@@ -1,7 +1,11 @@
+/**
+ * Configuração do Prisma Client
+ * Desenvolvido por Gabriel Vieira
+ */
+
 import { PrismaClient } from "@prisma/client"
 
-// PrismaClient é anexado ao objeto global em desenvolvimento para evitar
-// múltiplas instâncias do Prisma Client em desenvolvimento
+// Declarar o prisma global
 declare global {
   var prisma: PrismaClient | undefined
 }
@@ -10,11 +14,13 @@ declare global {
 const isServer = typeof window === "undefined"
 
 // Criar o cliente Prisma apenas no lado do servidor
-const prismaClient = isServer ? global.prisma || new PrismaClient() : (null as unknown as PrismaClient)
+const prismaInstance = isServer ? global.prisma || new PrismaClient() : (null as any as PrismaClient)
 
 // Salvar o cliente no objeto global em desenvolvimento
 if (isServer && process.env.NODE_ENV !== "production") {
-  global.prisma = prismaClient
+  global.prisma = prismaInstance
 }
 
-export default prismaClient
+// Exportar como exportação padrão e nomeada
+export default prismaInstance
+export const prisma = prismaInstance

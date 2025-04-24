@@ -10,6 +10,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum AdminType {
+  SUPREME
+  DIRECTOR
+  COORDINATOR
+}
+
+model User {
+  id             String     @id @default(cuid())
+  name           String?
+  email          String?    @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  role           Role       @default(STUDENT)
+  adminType      AdminType?
+  class          String?
+  grade          String?
+  subject        String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  chatSessions  ChatSession[]
+  chatMessages  ChatMessage[]
+  notifications Notification[]
+  materials     Material[]
+  grades        Grade[]
+  tasks         Task[]
+
+  @@map("users")
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -27,6 +66,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model Session {
@@ -35,44 +75,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
-model User {
-  id             String    @id @default(cuid())
-  name           String?
-  email          String?   @unique
-  emailVerified  DateTime?
-  image          String?
-  hashedPassword String?
-  role           Role      @default(STUDENT)
-  adminType      AdminType? // Tipo de administrador (se role for ADMIN)
-  
-  // Campos específicos para estudantes
-  class          String?
-  grade          String?
-  
-  // Campos específicos para professores
-  subject        String?
-  bio            String?
-  
-  // Campos comuns
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  
-  accounts       Account[]
-  sessions       Session[]
-  materials      Material[]
-  notifications  Notification[]
-  grades         Grade[]
-  tasks          Task[]
-  
-  // Relações para administradores
-  classesManaged Class[]
-  disciplinesCreated Discipline[]
-  schedules      Schedule[]
-  exams          Exam[]
-  financialRecords FinancialRecord[]
-  systemLogs     SystemLog[]
+  @@map("sessions")
 }
 
 model VerificationToken {
@@ -81,162 +85,108 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
-enum Role {
-  STUDENT
-  TEACHER
-  ADMIN
+// Modelos para o chatbot
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String   @default("Nova conversa")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@map("chat_sessions")
 }
 
-enum AdminType {
-  SUPREME      // Admin Supremo - acesso total
-  GENERAL      // Admin Geral - acesso total
-  PEDAGOGICAL  // Coordenador pedagógico - acesso acadêmico
-  SECRETARY    // Secretaria - cadastros e documentação
-  TECHNICAL    // TI/Admin técnico - configurações do sistema
+model ChatMessage {
+  id           String   @id @default(cuid())
+  sessionId    String
+  userId       String
+  role         String   @default("user") // "user" ou "assistant"
+  content      String   @db.Text
+  createdAt    DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
 }
 
-// Modelos para materiais didáticos
-model Material {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  subject     String
-  fileUrl     String
-  uploadDate  DateTime @default(now())
-  teacherId   String
-  classTarget String
-  
-  teacher     User     @relation(fields: [teacherId], references: [id])
-}
-
-// Modelos para tarefas
-model Task {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  dueDate     DateTime
-  completed   Boolean  @default(false)
-  userId      String
-  
-  user        User     @relation(fields: [userId], references: [id])
-}
-
-// Modelos para notificações
+// Modelos para o portal
 model Notification {
   id          String   @id @default(cuid())
+  userId      String
   title       String
-  content     String
-  date        DateTime @default(now())
-  teacherId   String
-  teacherName String
-  targetClass String?  // null significa para todas as turmas
+  content     String   @db.Text
   isRead      Boolean  @default(false)
-  
-  teacher     User     @relation(fields: [teacherId], references: [id])
+  teacherName String?
+  date        String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 
-// Modelos para notas
-model Grade {
-  id          String   @id @default(cuid())
-  studentId   String
-  studentName String
-  subject     String
-  teacherId   String
-  value       Float
-  term        String
-  date        DateTime @default(now())
-  comments    String?
-  
-  teacher     User     @relation(fields: [teacherId], references: [id])
-}
-
-// Modelos para administração acadêmica
-model Class {
-  id          String   @id @default(cuid())
-  name        String
-  grade       String
-  year        Int
-  adminId     String
-  
-  admin       User     @relation(fields: [adminId], references: [id])
-  students    StudentClass[]
-  schedules   Schedule[]
-  exams       Exam[]
-}
-
-model StudentClass {
-  id          String   @id @default(cuid())
-  studentId   String
-  classId     String
-  
-  class       Class    @relation(fields: [classId], references: [id])
-}
-
-model Discipline {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  createdById String
-  
-  createdBy   User     @relation(fields: [createdById], references: [id])
-  schedules   Schedule[]
-  exams       Exam[]
-}
-
-model Schedule {
-  id          String   @id @default(cuid())
-  classId     String
-  disciplineId String
-  teacherId   String?
-  dayOfWeek   Int      // 1-7 (segunda a domingo)
-  startTime   String
-  endTime     String
-  adminId     String
-  
-  class       Class    @relation(fields: [classId], references: [id])
-  discipline  Discipline @relation(fields: [disciplineId], references: [id])
-  admin       User     @relation(fields: [adminId], references: [id])
-}
-
-model Exam {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  date        DateTime
-  classId     String
-  disciplineId String
-  adminId     String
-  
-  class       Class    @relation(fields: [classId], references: [id])
-  discipline  Discipline @relation(fields: [disciplineId], references: [id])
-  admin       User     @relation(fields: [adminId], references: [id])
-}
-
-// Modelos para administração financeira
-model FinancialRecord {
-  id          String   @id @default(cuid())
-  studentId   String?
-  type        String   // mensalidade, taxa, multa, etc.
-  amount      Float
-  dueDate     DateTime?
-  paymentDate DateTime?
-  status      String   // pendente, pago, atrasado, etc.
-  description String?
-  adminId     String
-  
-  admin       User     @relation(fields: [adminId], references: [id])
-}
-
-// Modelos para logs do sistema
-model SystemLog {
+model Material {
   id          String   @id @default(cuid())
   userId      String
-  action      String
-  details     String?
-  ipAddress   String?
-  timestamp   DateTime @default(now())
-  
-  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  description String   @db.Text
+  subject     String
+  fileUrl     String
+  uploadDate  String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("materials")
+}
+
+model Grade {
+  id       String @id @default(cuid())
+  userId   String
+  subject  String
+  value    Float
+  term     String
+  date     String
+  comments String @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("grades")
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String   @db.Text
+  dueDate     String?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+// Modelo para arquivos
+model File {
+  id          String   @id @default(cuid())
+  url         String   @unique
+  filename    String
+  contentType String
+  size        Int
+  uploadedBy  String
+  category    String?
+  description String?
+  type        String
+  createdAt   DateTime @default(now())
+
+  @@map("files")
 }
