@@ -2,19 +2,20 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com', 'hebbkx1anhila5yf.public.blob.vercel-storage.com'],
+    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com', 'placeholder.svg', 'images.unsplash.com'],
     unoptimized: true,
   },
-  transpilePackages: ['@prisma/client'],
-  webpack: (config) => {
-    // Isso resolve problemas com o Prisma Client
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-      crypto: false,
-    };
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Não incluir o Prisma Client no bundle do cliente
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '.prisma/client/index-browser': require.resolve('./lib/prisma-browser-dummy.js'),
+      };
+    }
     return config;
   },
   eslint: {

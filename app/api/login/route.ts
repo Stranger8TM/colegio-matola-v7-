@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { createHash } from "crypto"
+import prisma from "@/lib/prisma"
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json()
+    const body = await request.json()
     const { email, password } = body
 
-    // Verificar se o usuário existe
-    const user = await db.user.findUnique({
+    if (!email || !password) {
+      return NextResponse.json({ error: "Email e senha são obrigatórios" }, { status: 400 })
+    }
+
+    // Buscar o usuário pelo email
+    const user = await prisma.user.findUnique({
       where: {
         email,
       },
@@ -17,19 +22,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 })
     }
 
-    // Em produção, você deve usar bcrypt.compare
-    const passwordMatch = password === user.hashedPassword
+    // Verificar a senha
+    const hashedInputPassword = createHash("sha256").update(password).digest("hex")
+    const isPasswordValid = hashedInputPassword === user.hashedPassword
 
-    if (!passwordMatch) {
+    if (!isPasswordValid) {
       return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 })
     }
 
-    // Não retorne a senha no objeto de resposta
-    const { hashedPassword, ...userWithoutPassword } = user
-
-    return NextResponse.json(userWithoutPassword)
+    // Retornar os dados do usuário (sem a senha)
+    return NextResponse.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      adminType: user.adminType,
+    })
   } catch (error) {
-    console.error("LOGIN_ERROR", error)
-    return NextResponse.json({ error: "Erro ao fazer login" }, { status: 500 })
+    console.error("Erro ao fazer login:", error)
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
   }
 }

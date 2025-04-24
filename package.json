@@ -72,7 +72,11 @@
     "@prisma/client": "latest",
     "next-auth": "latest",
     "framer-motion": "latest",
+    "crypto": "latest",
     "@react-three/drei": "latest",
+    "child_process": "latest",
+    "fs": "latest",
+    "path": "latest",
     "@next-auth/prisma-adapter": "latest"
   },
   "devDependencies": {

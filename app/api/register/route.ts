@@ -1,47 +1,51 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
-import type { Role } from "@prisma/client"
+import { createHash } from "crypto"
+import prisma from "@/lib/prisma"
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json()
-    const { name, email, password, role, class: userClass, grade, subject } = body
+    const body = await request.json()
+    const { name, email, password, role } = body
+
+    if (!name || !email || !password) {
+      return NextResponse.json({ error: "Dados incompletos" }, { status: 400 })
+    }
 
     // Verificar se o usuário já existe
-    const existingUser = await db.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: {
         email,
       },
     })
 
     if (existingUser) {
-      return NextResponse.json({ error: "Email já está em uso" }, { status: 400 })
+      return NextResponse.json({ error: "Email já cadastrado" }, { status: 400 })
     }
 
-    // Em produção, você deve usar bcrypt para hash da senha
-    const hashedPassword = password // Simplificado para demonstração
+    // Hash da senha usando crypto (em produção, use bcrypt)
+    const hashedPassword = createHash("sha256").update(password).digest("hex")
 
     // Criar o usuário
-    const user = await db.user.create({
+    const user = await prisma.user.create({
       data: {
         name,
         email,
         hashedPassword,
-        role: role as Role,
-        class: userClass,
-        grade,
-        subject,
+        role: role || "STUDENT",
       },
     })
 
-    return NextResponse.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    })
+    return NextResponse.json(
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      { status: 201 },
+    )
   } catch (error) {
-    console.error("REGISTRATION_ERROR", error)
-    return NextResponse.json({ error: "Erro ao registrar usuário" }, { status: 500 })
+    console.error("Erro ao registrar usuário:", error)
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })
   }
 }

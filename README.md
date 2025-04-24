@@ -1,115 +1,104 @@
-# Colégio Privado da Matola - Site Institucional
+# Colégio Privado Matola
 
-Este projeto é um site responsivo moderno para o Colégio Privado da Matola, desenvolvido com Next.js e React.
+Este é o repositório do site do Colégio Privado Matola, uma instituição de ensino moderna e inovadora.
 
-## Como iniciar o projeto
+## Configuração do Ambiente
 
 ### Pré-requisitos
 
-- Node.js 18 ou superior
-- npm ou yarn
+- Node.js 16 ou superior
+- npm ou pnpm
+- Banco de dados PostgreSQL (pode ser local ou na nuvem)
 
-### Instalação
+### Configuração Inicial
 
-1. Crie um novo projeto Next.js:
+1. Clone o repositório:
+   \`\`\`bash
+   git clone https://github.com/seu-usuario/colegio-matola.git
+   cd colegio-matola
+   \`\`\`
 
-\`\`\`bash
-npx create-next-app@latest colegio-matola
-\`\`\`
+2. Instale as dependências:
+   \`\`\`bash
+   npm install
+   # ou
+   pnpm install
+   \`\`\`
 
-Selecione as seguintes opções:
-- Would you like to use TypeScript? **Yes**
-- Would you like to use ESLint? **Yes**
-- Would you like to use Tailwind CSS? **Yes**
-- Would you like to use `src/` directory? **No**
-- Would you like to use App Router? **Yes**
-- Would you like to customize the default import alias? **No**
+3. Configure as variáveis de ambiente:
+   - Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
+   \`\`\`
+   DATABASE_URL="postgresql://usuario:senha@localhost:5432/colegio_matola?schema=public"
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="seu-segredo-aqui"
+   GOOGLE_CLIENT_ID="seu-client-id-aqui"
+   GOOGLE_CLIENT_SECRET="seu-client-secret-aqui"
+   \`\`\`
 
-2. Navegue até o diretório do projeto:
+4. Execute o script de configuração automatizado:
+   \`\`\`bash
+   npm run setup
+   \`\`\`
 
-\`\`\`bash
-cd colegio-matola
-\`\`\`
-
-3. Instale as dependências adicionais:
-
-\`\`\`bash
-npm install @radix-ui/react-slot class-variance-authority clsx lucide-react tailwind-merge tailwindcss-animate framer-motion next-themes @radix-ui/react-tabs @radix-ui/react-avatar
-\`\`\`
-
-4. Copie todos os arquivos do projeto para a pasta correspondente.
+   Este script irá:
+   - Gerar o Prisma Client
+   - Criar as tabelas no banco de dados
+   - Inicializar o banco de dados com dados iniciais
 
 5. Inicie o servidor de desenvolvimento:
+   \`\`\`bash
+   npm run dev
+   \`\`\`
 
-\`\`\`bash
-npm run dev
-\`\`\`
+6. Acesse o site em [http://localhost:3000](http://localhost:3000)
 
-6. Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
+### Credenciais Padrão
+
+- **Administrador**:
+  - Email: gabriel@colegiomatola.co.mz
+  - Senha: Gabriel123
+
+- **Professor**:
+  - Email: gabriel.vieira@colegiomatola.co.mz
+  - Senha: Professor123
+
+- **Aluno**:
+  - Email: gabriel.silva@aluno.colegiomatola.co.mz
+  - Senha: Aluno123
+
+## Configuração no Ambiente Vercel
+
+Se você estiver implantando o projeto na Vercel, siga estas etapas:
+
+1. Configure as variáveis de ambiente no painel da Vercel:
+   - DATABASE_URL
+   - NEXTAUTH_URL
+   - NEXTAUTH_SECRET
+   - GOOGLE_CLIENT_ID
+   - GOOGLE_CLIENT_SECRET
+
+2. Após o deploy, acesse o console da Vercel e execute:
+   \`\`\`bash
+   npx prisma generate
+   npx prisma db push
+   node scripts/vercel-setup.js
+   \`\`\`
 
 ## Estrutura do Projeto
 
-\`\`\`
-/colegio-matola
-  /app
-    /admissao
-      page.tsx
-    /contacto
-      page.tsx
-    /cursos
-      page.tsx
-    /portal
-      /dashboard
-        page.tsx
-      page.tsx
-    globals.css
-    layout.tsx
-    manifest.ts
-    page.tsx
-  /components
-    /ui (componentes padrão shadcn/ui)
-    footer.tsx
-    hero-section.tsx
-    navbar.tsx
-    features-section.tsx
-    testimonials-section.tsx
-    cta-section.tsx
-    theme-provider.tsx
-  /lib
-    db.ts
-    utils.ts
-  /public
-    biblioteca.jpg
-    biblioteca1.jpg
-    campo.jpg
-    galerary1.png
-    lab.jpg
-    laboratorio.jpg
-  tailwind.config.ts
-  next.config.js
-  package.json
-\`\`\`
+- `/app` - Rotas e páginas da aplicação (Next.js App Router)
+- `/components` - Componentes React reutilizáveis
+- `/lib` - Utilitários e configurações
+- `/prisma` - Schema do Prisma e migrações
+- `/public` - Arquivos estáticos
+- `/scripts` - Scripts de configuração e inicialização
 
-## Possíveis Problemas e Soluções
+## Tecnologias Utilizadas
 
-### Problema com import de componentes shadcn/ui
-Se você encontrar erros relacionados aos componentes da UI, certifique-se de instalar os componentes do shadcn/ui:
-
-\`\`\`bash
-npx shadcn@latest init
-\`\`\`
-
-E então instale os componentes necessários:
-
-\`\`\`bash
-npx shadcn@latest add button card tabs avatar
-\`\`\`
-
-### Problema com imagens
-Se as imagens não carregarem, verifique se todos os arquivos de imagem estão na pasta `/public`.
-
-## Personalização
-
-- As cores principais do site estão configuradas no arquivo `tailwind.config.ts`
-- Os textos podem ser editados diretamente nos componentes
-- As imagens podem ser substituídas na pasta `/public` (mantenha os mesmos nomes)
+- Next.js 13 (App Router)
+- React 18
+- Prisma ORM
+- NextAuth.js
+- Tailwind CSS
+- Three.js / React Three Fiber
+- TypeScript

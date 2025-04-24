@@ -2,16 +2,25 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
-import { db } from "@/lib/db"
+import { createHash } from "crypto"
+
+import prisma from "@/lib/prisma"
+
+// Função simples para verificar senha
+function verifyPassword(password: string, hashedPassword: string): boolean {
+  const inputHash = createHash("sha256").update(password).digest("hex")
+  return inputHash === hashedPassword
+}
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
   },
   pages: {
     signIn: "/login",
     error: "/login",
+    newUser: "/register",
   },
   providers: [
     GoogleProvider({
@@ -30,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const user = await db.user.findUnique({
+          const user = await prisma.user.findUnique({
             where: {
               email: credentials.email,
             },
@@ -40,11 +49,9 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Em produção, você deve usar bcrypt.compare
-          // Aqui estamos fazendo uma comparação simples para evitar problemas de deploy
-          const passwordMatch = credentials.password === user.hashedPassword
+          const isPasswordValid = verifyPassword(credentials.password, user.hashedPassword)
 
-          if (!passwordMatch) {
+          if (!isPasswordValid) {
             return null
           }
 
@@ -55,9 +62,6 @@ export const authOptions: NextAuthOptions = {
             image: user.image,
             role: user.role,
             adminType: user.adminType,
-            class: user.class,
-            grade: user.grade,
-            subject: user.subject,
           }
         } catch (error) {
           console.error("AUTH_ERROR", error)
@@ -67,30 +71,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ token, session }) {
-      if (token) {
-        session.user.id = token.id as string
-        session.user.name = token.name as string
-        session.user.email = token.email as string
-        session.user.image = token.picture as string
-        session.user.role = token.role as any
-        session.user.adminType = token.adminType as any
-        session.user.class = token.class as string
-        session.user.grade = token.grade as string
-        session.user.subject = token.subject as string
-      }
-      return session
-    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.role = user.role
         token.adminType = user.adminType
-        token.class = user.class
-        token.grade = user.grade
-        token.subject = user.subject
       }
       return token
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
+        session.user.adminType = token.adminType as string | null
+      }
+      return session
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
