@@ -2,19 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
+    domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com', 'hebbkx1anhila5yf.public.blob.vercel-storage.com'],
     unoptimized: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client'],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  transpilePackages: ['@prisma/client'],
   webpack: (config) => {
+    // Isso resolve problemas com o Prisma Client
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
@@ -23,6 +16,12 @@ const nextConfig = {
       crypto: false,
     };
     return config;
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
 }
 

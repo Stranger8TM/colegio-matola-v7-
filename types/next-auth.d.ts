@@ -5,6 +5,9 @@ declare module "next-auth" {
     id: string
     role: Role
     adminType?: AdminType | null
+    class?: string | null
+    grade?: string | null
+    subject?: string | null
   }
 
   interface Session {
@@ -12,6 +15,9 @@ declare module "next-auth" {
       id: string
       role: Role
       adminType?: string | null
+      class?: string | null
+      grade?: string | null
+      subject?: string | null
     }
   }
 }
@@ -21,5 +27,8 @@ declare module "next-auth/jwt" {
     id: string
     role: Role
     adminType?: AdminType | null
+    class?: string | null
+    grade?: string | null
+    subject?: string | null
   }
 }

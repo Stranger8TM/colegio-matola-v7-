@@ -70,10 +70,10 @@
     "three": "latest",
     "@react-three/fiber": "latest",
     "@prisma/client": "latest",
-    "framer-motion": "latest",
     "next-auth": "latest",
+    "framer-motion": "latest",
     "@react-three/drei": "latest",
-    "@auth/prisma-adapter": "latest"
+    "@next-auth/prisma-adapter": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

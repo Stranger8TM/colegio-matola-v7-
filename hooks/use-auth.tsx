@@ -1,26 +1,29 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { Role } from "@prisma/client"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
-export function useAuth() {
+export function useAuth({ required = true, redirectTo = "/login", requiredRole = null } = {}) {
   const { data: session, status } = useSession()
+  const router = useRouter()
+  const loading = status === "loading"
+  const authenticated = status === "authenticated"
+  const user = session?.user
 
-  const isAuthenticated = status === "authenticated"
-  const isLoading = status === "loading"
+  useEffect(() => {
+    if (loading) return
 
-  const isAdmin = isAuthenticated && session?.user?.role === Role.ADMIN
-  const isTeacher = isAuthenticated && session?.user?.role === Role.TEACHER
-  const isStudent = isAuthenticated && session?.user?.role === Role.STUDENT
+    if (required && !authenticated) {
+      router.push(`${redirectTo}?callbackUrl=${encodeURIComponent(window.location.href)}`)
+      return
+    }
 
-  return {
-    session,
-    status,
-    isAuthenticated,
-    isLoading,
-    isAdmin,
-    isTeacher,
-    isStudent,
-    user: session?.user,
-  }
+    if (requiredRole && authenticated && user?.role !== requiredRole) {
+      router.push("/unauthorized")
+      return
+    }
+  }, [loading, authenticated, required, redirectTo, router, requiredRole, user])
+
+  return { user, loading, authenticated }
 }

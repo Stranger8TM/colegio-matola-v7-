@@ -30,6 +30,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/unauthorized", request.url))
   }
 
+  if (pathname.startsWith("/admin") && token.role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url))
+  }
+
   return NextResponse.next()
 }
 

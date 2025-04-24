@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import type { Role } from "@prisma/client"
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { name, email, password, role } = body
+    const { name, email, password, role, class: userClass, grade, subject } = body
 
     // Verificar se o usuário já existe
     const existingUser = await db.user.findUnique({
@@ -26,7 +27,10 @@ export async function POST(req: Request) {
         name,
         email,
         hashedPassword,
-        role,
+        role: role as Role,
+        class: userClass,
+        grade,
+        subject,
       },
     })
 
