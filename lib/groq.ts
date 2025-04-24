@@ -3,10 +3,10 @@
  * Desenvolvido por Gabriel Vieira
  */
 
-import { GroqChat } from "groq-sdk"
+import { Groq } from "groq-sdk"
 
 // Inicializar o cliente Groq
-export const groq = new GroqChat({
+export const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY!,
 })
 

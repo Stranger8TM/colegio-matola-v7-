@@ -6,7 +6,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { getUserChatSessions, createChatSession } from "@/lib/chat-service"
+import { getChatSessions, createChatSession } from "@/lib/db-service"
 
 export async function GET() {
   try {
@@ -17,7 +17,7 @@ export async function GET() {
     }
 
     // Obter as sessões de chat do usuário
-    const chatSessions = await getUserChatSessions(session.user.id)
+    const chatSessions = await getChatSessions(session.user.id)
 
     // Retornar as sessões
     return NextResponse.json(chatSessions)
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     const { title } = await req.json()
 
     // Criar uma nova sessão de chat
-    const chatSession = await createChatSession(session.user.id, title)
+    const chatSession = await createChatSession(session.user.id, title || "Nova conversa")
 
     // Retornar a sessão criada
     return NextResponse.json(chatSession)

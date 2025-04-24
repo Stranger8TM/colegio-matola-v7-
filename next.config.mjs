@@ -11,9 +11,10 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Não incluir o Prisma Client no bundle do cliente
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '.prisma/client/index-browser': require.resolve('./lib/prisma-browser-dummy.js'),
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@prisma/client': false,
+        '.prisma/client': false,
       };
     }
     return config;

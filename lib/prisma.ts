@@ -5,22 +5,14 @@
 
 import { PrismaClient } from "@prisma/client"
 
-// Declarar o prisma global
-declare global {
-  var prisma: PrismaClient | undefined
-}
+// Definir o tipo global para o Prisma
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-// Verificar se estamos no lado do servidor
-const isServer = typeof window === "undefined"
+// Criar ou reutilizar a instância do Prisma
+export const prisma = globalForPrisma.prisma || new PrismaClient()
 
-// Criar o cliente Prisma apenas no lado do servidor
-const prismaInstance = isServer ? global.prisma || new PrismaClient() : (null as any as PrismaClient)
+// Em desenvolvimento, salvar a instância no objeto global
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
 
-// Salvar o cliente no objeto global em desenvolvimento
-if (isServer && process.env.NODE_ENV !== "production") {
-  global.prisma = prismaInstance
-}
-
-// Exportar como exportação padrão e nomeada
-export default prismaInstance
-export const prisma = prismaInstance
+// Exportação padrão para compatibilidade com código existente
+export default prisma

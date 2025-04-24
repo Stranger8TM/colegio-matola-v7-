@@ -6,13 +6,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { uploadAndSaveFile } from "@/lib/file-service"
+import { put } from "@vercel/blob"
+import { createFile } from "@/lib/db-service"
 
 export async function POST(req: NextRequest) {
   try {
     // Verificar se o usuário está autenticado
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
     }
 
@@ -27,11 +28,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Arquivo não fornecido" }, { status: 400 })
     }
 
-    // Fazer upload do arquivo
-    const result = await uploadAndSaveFile(file, session.user.id, category, description)
+    // Fazer upload do arquivo para o Blob Storage
+    const blob = await put(file.name, file, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: file.type,
+    })
+
+    // Salvar os metadados do arquivo no banco de dados
+    const fileRecord = await createFile({
+      url: blob.url,
+      filename: blob.pathname,
+      contentType: file.type,
+      size: file.size,
+      category: category || "uncategorized",
+      description: description || "",
+      type: file.type.split("/")[0] || "other",
+      userEmail: session.user.email,
+    })
 
     // Retornar o resultado
-    return NextResponse.json(result)
+    return NextResponse.json(fileRecord)
   } catch (error) {
     console.error("Erro na API de upload:", error)
     return NextResponse.json({ error: "Erro ao processar a solicitação" }, { status: 500 })

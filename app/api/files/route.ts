@@ -6,7 +6,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { listFilesFromDatabase } from "@/lib/file-service"
+import { getFiles } from "@/lib/db-service"
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const uploadedBy = searchParams.get("uploadedBy") || undefined
 
     // Listar os arquivos
-    const files = await listFilesFromDatabase(type, category, uploadedBy)
+    const files = await getFiles(type, category, uploadedBy)
 
     // Retornar os arquivos
     return NextResponse.json(files)

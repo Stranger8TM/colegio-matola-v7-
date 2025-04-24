@@ -6,7 +6,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { getChatSession, deleteChatSession } from "@/lib/chat-service"
+import { getChatSessionById } from "@/lib/db-service"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     // Obter a sessão de chat
-    const chatSession = await getChatSession(params.id)
+    const chatSession = await getChatSessionById(params.id)
 
     // Verificar se a sessão existe e pertence ao usuário
     if (!chatSession || chatSession.userId !== session.user.id) {
@@ -41,15 +42,21 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     // Obter a sessão de chat
-    const chatSession = await getChatSession(params.id)
+    const chatSession = await getChatSessionById(params.id)
 
     // Verificar se a sessão existe e pertence ao usuário
     if (!chatSession || chatSession.userId !== session.user.id) {
       return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 })
     }
 
-    // Excluir a sessão
-    await deleteChatSession(params.id)
+    // Excluir a sessão (usando prisma diretamente aqui porque precisamos excluir mensagens relacionadas)
+    await prisma.chatMessage.deleteMany({
+      where: { sessionId: params.id },
+    })
+
+    await prisma.chatSession.delete({
+      where: { id: params.id },
+    })
 
     // Retornar sucesso
     return NextResponse.json({ success: true })
