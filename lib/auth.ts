@@ -1,18 +1,12 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
-
-// Função simples para comparar senhas (substitui bcrypt.compare)
-async function comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
-  // Em produção, você deve usar bcrypt, mas para fins de demonstração
-  // estamos usando uma comparação simples
-  return plainPassword === hashedPassword
-}
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import type { Role } from "@prisma/client"
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
+  adapter: PrismaAdapter(db as any),
   session: {
     strategy: "jwt",
   },
@@ -33,81 +27,62 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Credenciais inválidas")
+          return null
         }
 
-        const user = await db.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        })
+        try {
+          const user = await db.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          })
 
-        if (!user || !user.hashedPassword) {
-          throw new Error("Usuário não encontrado")
-        }
+          if (!user || !user.hashedPassword) {
+            return null
+          }
 
-        // Usando nossa função simples em vez de bcrypt
-        const isPasswordValid = await comparePasswords(credentials.password, user.hashedPassword)
+          // Em produção, você deve usar bcrypt.compare
+          // const passwordMatch = await compare(credentials.password, user.hashedPassword)
+          const passwordMatch = credentials.password === user.hashedPassword
 
-        if (!isPasswordValid) {
-          throw new Error("Senha incorreta")
-        }
+          if (!passwordMatch) {
+            return null
+          }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          adminType: user.adminType,
-          image: user.image,
-          class: user.class,
-          grade: user.grade,
-          subject: user.subject,
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: user.role,
+            adminType: user.adminType,
+          }
+        } catch (error) {
+          console.error("AUTH_ERROR", error)
+          return null
         }
       },
     }),
   ],
   callbacks: {
-    async session({ token, session }) {
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string
-        session.user.name = token.name
-        session.user.email = token.email
-        session.user.role = token.role as string
+        session.user.name = token.name as string
+        session.user.email = token.email as string
+        session.user.image = token.picture as string
+        session.user.role = token.role as Role
         session.user.adminType = token.adminType as string
-        session.user.image = token.picture
-        session.user.class = token.class as string
-        session.user.grade = token.grade as string
-        session.user.subject = token.subject as string
       }
       return session
     },
     async jwt({ token, user }) {
-      const dbUser = await db.user.findFirst({
-        where: {
-          email: token.email,
-        },
-      })
-
-      if (!dbUser) {
-        if (user) {
-          token.id = user.id
-        }
-        return token
+      if (user) {
+        token.id = user.id
+        token.role = user.role
+        token.adminType = user.adminType
       }
-
-      return {
-        id: dbUser.id,
-        name: dbUser.name,
-        email: dbUser.email,
-        role: dbUser.role,
-        adminType: dbUser.adminType,
-        picture: dbUser.image,
-        class: dbUser.class,
-        grade: dbUser.grade,
-        subject: dbUser.subject,
-      }
+      return token
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
 }

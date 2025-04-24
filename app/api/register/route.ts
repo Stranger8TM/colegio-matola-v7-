@@ -18,7 +18,6 @@ export async function POST(req: Request) {
     }
 
     // Em produção, você deve usar bcrypt para hash da senha
-    // const hashedPassword = await hash(password, 10)
     const hashedPassword = password // Simplificado para demonstração
 
     // Criar o usuário

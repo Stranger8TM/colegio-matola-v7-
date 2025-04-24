@@ -59,11 +59,9 @@
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
     "@emotion/is-prop-valid": "latest",
-    "prisma": "latest",
     "@auth/core": "latest",
     "nodemailer": "latest",
-    "@prisma/client": "latest",
-    "next-auth": "latest",
+    "prisma": "latest",
     "expo": "latest",
     "expo-asset": "latest",
     "expo-file-system": "latest",
@@ -71,9 +69,11 @@
     "react-native": "latest",
     "three": "latest",
     "@react-three/fiber": "latest",
+    "@prisma/client": "latest",
     "framer-motion": "latest",
-    "@next-auth/prisma-adapter": "latest",
-    "@react-three/drei": "latest"
+    "next-auth": "latest",
+    "@react-three/drei": "latest",
+    "@auth/prisma-adapter": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
