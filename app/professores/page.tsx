@@ -7,7 +7,7 @@ export default function ProfessoresRedirect() {
   const router = useRouter()
 
   useEffect(() => {
-    router.push("/painel")
+    router.push("/professores")
   }, [router])
 
   return null
