@@ -3073,8 +3073,8 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  lan-network@0.1.4:
-    resolution: {integrity: sha512-9EzcRaFzlj3nSwcn2VOdxm30uHBBCgkX8/xzhSIlZXvQ1N1QV2cSwSrL+4bJC/WI+3k1f9SNJuPt4/F/9Au6hQ==}
+  lan-network@0.1.5:
+    resolution: {integrity: sha512-CV3k7l8jW0Z1b+G41tB7JInVyJEKQzh/YPl2v9uXpZMusp0aa+rh3OqG77xWuX7+eVBa8PsdTuMznTAssF4qwg==}
     hasBin: true
 
   leven@3.1.0:
@@ -5078,7 +5078,7 @@ snapshots:
       freeport-async: 2.0.0
       getenv: 1.0.0
       glob: 10.4.5
-      lan-network: 0.1.4
+      lan-network: 0.1.5
       minimatch: 9.0.5
       node-forge: 1.3.1
       npm-package-arg: 11.0.3
@@ -7683,7 +7683,7 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  lan-network@0.1.4: {}
+  lan-network@0.1.5: {}
 
   leven@3.1.0: {}
 
