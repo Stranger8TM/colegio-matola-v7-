@@ -104,6 +104,28 @@ export async function getAllTeachers() {
   })
 }
 
+/**
+ * Atualiza o perfil de um professor
+ * @param id ID do professor
+ * @param data Dados a serem atualizados
+ * @returns Professor atualizado
+ */
+export async function updateTeacherProfile(
+  id: string,
+  data: {
+    name?: string
+    email?: string
+    profileImage?: string
+    subject?: string
+    bio?: string
+  },
+) {
+  return prisma.teacher.update({
+    where: { id },
+    data,
+  })
+}
+
 // Materiais
 export async function getMaterials(classTarget?: string) {
   if (classTarget) {
@@ -286,6 +308,38 @@ export async function addGrade(data: {
   return prisma.grade.create({
     data,
   })
+}
+
+/**
+ * Atualiza uma nota existente
+ * @param id ID da nota
+ * @param data Dados a serem atualizados
+ * @returns Nota atualizada
+ */
+export async function updateGrade(
+  id: string,
+  data: {
+    value?: number
+    term?: string
+    comments?: string
+  },
+) {
+  return prisma.grade.update({
+    where: { id },
+    data,
+  })
+}
+
+/**
+ * Exclui uma nota
+ * @param id ID da nota a ser excluída
+ * @returns true se a exclusão for bem-sucedida
+ */
+export async function deleteGrade(id: string) {
+  await prisma.grade.delete({
+    where: { id },
+  })
+  return true
 }
 
 // Cursos

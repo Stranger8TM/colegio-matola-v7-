@@ -67,10 +67,14 @@
     "three": "latest",
     "@react-three/fiber": "latest",
     "prisma": "latest",
+    "jspdf": "latest",
     "framer-motion": "latest",
     "@react-three/drei": "latest",
     "@prisma/client": "latest",
-    "bcryptjs": "latest"
+    "bcryptjs": "latest",
+    "@vercel/blob": "latest",
+    "nanoid": "latest",
+    "jspdf-autotable": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

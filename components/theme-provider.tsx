@@ -10,9 +10,6 @@ type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
-  attribute?: string
-  enableSystem?: boolean
-  disableTransitionOnChange?: boolean
 }
 
 type ThemeProviderState = {
@@ -30,89 +27,36 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "theme",
-  attribute = "data-theme",
-  enableSystem = true,
-  disableTransitionOnChange = false,
+  storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
-
-  useEffect(() => {
-    // Aplicar o tema imediatamente ao montar o componente
-    const root = window.document.documentElement
-    const initialTheme = (localStorage.getItem(storageKey) as Theme) || defaultTheme
-
-    if (initialTheme === "system" && enableSystem) {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-      root.classList.toggle("dark", systemTheme === "dark")
-    } else {
-      root.classList.toggle("dark", initialTheme === "dark")
-    }
-  }, [])
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme)
 
   useEffect(() => {
     const root = window.document.documentElement
 
-    // Remove the old attribute if it exists
-    root.removeAttribute(attribute)
+    root.classList.remove("light", "dark")
 
-    // Initialize with the stored or default theme
-    const initialTheme = (localStorage.getItem(storageKey) as Theme) || defaultTheme
-    setTheme(initialTheme)
-
-    // Add the attribute with the current theme
-    if (initialTheme === "system" && enableSystem) {
+    if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-      root.classList.toggle("dark", systemTheme === "dark")
-      root.setAttribute(attribute, systemTheme)
-    } else {
-      root.classList.toggle("dark", initialTheme === "dark")
-      root.setAttribute(attribute, initialTheme)
+
+      root.classList.add(systemTheme)
+      return
     }
 
-    // Listen for system theme changes
-    if (enableSystem) {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-      const handleChange = () => {
-        if (theme === "system") {
-          const newTheme = mediaQuery.matches ? "dark" : "light"
-          root.classList.toggle("dark", newTheme === "dark")
-          root.setAttribute(attribute, newTheme)
-        }
-      }
+    root.classList.add(theme)
+  }, [theme])
 
-      mediaQuery.addEventListener("change", handleChange)
-      return () => mediaQuery.removeEventListener("change", handleChange)
-    }
-  }, [attribute, defaultTheme, enableSystem, storageKey, theme])
-
-  useEffect(() => {
-    const root = window.document.documentElement
-
-    // Disable transitions during theme changes if specified
-    if (disableTransitionOnChange) {
-      root.classList.add("no-transitions")
-      window.setTimeout(() => {
-        root.classList.remove("no-transitions")
-      }, 0)
-    }
-
-    // Update the theme in storage and in the DOM
-    localStorage.setItem(storageKey, theme)
-
-    if (theme === "system" && enableSystem) {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-      root.classList.toggle("dark", systemTheme === "dark")
-      root.setAttribute(attribute, systemTheme)
-    } else {
-      root.classList.toggle("dark", theme === "dark")
-      root.setAttribute(attribute, theme)
-    }
-  }, [theme, attribute, storageKey, disableTransitionOnChange, enableSystem])
+  const value = {
+    theme,
+    setTheme: (theme: Theme) => {
+      localStorage.setItem(storageKey, theme)
+      setTheme(theme)
+    },
+  }
 
   return (
-    <ThemeProviderContext.Provider value={{ theme, setTheme }} {...props}>
+    <ThemeProviderContext.Provider {...props} value={value}>
       {children}
     </ThemeProviderContext.Provider>
   )
@@ -120,6 +64,8 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
+
   if (context === undefined) throw new Error("useTheme must be used within a ThemeProvider")
+
   return context
 }
