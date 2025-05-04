@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from "clsx"
+import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -6,28 +6,22 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Formata uma data para exibição no formato local
+ * Formata uma data para o formato brasileiro (DD/MM/YYYY)
  * @param date Data a ser formatada
- * @param includeTime Se deve incluir o horário
- * @returns String formatada da data
+ * @param showTime Se deve mostrar o horário
+ * @returns String formatada
  */
-export function formatDate(date: Date | string, includeTime = false): string {
-  if (!date) return "Data inválida"
+export function formatDate(date: Date | string, showTime = false): string {
+  const d = new Date(date)
+  const day = d.getDate().toString().padStart(2, "0")
+  const month = (d.getMonth() + 1).toString().padStart(2, "0")
+  const year = d.getFullYear()
 
-  const dateObj = typeof date === "string" ? new Date(date) : date
-
-  if (isNaN(dateObj.getTime())) return "Data inválida"
-
-  const options: Intl.DateTimeFormatOptions = {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
+  if (showTime) {
+    const hours = d.getHours().toString().padStart(2, "0")
+    const minutes = d.getMinutes().toString().padStart(2, "0")
+    return `${day}/${month}/${year} ${hours}:${minutes}`
   }
 
-  if (includeTime) {
-    options.hour = "2-digit"
-    options.minute = "2-digit"
-  }
-
-  return dateObj.toLocaleDateString("pt-BR", options)
+  return `${day}/${month}/${year}`
 }

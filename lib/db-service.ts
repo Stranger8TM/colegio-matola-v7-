@@ -1,5 +1,5 @@
 import prisma from "./prisma"
-import { compare } from "bcrypt"
+import { compare } from "bcryptjs"
 
 // Autenticação
 export async function authenticateUser(username: string, password: string) {

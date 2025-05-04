@@ -1,331 +1,340 @@
 import { PrismaClient } from "@prisma/client"
-import { hash } from "bcrypt"
+import { hash } from "bcryptjs"
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Limpar banco de dados existente
+  console.log("Iniciando seed...")
+
+  // Limpar dados existentes
   await prisma.grade.deleteMany()
   await prisma.notification.deleteMany()
   await prisma.material.deleteMany()
   await prisma.task.deleteMany()
-  await prisma.document.deleteMany()
-  await prisma.event.deleteMany()
-  await prisma.course.deleteMany()
-  await prisma.statistic.deleteMany()
-  await prisma.teacher.deleteMany()
   await prisma.user.deleteMany()
+  await prisma.teacher.deleteMany()
+  await prisma.course.deleteMany()
+  await prisma.event.deleteMany()
+  await prisma.document.deleteMany()
+  await prisma.statistic.deleteMany()
 
-  console.log("Banco de dados limpo")
+  console.log("Dados existentes removidos")
 
-  // Criar administrador
-  const adminPassword = await hash("admin123", 10)
+  // Criar professores
+  const teacherGabriel = await prisma.teacher.create({
+    data: {
+      name: "Gabriel Vieira",
+      email: "gabriel.vieira@escolamatola.com",
+      password: await hash("senha123", 10),
+      profileImage: "/teacher-gabriel.jpg",
+      subject: "Matemática",
+      bio: "Professor de Matemática com 10 anos de experiência. Especialista em ensino de álgebra e geometria.",
+    },
+  })
+
+  const teacherMaria = await prisma.teacher.create({
+    data: {
+      name: "Maria Silva",
+      email: "maria.silva@escolamatola.com",
+      password: await hash("senha123", 10),
+      profileImage: "/teacher-maria.jpg",
+      subject: "Português",
+      bio: "Professora de Português com foco em literatura e redação. Mestre em Letras.",
+    },
+  })
+
+  console.log("Professores criados")
+
+  // Criar alunos
+  const student1 = await prisma.user.create({
+    data: {
+      username: "joao.silva",
+      password: await hash("senha123", 10),
+      name: "João Silva",
+      email: "joao.silva@aluno.escolamatola.com",
+      profileImage: "/avatar-1.jpg",
+      class: "10A",
+      grade: "10",
+      role: "student",
+    },
+  })
+
+  const student2 = await prisma.user.create({
+    data: {
+      username: "ana.santos",
+      password: await hash("senha123", 10),
+      name: "Ana Santos",
+      email: "ana.santos@aluno.escolamatola.com",
+      profileImage: "/avatar-2.jpg",
+      class: "10A",
+      grade: "10",
+      role: "student",
+    },
+  })
+
+  const student3 = await prisma.user.create({
+    data: {
+      username: "pedro.costa",
+      password: await hash("senha123", 10),
+      name: "Pedro Costa",
+      email: "pedro.costa@aluno.escolamatola.com",
+      profileImage: "/avatar-3.jpg",
+      class: "11B",
+      grade: "11",
+      role: "student",
+    },
+  })
+
+  // Criar admin
   const admin = await prisma.user.create({
     data: {
       username: "admin",
-      password: adminPassword,
+      password: await hash("admin123", 10),
       name: "Administrador",
-      email: "admin@colegiomatola.co.mz",
+      email: "admin@escolamatola.com",
+      profileImage: "/avatar-5.jpg",
       role: "admin",
     },
   })
 
-  console.log("Administrador criado:", admin.name)
-
-  // Criar professores
-  const teacherPassword = await hash("Gabriel", 10)
-  const teachers = await Promise.all([
-    prisma.teacher.create({
-      data: {
-        id: "12345678",
-        password: teacherPassword,
-        name: "Gabriel Vieira",
-        email: "gabriel.vieira@colegiomatola.co.mz",
-        profileImage: "/teacher-gabriel.jpg",
-        subject: "Matemática",
-        bio: "Professor de Matemática com 8 anos de experiência. Especialista em Álgebra e Geometria.",
-      },
-    }),
-    prisma.teacher.create({
-      data: {
-        id: "23456789",
-        password: await hash("Maria123", 10),
-        name: "Maria Fernandes",
-        email: "maria.fernandes@colegiomatola.co.mz",
-        profileImage: "/teacher-maria.jpg",
-        subject: "Biologia",
-        bio: "Professora de Biologia com mestrado em Ciências Naturais. Apaixonada por ensinar sobre o mundo natural.",
-      },
-    }),
-    prisma.teacher.create({
-      data: {
-        id: "34567890",
-        password: await hash("Antonio123", 10),
-        name: "António Mabjaia",
-        email: "antonio.mabjaia@colegiomatola.co.mz",
-        profileImage: "/avatar-3.jpg",
-        subject: "Física",
-        bio: "Professor de Física com doutorado em Física Quântica. Pesquisador e educador há 12 anos.",
-      },
-    }),
-  ])
-
-  console.log(`${teachers.length} professores criados`)
-
-  // Criar alunos
-  const studentPassword = await hash("Gabriel", 10)
-  const students = await Promise.all([
-    prisma.user.create({
-      data: {
-        id: "1",
-        username: "Gabriel",
-        password: studentPassword,
-        name: "Gabriel Silva",
-        email: "gabriel.silva@aluno.colegiomatola.co.mz",
-        profileImage: "/avatar-1.jpg",
-        class: "10ª Classe",
-        grade: "A",
-        role: "student",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        username: "carlos",
-        password: await hash("carlos123", 10),
-        name: "Carlos Mendes",
-        email: "carlos.mendes@aluno.colegiomatola.co.mz",
-        profileImage: "/avatar-2.jpg",
-        class: "12ª Classe",
-        grade: "B",
-        role: "student",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        username: "beatriz",
-        password: await hash("beatriz123", 10),
-        name: "Beatriz Fonseca",
-        email: "beatriz.fonseca@aluno.colegiomatola.co.mz",
-        profileImage: "/avatar-3.jpg",
-        class: "9ª Classe",
-        grade: "A",
-        role: "student",
-      },
-    }),
-  ])
-
-  console.log(`${students.length} alunos criados`)
+  console.log("Usuários criados")
 
   // Criar materiais
-  const materials = await Promise.all([
-    prisma.material.create({
-      data: {
-        title: "Matemática - Funções Quadráticas",
-        description: "Material de estudo sobre funções quadráticas e suas aplicações",
+  await prisma.material.createMany({
+    data: [
+      {
+        title: "Apostila de Álgebra",
+        description: "Material completo sobre equações de primeiro e segundo grau",
         subject: "Matemática",
-        fileUrl: "#",
-        classTarget: "10ª Classe",
-        teacherId: teachers[0].id,
+        fileUrl: "/materials/algebra.pdf",
+        classTarget: "10A",
+        teacherId: teacherGabriel.id,
+        uploadDate: new Date(),
       },
-    }),
-    prisma.material.create({
-      data: {
-        title: "Biologia - Sistema Circulatório",
-        description: "Apostila sobre o sistema circulatório humano",
-        subject: "Biologia",
-        fileUrl: "#",
-        classTarget: "9ª Classe",
-        teacherId: teachers[1].id,
+      {
+        title: "Exercícios de Geometria",
+        description: "Lista de exercícios sobre triângulos e círculos",
+        subject: "Matemática",
+        fileUrl: "/materials/geometria.pdf",
+        classTarget: "10A",
+        teacherId: teacherGabriel.id,
+        uploadDate: new Date(Date.now() - 86400000), // 1 dia atrás
       },
-    }),
-  ])
+      {
+        title: "Análise de Texto - Machado de Assis",
+        description: "Material para análise de obras de Machado de Assis",
+        subject: "Português",
+        fileUrl: "/materials/machado.pdf",
+        classTarget: "11B",
+        teacherId: teacherMaria.id,
+        uploadDate: new Date(Date.now() - 172800000), // 2 dias atrás
+      },
+    ],
+  })
 
-  console.log(`${materials.length} materiais criados`)
+  console.log("Materiais criados")
 
   // Criar tarefas
-  const tasks = await Promise.all([
-    prisma.task.create({
-      data: {
-        title: "Trabalho de Matemática",
-        description: "Resolver os exercícios da página 45 do livro",
-        dueDate: new Date("2023-06-10"),
-        userId: students[0].id,
+  await prisma.task.createMany({
+    data: [
+      {
+        title: "Exercícios de Álgebra",
+        description: "Resolver os exercícios 1 a 10 da apostila",
+        dueDate: new Date(Date.now() + 604800000), // 7 dias no futuro
+        completed: false,
+        userId: student1.id,
       },
-    }),
-    prisma.task.create({
-      data: {
-        title: "Redação de Português",
-        description: 'Escrever uma redação sobre o tema "Meio Ambiente"',
-        dueDate: new Date("2023-06-15"),
-        userId: students[0].id,
+      {
+        title: "Redação sobre Machado de Assis",
+        description: "Escrever uma redação sobre a obra Dom Casmurro",
+        dueDate: new Date(Date.now() + 1209600000), // 14 dias no futuro
+        completed: false,
+        userId: student1.id,
       },
-    }),
-  ])
+      {
+        title: "Trabalho de Geometria",
+        description: "Preparar apresentação sobre teorema de Pitágoras",
+        dueDate: new Date(Date.now() + 432000000), // 5 dias no futuro
+        completed: false,
+        userId: student2.id,
+      },
+    ],
+  })
 
-  console.log(`${tasks.length} tarefas criadas`)
+  console.log("Tarefas criadas")
 
   // Criar notificações
-  const notifications = await Promise.all([
-    prisma.notification.create({
-      data: {
-        title: "Prova de Matemática",
-        content: "A prova de Matemática será realizada na próxima segunda-feira. Estudem o capítulo 5 do livro.",
-        targetClass: "10ª Classe",
-        teacherId: teachers[0].id,
-        users: {
-          connect: [{ id: students[0].id }],
-        },
+  const notification1 = await prisma.notification.create({
+    data: {
+      title: "Prova de Matemática",
+      content: "A prova de matemática será realizada na próxima semana",
+      date: new Date(),
+      targetClass: "10A",
+      isRead: false,
+      teacherId: teacherGabriel.id,
+      users: {
+        connect: [{ id: student1.id }, { id: student2.id }],
       },
-    }),
-    prisma.notification.create({
-      data: {
-        title: "Trabalho de Biologia",
-        content: "O trabalho sobre o Sistema Circulatório deve ser entregue até sexta-feira.",
-        targetClass: "9ª Classe",
-        teacherId: teachers[1].id,
-        users: {
-          connect: [{ id: students[2].id }],
-        },
-      },
-    }),
-  ])
+    },
+  })
 
-  console.log(`${notifications.length} notificações criadas`)
+  const notification2 = await prisma.notification.create({
+    data: {
+      title: "Trabalho de Português",
+      content: "O prazo para entrega do trabalho de português foi estendido",
+      date: new Date(Date.now() - 86400000), // 1 dia atrás
+      targetClass: "11B",
+      isRead: false,
+      teacherId: teacherMaria.id,
+      users: {
+        connect: [{ id: student3.id }],
+      },
+    },
+  })
+
+  console.log("Notificações criadas")
 
   // Criar notas
-  const grades = await Promise.all([
-    prisma.grade.create({
-      data: {
-        studentId: students[0].id,
-        teacherId: teachers[0].id,
+  await prisma.grade.createMany({
+    data: [
+      {
+        studentId: student1.id,
+        teacherId: teacherGabriel.id,
         subject: "Matemática",
-        value: 18,
+        value: 85,
         term: "1º Trimestre",
-        comments: "Excelente desempenho nos exercícios de álgebra.",
+        comments: "Bom desempenho em álgebra, precisa melhorar em geometria",
+        date: new Date(Date.now() - 2592000000), // 30 dias atrás
       },
-    }),
-    prisma.grade.create({
-      data: {
-        studentId: students[0].id,
-        teacherId: teachers[1].id,
-        subject: "Biologia",
-        value: 16,
+      {
+        studentId: student1.id,
+        teacherId: teacherMaria.id,
+        subject: "Português",
+        value: 78,
         term: "1º Trimestre",
-        comments: "Bom trabalho sobre células, mas precisa melhorar na parte de genética.",
+        comments: "Boa redação, precisa melhorar gramática",
+        date: new Date(Date.now() - 2505600000), // 29 dias atrás
       },
-    }),
-  ])
+      {
+        studentId: student2.id,
+        teacherId: teacherGabriel.id,
+        subject: "Matemática",
+        value: 92,
+        term: "1º Trimestre",
+        comments: "Excelente desempenho em todos os tópicos",
+        date: new Date(Date.now() - 2592000000), // 30 dias atrás
+      },
+      {
+        studentId: student3.id,
+        teacherId: teacherMaria.id,
+        subject: "Português",
+        value: 88,
+        term: "1º Trimestre",
+        comments: "Ótima análise literária",
+        date: new Date(Date.now() - 2505600000), // 29 dias atrás
+      },
+    ],
+  })
 
-  console.log(`${grades.length} notas criadas`)
+  console.log("Notas criadas")
 
   // Criar cursos
-  const courses = await Promise.all([
-    prisma.course.create({
-      data: {
-        name: "Ensino Primário",
-        description: "Curso de ensino primário do 1º ao 7º ano",
-        students: 450,
-        classes: 15,
+  await prisma.course.createMany({
+    data: [
+      {
+        name: "Ensino Fundamental I",
+        description: "Do 1º ao 5º ano",
+        imageUrl: "/curriculo.jpg",
       },
-    }),
-    prisma.course.create({
-      data: {
-        name: "Ensino Secundário Geral",
-        description: "Curso de ensino secundário geral da 8ª à 12ª classe",
-        students: 580,
-        classes: 18,
+      {
+        name: "Ensino Fundamental II",
+        description: "Do 6º ao 9º ano",
+        imageUrl: "/curriculo.jpg",
       },
-    }),
-    prisma.course.create({
-      data: {
-        name: "Ensino Técnico-Profissional",
-        description: "Curso técnico-profissional com foco em tecnologia e administração",
-        students: 220,
-        classes: 9,
+      {
+        name: "Ensino Médio",
+        description: "Do 10º ao 12º ano",
+        imageUrl: "/curriculo.jpg",
       },
-    }),
-  ])
+    ],
+  })
 
-  console.log(`${courses.length} cursos criados`)
+  console.log("Cursos criados")
 
   // Criar eventos
-  const events = await Promise.all([
-    prisma.event.create({
-      data: {
-        name: "Reunião de Professores",
-        description: "Reunião para discutir o planejamento do próximo trimestre",
-        date: new Date("2023-05-15"),
-        time: "14:00",
-        location: "Sala de Conferências",
-      },
-    }),
-    prisma.event.create({
-      data: {
-        name: "Feira de Ciências",
+  await prisma.event.createMany({
+    data: [
+      {
+        title: "Feira de Ciências",
         description: "Apresentação de projetos científicos dos alunos",
-        date: new Date("2023-05-22"),
-        time: "09:00",
-        location: "Pátio Central",
+        date: new Date(Date.now() + 1209600000), // 14 dias no futuro
+        location: "Pátio da Escola",
+        imageUrl: "/news-1.jpg",
       },
-    }),
-    prisma.event.create({
-      data: {
-        name: "Entrega de Notas",
-        description: "Entrega de boletins e reunião com pais",
-        date: new Date("2023-05-30"),
-        time: "13:00",
-        location: "Salas de Aula",
+      {
+        title: "Reunião de Pais",
+        description: "Reunião para discutir o desempenho dos alunos",
+        date: new Date(Date.now() + 604800000), // 7 dias no futuro
+        location: "Auditório",
+        imageUrl: "/news-2.jpg",
       },
-    }),
-  ])
+      {
+        title: "Torneio Esportivo",
+        description: "Competições esportivas entre turmas",
+        date: new Date(Date.now() + 1814400000), // 21 dias no futuro
+        location: "Quadra Poliesportiva",
+        imageUrl: "/news-3.jpg",
+      },
+    ],
+  })
 
-  console.log(`${events.length} eventos criados`)
+  console.log("Eventos criados")
 
   // Criar documentos
-  const documents = await Promise.all([
-    prisma.document.create({
-      data: {
-        name: "Calendário Escolar 2023",
-        type: "PDF",
-        size: "2.4 MB",
-        fileUrl: "#",
+  await prisma.document.createMany({
+    data: [
+      {
+        title: "Calendário Escolar 2023",
+        description: "Calendário oficial com datas importantes",
+        fileUrl: "/documents/calendario.pdf",
+        category: "Institucional",
+        uploadDate: new Date(Date.now() - 7776000000), // 90 dias atrás
       },
-    }),
-    prisma.document.create({
-      data: {
-        name: "Regulamento Interno",
-        type: "DOCX",
-        size: "1.8 MB",
-        fileUrl: "#",
+      {
+        title: "Regimento Interno",
+        description: "Normas e regras da instituição",
+        fileUrl: "/documents/regimento.pdf",
+        category: "Institucional",
+        uploadDate: new Date(Date.now() - 15552000000), // 180 dias atrás
       },
-    }),
-    prisma.document.create({
-      data: {
-        name: "Plano Curricular",
-        type: "PDF",
-        size: "3.2 MB",
-        fileUrl: "#",
+      {
+        title: "Formulário de Matrícula",
+        description: "Documento para matrícula de novos alunos",
+        fileUrl: "/documents/matricula.pdf",
+        category: "Formulários",
+        uploadDate: new Date(Date.now() - 2592000000), // 30 dias atrás
       },
-    }),
-  ])
+    ],
+  })
 
-  console.log(`${documents.length} documentos criados`)
+  console.log("Documentos criados")
 
   // Criar estatísticas
   await prisma.statistic.create({
     data: {
-      totalStudents: 1250,
-      totalTeachers: 68,
-      totalCourses: 24,
-      activeClasses: 42,
-      pendingAdmissions: 78,
-      monthlyRevenue: "1.245.000 MZN",
+      totalStudents: 450,
+      totalTeachers: 35,
+      totalCourses: 3,
+      activeClasses: 15,
+      pendingAdmissions: 28,
+      monthlyRevenue: "125000",
+      updatedAt: new Date(),
     },
   })
 
   console.log("Estatísticas criadas")
 
-  console.log("Banco de dados inicializado com sucesso!")
+  console.log("Seed concluído com sucesso!")
 }
 
 main()
