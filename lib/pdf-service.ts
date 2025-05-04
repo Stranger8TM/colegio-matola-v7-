@@ -1,193 +1,208 @@
-import { jsPDF } from "jspdf"
-import autoTable from "jspdf-autotable"
-import { formatDate } from "./utils"
+import jsPDF from "jspdf"
 
-// Função para gerar boletim escolar em PDF
-export function generateReportCard(studentData: any, grades: any[]) {
+/**
+ * Gera um boletim escolar em PDF
+ * @param student Dados do aluno
+ * @param grades Notas do aluno
+ * @returns Documento PDF
+ */
+export function generateReportCard(student: any, grades: any[]) {
   const doc = new jsPDF()
 
-  // Adicionar cabeçalho
+  // Cabeçalho
   doc.setFontSize(18)
-  doc.setTextColor(0, 51, 153)
-  doc.text("Escola Privada da Matola", 105, 20, { align: "center" })
+  doc.setFont("helvetica", "bold")
+  doc.text("Colégio Privado da Matola", 105, 20, { align: "center" })
 
   doc.setFontSize(14)
-  doc.setTextColor(0, 0, 0)
   doc.text("Boletim Escolar", 105, 30, { align: "center" })
 
-  // Adicionar informações do aluno
+  // Informações do aluno
   doc.setFontSize(12)
-  doc.text(`Aluno: ${studentData.name}`, 20, 45)
-  doc.text(`Classe: ${studentData.class}`, 20, 52)
-  doc.text(`Turma: ${studentData.grade || "N/A"}`, 20, 59)
-  doc.text(`Data de emissão: ${formatDate(new Date())}`, 20, 66)
+  doc.setFont("helvetica", "normal")
+  doc.text(`Aluno: ${student.name}`, 20, 50)
+  doc.text(`Classe: ${student.class}`, 20, 60)
+  doc.text(`Turma: ${student.grade || "A"}`, 20, 70)
+  doc.text(`Data de emissão: ${new Date().toLocaleDateString("pt-BR")}`, 20, 80)
 
-  // Adicionar tabela de notas
-  const tableColumn = ["Disciplina", "Nota", "Trimestre", "Data", "Professor", "Observações"]
-  const tableRows: any[] = []
+  // Tabela de notas
+  doc.setFontSize(12)
+  doc.setFont("helvetica", "bold")
+  doc.text("Disciplina", 20, 100)
+  doc.text("Nota", 120, 100)
+  doc.text("Trimestre", 150, 100)
+  doc.text("Situação", 180, 100)
 
-  grades.forEach((grade) => {
-    const gradeData = [
-      grade.subject,
-      grade.value.toString(),
-      grade.term,
-      formatDate(new Date(grade.date)),
-      grade.teacher?.name || "N/A",
-      grade.comments || "-",
-    ]
-    tableRows.push(gradeData)
+  doc.line(20, 105, 190, 105)
+
+  // Dados das notas
+  doc.setFont("helvetica", "normal")
+  let y = 115
+
+  grades.forEach((grade, index) => {
+    doc.text(grade.subject, 20, y)
+    doc.text(grade.value.toString(), 120, y)
+    doc.text(grade.term, 150, y)
+
+    if (grade.value >= 14) {
+      doc.setTextColor(0, 128, 0) // Verde
+      doc.text("Excelente", 180, y)
+    } else if (grade.value >= 10) {
+      doc.setTextColor(0, 0, 255) // Azul
+      doc.text("Aprovado", 180, y)
+    } else {
+      doc.setTextColor(255, 0, 0) // Vermelho
+      doc.text("Reprovado", 180, y)
+    }
+
+    doc.setTextColor(0, 0, 0) // Resetar cor
+
+    y += 10
+
+    // Nova página se necessário
+    if (y > 270) {
+      doc.addPage()
+      y = 20
+
+      // Cabeçalho da nova página
+      doc.setFontSize(12)
+      doc.setFont("helvetica", "bold")
+      doc.text("Disciplina", 20, y)
+      doc.text("Nota", 120, y)
+      doc.text("Trimestre", 150, y)
+      doc.text("Situação", 180, y)
+
+      doc.line(20, y + 5, 190, y + 5)
+      y += 15
+    }
   })
 
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 75,
-    theme: "grid",
-    styles: {
-      fontSize: 10,
-      cellPadding: 3,
-      lineColor: [0, 51, 153],
-      lineWidth: 0.1,
-    },
-    headStyles: {
-      fillColor: [0, 51, 153],
-      textColor: 255,
-      fontStyle: "bold",
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240],
-    },
-  })
+  // Calcular média geral
+  const average = grades.reduce((sum, grade) => sum + grade.value, 0) / grades.length
 
-  // Adicionar rodapé
-  const finalY = (doc as any).lastAutoTable.finalY || 75
-  doc.setFontSize(10)
-  doc.text("Este documento é uma versão digital do boletim escolar.", 105, finalY + 20, { align: "center" })
-  doc.text("Escola Privada da Matola - Educação de Excelência", 105, finalY + 25, { align: "center" })
-  doc.text(`Produzido por Gabriel Vieira - ${new Date().getFullYear()}`, 105, finalY + 30, { align: "center" })
+  y += 10
+  doc.line(20, y, 190, y)
+  y += 10
 
-  return doc
-}
+  doc.setFont("helvetica", "bold")
+  doc.text("Média Geral:", 20, y)
+  doc.text(average.toFixed(1), 120, y)
 
-// Função para gerar lista de alunos em PDF
-export function generateStudentList(students: any[], className: string) {
-  const doc = new jsPDF()
+  // Situação final
+  y += 20
+  doc.text("Situação Final:", 20, y)
 
-  // Adicionar cabeçalho
-  doc.setFontSize(18)
-  doc.setTextColor(0, 51, 153)
-  doc.text("Escola Privada da Matola", 105, 20, { align: "center" })
+  if (average >= 14) {
+    doc.setTextColor(0, 128, 0) // Verde
+    doc.text("EXCELENTE", 70, y)
+  } else if (average >= 10) {
+    doc.setTextColor(0, 0, 255) // Azul
+    doc.text("APROVADO", 70, y)
+  } else {
+    doc.setTextColor(255, 0, 0) // Vermelho
+    doc.text("REPROVADO", 70, y)
+  }
 
-  doc.setFontSize(14)
+  // Rodapé
   doc.setTextColor(0, 0, 0)
-  doc.text(`Lista de Alunos - ${className}`, 105, 30, { align: "center" })
-
-  // Adicionar data
   doc.setFontSize(10)
-  doc.text(`Data de emissão: ${formatDate(new Date())}`, 20, 40)
-
-  // Adicionar tabela de alunos
-  const tableColumn = ["Nome", "Classe", "Turma", "Status"]
-  const tableRows: any[] = []
-
-  students.forEach((student) => {
-    const studentData = [student.name, student.class, student.grade || "N/A", student.status || "Ativo"]
-    tableRows.push(studentData)
-  })
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 45,
-    theme: "grid",
-    styles: {
-      fontSize: 10,
-      cellPadding: 3,
-      lineColor: [0, 51, 153],
-      lineWidth: 0.1,
-    },
-    headStyles: {
-      fillColor: [0, 51, 153],
-      textColor: 255,
-      fontStyle: "bold",
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240],
-    },
-  })
-
-  // Adicionar rodapé
-  const finalY = (doc as any).lastAutoTable.finalY || 45
-  doc.setFontSize(10)
-  doc.text("Documento gerado pelo sistema de gestão escolar.", 105, finalY + 20, { align: "center" })
-  doc.text("Escola Privada da Matola - Educação de Excelência", 105, finalY + 25, { align: "center" })
-  doc.text(`Produzido por Gabriel Vieira - ${new Date().getFullYear()}`, 105, finalY + 30, { align: "center" })
+  doc.setFont("helvetica", "normal")
+  doc.text("Produzido por Gabriel Vieira - Sistema Escolar v2.1.0", 105, 280, { align: "center" })
 
   return doc
 }
 
-// Função para gerar relatório de desempenho da turma
+/**
+ * Gera um relatório de desempenho da turma em PDF
+ * @param className Nome da turma
+ * @param subjects Lista de disciplinas
+ * @param performanceData Dados de desempenho
+ * @returns Documento PDF
+ */
 export function generateClassPerformanceReport(className: string, subjects: string[], performanceData: any[]) {
   const doc = new jsPDF()
 
-  // Adicionar cabeçalho
+  // Cabeçalho
   doc.setFontSize(18)
-  doc.setTextColor(0, 51, 153)
-  doc.text("Escola Privada da Matola", 105, 20, { align: "center" })
+  doc.setFont("helvetica", "bold")
+  doc.text("Colégio Privado da Matola", 105, 20, { align: "center" })
 
   doc.setFontSize(14)
-  doc.setTextColor(0, 0, 0)
   doc.text(`Relatório de Desempenho - ${className}`, 105, 30, { align: "center" })
 
-  // Adicionar data
-  doc.setFontSize(10)
-  doc.text(`Data de emissão: ${formatDate(new Date())}`, 20, 40)
-  doc.text(`Período: ${performanceData[0]?.term || "Atual"}`, 20, 45)
+  // Informações gerais
+  doc.setFontSize(12)
+  doc.setFont("helvetica", "normal")
+  doc.text(`Data de emissão: ${new Date().toLocaleDateString("pt-BR")}`, 20, 50)
+  doc.text(`Trimestre: ${performanceData[0]?.term || "1º Trimestre"}`, 20, 60)
 
-  // Adicionar tabela de desempenho
-  const tableColumn = ["Disciplina", "Média da Turma", "Nota Mais Alta", "Nota Mais Baixa", "% Aprovação"]
-  const tableRows: any[] = []
+  // Tabela de desempenho
+  doc.setFontSize(12)
+  doc.setFont("helvetica", "bold")
+  doc.text("Disciplina", 20, 80)
+  doc.text("Média", 80, 80)
+  doc.text("Maior Nota", 110, 80)
+  doc.text("Menor Nota", 145, 80)
+  doc.text("% Aprovação", 180, 80)
+
+  doc.line(20, 85, 190, 85)
+
+  // Dados de desempenho
+  doc.setFont("helvetica", "normal")
+  let y = 95
 
   performanceData.forEach((data) => {
-    const rowData = [
-      data.subject,
-      data.average.toFixed(1),
-      data.highest.toFixed(1),
-      data.lowest.toFixed(1),
-      `${data.passRate}%`,
-    ]
-    tableRows.push(rowData)
+    doc.text(data.subject, 20, y)
+    doc.text(data.average.toFixed(1), 80, y)
+    doc.text(data.highest.toString(), 110, y)
+    doc.text(data.lowest.toString(), 145, y)
+    doc.text(`${data.passRate}%`, 180, y)
+
+    y += 10
   })
 
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 55,
-    theme: "grid",
-    styles: {
-      fontSize: 10,
-      cellPadding: 3,
-      lineColor: [0, 51, 153],
-      lineWidth: 0.1,
-    },
-    headStyles: {
-      fillColor: [0, 51, 153],
-      textColor: 255,
-      fontStyle: "bold",
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240],
-    },
+  // Gráfico de barras simples
+  y += 20
+  doc.setFont("helvetica", "bold")
+  doc.text("Gráfico de Desempenho por Disciplina", 105, y, { align: "center" })
+
+  y += 15
+  const barHeight = 10
+  const maxBarWidth = 100
+  const startX = 70
+
+  performanceData.forEach((data) => {
+    const barWidth = (data.average / 20) * maxBarWidth
+
+    doc.setFont("helvetica", "normal")
+    doc.text(data.subject, 20, y + barHeight / 2)
+
+    // Barra de progresso
+    doc.setFillColor(51, 102, 204) // Azul
+    doc.rect(startX, y - barHeight / 2, barWidth, barHeight, "F")
+
+    // Valor
+    doc.text(`${data.average.toFixed(1)}`, startX + barWidth + 5, y + barHeight / 2 - 1)
+
+    y += barHeight + 5
   })
 
-  // Adicionar rodapé
-  const finalY = (doc as any).lastAutoTable.finalY || 55
+  // Observações
+  y += 20
+  doc.setFont("helvetica", "bold")
+  doc.text("Observações:", 20, y)
+
+  y += 10
+  doc.setFont("helvetica", "normal")
+  doc.text("- Este relatório apresenta uma visão geral do desempenho da turma.", 20, y)
+  y += 10
+  doc.text("- Recomenda-se atenção especial às disciplinas com média abaixo de 10.", 20, y)
+  y += 10
+  doc.text("- Os dados são baseados nas avaliações registradas no sistema.", 20, y)
+
+  // Rodapé
   doc.setFontSize(10)
-  doc.text("Este relatório apresenta o desempenho médio da turma por disciplina.", 105, finalY + 20, {
-    align: "center",
-  })
-  doc.text("Escola Privada da Matola - Educação de Excelência", 105, finalY + 25, { align: "center" })
-  doc.text(`Produzido por Gabriel Vieira - ${new Date().getFullYear()}`, 105, finalY + 30, { align: "center" })
+  doc.text("Produzido por Gabriel Vieira - Sistema Escolar v2.1.0", 105, 280, { align: "center" })
 
   return doc
 }

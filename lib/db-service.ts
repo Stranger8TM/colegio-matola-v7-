@@ -393,3 +393,152 @@ export async function getStatistics() {
 
   return stats
 }
+
+// Aulas Gravadas
+export async function getAllRecordedLessons(classTarget?: string) {
+  if (classTarget) {
+    return prisma.recordedLesson.findMany({
+      where: { classTarget },
+      include: {
+        teacher: {
+          select: {
+            name: true,
+            subject: true,
+          },
+        },
+      },
+      orderBy: { uploadDate: "desc" },
+    })
+  }
+
+  return prisma.recordedLesson.findMany({
+    include: {
+      teacher: {
+        select: {
+          name: true,
+          subject: true,
+        },
+      },
+    },
+    orderBy: { uploadDate: "desc" },
+  })
+}
+
+export async function getRecordedLessonsByTeacher(teacherId: string) {
+  return prisma.recordedLesson.findMany({
+    where: { teacherId },
+    orderBy: { uploadDate: "desc" },
+  })
+}
+
+export async function addRecordedLesson(data: {
+  title: string
+  description?: string
+  subject: string
+  videoUrl: string
+  thumbnailUrl?: string
+  duration: number
+  classTarget: string
+  teacherId: string
+}) {
+  return prisma.recordedLesson.create({
+    data,
+  })
+}
+
+export async function deleteRecordedLesson(id: string) {
+  await prisma.recordedLesson.delete({
+    where: { id },
+  })
+  return true
+}
+
+export async function updateRecordedLesson(
+  id: string,
+  data: {
+    title?: string
+    description?: string
+    thumbnailUrl?: string
+    classTarget?: string
+  },
+) {
+  return prisma.recordedLesson.update({
+    where: { id },
+    data,
+  })
+}
+
+// Progresso de visualização de aulas
+export async function updateLessonProgress(data: {
+  userId: string
+  lessonId: string
+  progress: number
+  completed: boolean
+}) {
+  const { userId, lessonId, progress, completed } = data
+
+  // Verificar se já existe um registro de progresso
+  const existingProgress = await prisma.lessonProgress.findUnique({
+    where: {
+      userId_lessonId: {
+        userId,
+        lessonId,
+      },
+    },
+  })
+
+  if (existingProgress) {
+    // Atualizar o progresso existente
+    return prisma.lessonProgress.update({
+      where: {
+        userId_lessonId: {
+          userId,
+          lessonId,
+        },
+      },
+      data: {
+        progress,
+        completed,
+        updatedAt: new Date(),
+      },
+    })
+  } else {
+    // Criar um novo registro de progresso
+    return prisma.lessonProgress.create({
+      data: {
+        userId,
+        lessonId,
+        progress,
+        completed,
+      },
+    })
+  }
+}
+
+export async function getLessonProgress(userId: string, lessonId: string) {
+  return prisma.lessonProgress.findUnique({
+    where: {
+      userId_lessonId: {
+        userId,
+        lessonId,
+      },
+    },
+  })
+}
+
+export async function getUserLessonsProgress(userId: string) {
+  return prisma.lessonProgress.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      lesson: {
+        select: {
+          id: true,
+          title: true,
+          subject: true,
+        },
+      },
+    },
+  })
+}

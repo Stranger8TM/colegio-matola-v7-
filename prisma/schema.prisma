@@ -11,137 +11,159 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String    @id @default(uuid())
+  username     String    @unique
   password     String
   name         String
-  email        String   @unique
+  email        String    @unique
   profileImage String?
-  class        String?
-  grade        String?
-  role         String   @default("student") // student, teacher, admin
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  class        String
+  grade        String
+  role         String    @default("student")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  // Relações
-  grades       Grade[]
-  materials    Material[] @relation("StudentMaterials")
-  tasks        Task[]
-  notifications Notification[] @relation("UserNotifications")
+  tasks           Task[]
+  notifications   Notification[]
+  grades          Grade[]
+  lessonProgress  LessonProgress[]
 }
 
 model Teacher {
-  id           String   @id @default(cuid())
-  password     String
+  id           String    @id @default(uuid())
   name         String
-  email        String   @unique
+  email        String    @unique
+  password     String
   profileImage String?
   subject      String
   bio          String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  // Relações
-  materials    Material[] @relation("TeacherMaterials")
-  grades       Grade[]    @relation("TeacherGrades")
-  notifications Notification[] @relation("TeacherNotifications")
+  materials       Material[]
+  notifications   Notification[]
+  grades          Grade[]
+  recordedLessons RecordedLesson[]
 }
 
 model Material {
-  id          String   @id @default(cuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
   subject     String
   fileUrl     String
-  uploadDate  DateTime @default(now())
   classTarget String
-  
-  // Relações
+  uploadDate  DateTime  @default(now())
   teacherId   String
-  teacher     Teacher  @relation("TeacherMaterials", fields: [teacherId], references: [id])
-  students    User[]   @relation("StudentMaterials")
+
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
 }
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
   dueDate     DateTime
-  completed   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relações
+  completed   Boolean   @default(false)
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Notification {
-  id          String   @id @default(cuid())
+  id          String    @id @default(uuid())
   title       String
   content     String
-  date        DateTime @default(now())
-  targetClass String?
-  isRead      Boolean  @default(false)
-  
-  // Relações
+  date        DateTime  @default(now())
+  isRead      Boolean   @default(false)
   teacherId   String
-  teacher     Teacher  @relation("TeacherNotifications", fields: [teacherId], references: [id])
-  users       User[]   @relation("UserNotifications")
+  targetClass String?
+
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
+  users       User[]
 }
 
 model Grade {
-  id          String   @id @default(cuid())
+  id          String    @id @default(uuid())
+  studentId   String
+  teacherId   String
+  subject     String
   value       Float
   term        String
-  date        DateTime @default(now())
+  date        DateTime  @default(now())
   comments    String?
-  
-  // Relações
-  studentId   String
-  student     User     @relation(fields: [studentId], references: [id])
-  teacherId   String
-  teacher     Teacher  @relation("TeacherGrades", fields: [teacherId], references: [id])
-  subject     String
+
+  student     User      @relation(fields: [studentId], references: [id])
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
 }
 
 model Course {
-  id          String   @id @default(cuid())
+  id          String    @id @default(uuid())
   name        String
   description String?
-  students    Int      @default(0)
-  classes     Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  name        String
+  id          String    @id @default(uuid())
+  title       String
   description String?
   date        DateTime
-  time        String
-  location    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  location    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Document {
-  id          String   @id @default(cuid())
-  name        String
-  type        String
-  size        String
+  id          String    @id @default(uuid())
+  title       String
   fileUrl     String
-  uploadDate  DateTime @default(now())
+  fileType    String
+  fileSize    Int
+  uploadDate  DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Statistic {
-  id              String   @id @default(cuid())
-  totalStudents   Int      @default(0)
-  totalTeachers   Int      @default(0)
-  totalCourses    Int      @default(0)
-  activeClasses   Int      @default(0)
-  pendingAdmissions Int    @default(0)
-  monthlyRevenue  String?
-  updatedAt       DateTime @default(now())
+  id                String    @id @default(uuid())
+  totalStudents     Int
+  totalTeachers     Int
+  totalCourses      Int
+  activeClasses     Int
+  pendingAdmissions Int
+  monthlyRevenue    String
+  updatedAt         DateTime  @updatedAt
+}
+
+model RecordedLesson {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  subject      String
+  videoUrl     String
+  thumbnailUrl String?
+  duration     Float
+  classTarget  String
+  uploadDate   DateTime  @default(now())
+  teacherId    String
+
+  teacher      Teacher   @relation(fields: [teacherId], references: [id])
+  progress     LessonProgress[]
+}
+
+model LessonProgress {
+  userId      String
+  lessonId    String
+  progress    Float     @default(0)
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id])
+  lesson      RecordedLesson @relation(fields: [lessonId], references: [id])
+
+  @@id([userId, lessonId])
 }
