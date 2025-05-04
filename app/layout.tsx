@@ -19,8 +19,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt" suppressHydrationWarning>
+      <head>
+        {/* Adicionar script para evitar flash de conteúdo não estilizado */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var mode = localStorage.getItem('ui-theme');
+                  if (mode === 'dark' || (!mode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.add('light');
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="light" storageKey="theme">
+        <ThemeProvider defaultTheme="light" storageKey="ui-theme">
           {children}
         </ThemeProvider>
       </body>

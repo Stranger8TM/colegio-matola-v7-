@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useContext, useEffect, useState } from "react"
+import { safeLocalStorage } from "@/lib/safe-storage"
 
 type Theme = "dark" | "light" | "system"
 
@@ -30,31 +30,45 @@ export function ThemeProvider({
   storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme)
+  // Sempre inicialize com o defaultTheme para evitar problemas no servidor
+  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [mounted, setMounted] = useState(false)
 
+  // Efeito para carregar o tema do localStorage apenas no cliente
   useEffect(() => {
+    const storedTheme = safeLocalStorage.getItem(storageKey) as Theme | null
+    if (storedTheme) {
+      setTheme(storedTheme)
+    }
+    setMounted(true)
+  }, [storageKey])
+
+  // Efeito para aplicar o tema ao documento
+  useEffect(() => {
+    if (!mounted) return
+
     const root = window.document.documentElement
 
     root.classList.remove("light", "dark")
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-
       root.classList.add(systemTheme)
       return
     }
 
     root.classList.add(theme)
-  }, [theme])
+  }, [theme, mounted])
 
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
+      safeLocalStorage.setItem(storageKey, theme)
       setTheme(theme)
     },
   }
 
+  // Renderize os filhos imediatamente para evitar problemas de hidratação
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
       {children}
@@ -65,7 +79,12 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
 
-  if (context === undefined) throw new Error("useTheme must be used within a ThemeProvider")
+  if (!context) {
+    return {
+      theme: "system",
+      setTheme: () => console.warn("useTheme must be used within a ThemeProvider"),
+    }
+  }
 
   return context
 }

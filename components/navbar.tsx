@@ -77,6 +77,11 @@ export default function Navbar() {
     setOpenSubmenu(openSubmenu === name ? null : name)
   }
 
+  // Não renderize nada até que o componente esteja montado no cliente
+  if (!mounted) {
+    return null
+  }
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -150,21 +155,19 @@ export default function Navbar() {
               <span>+258 84 039 3525 </span>
             </a>
 
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                aria-label="Alternar tema"
-                className="rounded-full"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-yellow-400" />
-                ) : (
-                  <Moon className="h-5 w-5 text-blue-800" />
-                )}
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label="Alternar tema"
+              className="rounded-full"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-yellow-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-blue-800" />
+              )}
+            </Button>
 
             <Button className="bg-blue-800 hover:bg-blue-700 text-white rounded-xl">
               <Link href="/admissao">Matricule-se</Link>
@@ -173,21 +176,19 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center space-x-4 lg:hidden">
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                aria-label="Alternar tema"
-                className="rounded-full"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-yellow-400" />
-                ) : (
-                  <Moon className="h-5 w-5 text-blue-800" />
-                )}
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label="Alternar tema"
+              className="rounded-full"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-yellow-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-blue-800" />
+              )}
+            </Button>
 
             <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Menu">
               {isOpen ? (
