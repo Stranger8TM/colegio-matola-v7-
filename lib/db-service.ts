@@ -1,3 +1,5 @@
+"use server"
+
 import prisma from "./prisma"
 import { compare } from "bcryptjs"
 
