@@ -1,8 +1,7 @@
 "use client"
 
-import type React from "react"
+import type * as React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { safeLocalStorage } from "@/lib/safe-storage"
 
 type Theme = "dark" | "light" | "system"
 
@@ -30,25 +29,19 @@ export function ThemeProvider({
   storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
-  // Sempre inicialize com o defaultTheme para evitar problemas no servidor
   const [theme, setTheme] = useState<Theme>(defaultTheme)
   const [mounted, setMounted] = useState(false)
 
-  // Efeito para carregar o tema do localStorage apenas no cliente
   useEffect(() => {
-    const storedTheme = safeLocalStorage.getItem(storageKey) as Theme | null
-    if (storedTheme) {
-      setTheme(storedTheme)
-    }
     setMounted(true)
-  }, [storageKey])
+    const savedTheme = getSavedTheme(storageKey, defaultTheme)
+    setTheme(savedTheme)
+  }, [storageKey, defaultTheme])
 
-  // Efeito para aplicar o tema ao documento
   useEffect(() => {
     if (!mounted) return
 
     const root = window.document.documentElement
-
     root.classList.remove("light", "dark")
 
     if (theme === "system") {
@@ -58,19 +51,25 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme)
-  }, [theme, mounted])
+    try {
+      localStorage.setItem(storageKey, theme)
+    } catch (error) {
+      console.error("Failed to save theme to localStorage:", error)
+    }
+  }, [theme, storageKey, mounted])
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      safeLocalStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
+  if (!mounted) {
+    return <>{children}</>
   }
 
-  // Renderize os filhos imediatamente para evitar problemas de hidratação
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeProviderContext.Provider
+      value={{
+        theme,
+        setTheme,
+      }}
+      {...props}
+    >
       {children}
     </ThemeProviderContext.Provider>
   )
@@ -78,13 +77,21 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
-
-  if (!context) {
-    return {
-      theme: "system",
-      setTheme: () => console.warn("useTheme must be used within a ThemeProvider"),
-    }
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider")
   }
-
   return context
+}
+
+// Função auxiliar para obter o tema salvo
+function getSavedTheme(storageKey: string, defaultTheme: Theme): Theme {
+  if (typeof window === "undefined") return defaultTheme
+
+  try {
+    const savedTheme = localStorage.getItem(storageKey) as Theme | null
+    return savedTheme || defaultTheme
+  } catch (error) {
+    console.error("Failed to get theme from localStorage:", error)
+    return defaultTheme
+  }
 }

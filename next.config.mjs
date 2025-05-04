@@ -6,12 +6,11 @@ const nextConfig = {
     domains: ['placeholder.com', 'v0.blob.vercel-storage.com'],
     unoptimized: true,
   },
-  // Desabilitar a pré-renderização da página 404
+  // Garantir que o SWC seja usado
   experimental: {
     // Configurações experimentais para melhorar a compatibilidade
     serverComponentsExternalPackages: ['bcryptjs', '@prisma/client'],
     optimizeCss: true,
-    optimizeServerReact: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -29,13 +28,6 @@ const nextConfig = {
         tls: false,
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
-        url: require.resolve('url/'),
-        zlib: require.resolve('browserify-zlib'),
-        http: require.resolve('stream-http'),
-        https: require.resolve('https-browserify'),
-        assert: require.resolve('assert/'),
-        os: require.resolve('os-browserify/browser'),
-        path: require.resolve('path-browserify'),
       };
     }
     return config;
