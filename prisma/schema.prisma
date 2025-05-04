@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  password     String
+  name         String
+  email        String   @unique
+  profileImage String?
+  class        String?
+  grade        String?
+  role         String   @default("student") // student, teacher, admin
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relações
+  grades       Grade[]
+  materials    Material[] @relation("StudentMaterials")
+  tasks        Task[]
+  notifications Notification[] @relation("UserNotifications")
+}
+
+model Teacher {
+  id           String   @id @default(cuid())
+  password     String
+  name         String
+  email        String   @unique
+  profileImage String?
+  subject      String
+  bio          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relações
+  materials    Material[] @relation("TeacherMaterials")
+  grades       Grade[]    @relation("TeacherGrades")
+  notifications Notification[] @relation("TeacherNotifications")
+}
+
+model Material {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  subject     String
+  fileUrl     String
+  uploadDate  DateTime @default(now())
+  classTarget String
+  
+  // Relações
+  teacherId   String
+  teacher     Teacher  @relation("TeacherMaterials", fields: [teacherId], references: [id])
+  students    User[]   @relation("StudentMaterials")
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relações
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  date        DateTime @default(now())
+  targetClass String?
+  isRead      Boolean  @default(false)
+  
+  // Relações
+  teacherId   String
+  teacher     Teacher  @relation("TeacherNotifications", fields: [teacherId], references: [id])
+  users       User[]   @relation("UserNotifications")
+}
+
+model Grade {
+  id          String   @id @default(cuid())
+  value       Float
+  term        String
+  date        DateTime @default(now())
+  comments    String?
+  
+  // Relações
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id])
+  teacherId   String
+  teacher     Teacher  @relation("TeacherGrades", fields: [teacherId], references: [id])
+  subject     String
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  students    Int      @default(0)
+  classes     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  date        DateTime
+  time        String
+  location    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  size        String
+  fileUrl     String
+  uploadDate  DateTime @default(now())
+}
+
+model Statistic {
+  id              String   @id @default(cuid())
+  totalStudents   Int      @default(0)
+  totalTeachers   Int      @default(0)
+  totalCourses    Int      @default(0)
+  activeClasses   Int      @default(0)
+  pendingAdmissions Int    @default(0)
+  monthlyRevenue  String?
+  updatedAt       DateTime @default(now())
+}

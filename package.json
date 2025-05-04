@@ -66,8 +66,11 @@
     "react-native": "latest",
     "three": "latest",
     "@react-three/fiber": "latest",
+    "prisma": "latest",
     "framer-motion": "latest",
-    "@react-three/drei": "latest"
+    "@react-three/drei": "latest",
+    "@prisma/client": "latest",
+    "bcryptjs": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
