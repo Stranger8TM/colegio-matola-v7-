@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
-import { Lock, ShieldAlert, GraduationCap, ArrowRight, CheckCircle } from "lucide-react"
+import { Lock, ShieldAlert, GraduationCap, ArrowRight, CheckCircle, UserCircle } from "lucide-react"
 
 export default function PainelPage() {
   const router = useRouter()
@@ -18,19 +18,33 @@ export default function PainelPage() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [codeVerified, setCodeVerified] = useState(false)
-  const [selectedPanel, setSelectedPanel] = useState<"admin" | "teacher" | null>(null)
+  const [selectedPanel, setSelectedPanel] = useState<"admin" | "teacher" | "student" | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    // Verificar se já existe um token de autenticação
-    const adminToken = localStorage.getItem("adminToken")
-    const teacherToken = localStorage.getItem("teacherId")
+    setIsMounted(true)
 
-    if (adminToken) {
-      router.push("/admin")
-    } else if (teacherToken) {
-      router.push("/professores/dashboard")
+    // Limpar qualquer token de autenticação existente ao entrar na página de painel
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("adminToken")
+      localStorage.removeItem("teacherId")
+      localStorage.removeItem("teacherName")
+      localStorage.removeItem("studentId")
+      localStorage.removeItem("studentName")
     }
-  }, [router])
+  }, [])
+
+  // Se não estiver montado no cliente, não renderize nada que use localStorage
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800 mx-auto mb-4"></div>
+          <p className="text-gray-700 dark:text-gray-300">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,8 +54,15 @@ export default function PainelPage() {
     try {
       // Em um ambiente real, isso seria uma chamada de API
       // Simulando uma verificação de código
-      if (accessCode === "Gabriel") {
+      if (accessCode === "admin123") {
         setCodeVerified(true)
+        setSelectedPanel("admin")
+      } else if (accessCode === "Gabriel") {
+        setCodeVerified(true)
+        setSelectedPanel("teacher")
+      } else if (accessCode === "aluno123") {
+        setCodeVerified(true)
+        setSelectedPanel("student")
       } else {
         setError("Código de acesso inválido. Tente novamente.")
       }
@@ -52,17 +73,21 @@ export default function PainelPage() {
     }
   }
 
-  const handleSelectPanel = (type: "admin" | "teacher") => {
+  const handleSelectPanel = (type: "admin" | "teacher" | "student") => {
     setSelectedPanel(type)
 
     // Simular autenticação
     if (type === "admin") {
       localStorage.setItem("adminToken", "admin-token-123")
       router.push("/admin")
-    } else {
+    } else if (type === "teacher") {
       localStorage.setItem("teacherId", "teacher-123")
       localStorage.setItem("teacherName", "Gabriel Vieira")
       router.push("/professores/dashboard")
+    } else if (type === "student") {
+      localStorage.setItem("studentId", "student-123")
+      localStorage.setItem("studentName", "Ana Silva")
+      router.push("/portal/dashboard")
     }
   }
 
@@ -81,7 +106,7 @@ export default function PainelPage() {
                   </div>
                   <CardTitle className="text-white text-3xl mb-2">Área Restrita</CardTitle>
                   <CardDescription className="text-blue-100 text-lg">
-                    Esta área é exclusiva para professores e administradores
+                    Esta área é exclusiva para alunos, professores e administradores
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-8">
@@ -163,8 +188,12 @@ export default function PainelPage() {
 
                     <div className="text-center text-sm text-gray-500 dark:text-gray-400">
                       <p>
-                        Se você é professor ou administrador e não possui o código de acesso, entre em contato com a
-                        administração da escola.
+                        Se você é aluno, professor ou administrador e não possui o código de acesso, entre em contato
+                        com a administração da escola.
+                      </p>
+                      <p className="mt-2 text-xs">
+                        <strong>Dica:</strong> Use "admin123" para administrador, "Gabriel" para professor ou "aluno123"
+                        para aluno.
                       </p>
                     </div>
                   </div>
@@ -193,7 +222,7 @@ export default function PainelPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
                   <Card
                     className={`border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer overflow-hidden ${
@@ -270,6 +299,47 @@ export default function PainelPage() {
                       </ul>
                       <Button className="w-full mt-6 bg-green-700 hover:bg-green-600">
                         Acessar Painel do Professor
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+                  <Card
+                    className={`border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer overflow-hidden ${
+                      selectedPanel === "student" ? "ring-2 ring-purple-500" : ""
+                    }`}
+                    onClick={() => handleSelectPanel("student")}
+                  >
+                    <div className="bg-gradient-to-r from-purple-700 to-purple-600 dark:from-purple-800 dark:to-purple-700 p-6">
+                      <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mb-4">
+                        <UserCircle className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-white mb-2">Portal do Aluno</h3>
+                      <p className="text-purple-100">Acesse suas notas, materiais e aulas</p>
+                    </div>
+                    <CardContent className="p-6">
+                      <ul className="space-y-3">
+                        <li className="flex items-center text-gray-700 dark:text-gray-300">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          Visualização de notas e boletins
+                        </li>
+                        <li className="flex items-center text-gray-700 dark:text-gray-300">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          Acesso a materiais didáticos
+                        </li>
+                        <li className="flex items-center text-gray-700 dark:text-gray-300">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          Aulas gravadas e exercícios
+                        </li>
+                        <li className="flex items-center text-gray-700 dark:text-gray-300">
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                          Comunicação com professores
+                        </li>
+                      </ul>
+                      <Button className="w-full mt-6 bg-purple-700 hover:bg-purple-600">
+                        Acessar Portal do Aluno
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardContent>
