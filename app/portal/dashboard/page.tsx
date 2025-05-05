@@ -19,6 +19,7 @@ import {
   Download,
   ExternalLink,
   MessageSquare,
+  Library,
 } from "lucide-react"
 import { motion } from "framer-motion"
 
@@ -127,6 +128,22 @@ export default function StudentDashboard() {
                     <Video className="mr-2 h-5 w-5" />
                     Aulas Gravadas
                   </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3"
+                    onClick={() => router.push("/portal/dashboard/biblioteca")}
+                  >
+                    <Library className="mr-2 h-5 w-5" />
+                    Biblioteca Digital
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3"
+                    onClick={() => router.push("/portal/dashboard/forum")}
+                  >
+                    <MessageSquare className="mr-2 h-5 w-5" />
+                    Fórum de Discussão
+                  </Button>
                   <Button variant="ghost" className="w-full justify-start rounded-xl py-3">
                     <BookOpen className="mr-2 h-5 w-5" />
                     Materiais
@@ -138,10 +155,6 @@ export default function StudentDashboard() {
                   <Button variant="ghost" className="w-full justify-start rounded-xl py-3">
                     <Calendar className="mr-2 h-5 w-5" />
                     Calendário
-                  </Button>
-                  <Button variant="ghost" className="w-full justify-start rounded-xl py-3">
-                    <MessageSquare className="mr-2 h-5 w-5" />
-                    Mensagens
                   </Button>
                 </nav>
                 <div className="p-4 pt-0">
@@ -214,6 +227,55 @@ export default function StudentDashboard() {
                   <CardContent>
                     <div className="text-3xl font-bold text-amber-800 dark:text-amber-400">2 dias</div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Matemática - 15/05/2023</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Novas Seções */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <Card
+                  className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer rounded-xl overflow-hidden"
+                  onClick={() => router.push("/portal/dashboard/forum")}
+                >
+                  <CardContent className="p-0">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-500 dark:from-blue-800 dark:to-blue-700 p-6 text-white">
+                      <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xl font-bold">Fórum de Discussão</h2>
+                        <MessageSquare className="h-8 w-8 text-white/80" />
+                      </div>
+                      <p className="text-blue-100 mb-4">
+                        Participe de discussões, tire dúvidas e compartilhe conhecimento com colegas e professores.
+                      </p>
+                      <div className="flex justify-between items-center text-sm">
+                        <span>5 novos tópicos</span>
+                        <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                          Acessar
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card
+                  className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer rounded-xl overflow-hidden"
+                  onClick={() => router.push("/portal/dashboard/biblioteca")}
+                >
+                  <CardContent className="p-0">
+                    <div className="bg-gradient-to-r from-green-600 to-green-500 dark:from-green-800 dark:to-green-700 p-6 text-white">
+                      <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xl font-bold">Biblioteca Digital</h2>
+                        <Library className="h-8 w-8 text-white/80" />
+                      </div>
+                      <p className="text-green-100 mb-4">
+                        Acesse livros, documentos, vídeos e outros materiais didáticos para seus estudos.
+                      </p>
+                      <div className="flex justify-between items-center text-sm">
+                        <span>12 novos materiais</span>
+                        <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                          Acessar
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

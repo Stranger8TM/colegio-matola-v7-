@@ -46,6 +46,22 @@ export async function authenticateTeacher(id: string, password: string) {
   }
 }
 
+// Adicionar função para verificar o código de acesso do professor
+export async function verifyTeacherAccessCode(code: string) {
+  // Em um ambiente real, isso verificaria contra o banco de dados
+  // Por enquanto, estamos usando uma variável de ambiente
+  const validCode = process.env.TEACHER_ACCESS_CODE || "Gabriel"
+  return code === validCode
+}
+
+// Adicionar função para verificar a senha do administrador
+export async function verifyAdminPassword(password: string) {
+  // Em um ambiente real, isso verificaria contra o banco de dados com hash
+  // Por enquanto, estamos usando uma variável de ambiente
+  const validPassword = process.env.ADMIN_PASSWORD || "Gabriel"
+  return password === validPassword
+}
+
 // Usuários
 export async function getUserById(id: string) {
   return prisma.user.findUnique({
