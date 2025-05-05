@@ -1,64 +1,106 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { verify } from "jsonwebtoken"
-import type { ApiResponse } from "@/types/api"
+import type { NextRequest } from "next/server"
+import jwt from "jsonwebtoken"
+import { apiConfig } from "./api-config"
 
-// Middleware para verificar autenticação
-export async function withAuth(
-  request: NextRequest,
-  handler: (req: NextRequest, decodedToken: any) => Promise<NextResponse>,
-) {
+interface TokenPayload {
+  id: number
+  name: string
+  email: string
+  role: string
+  iat: number
+  exp: number
+}
+
+export async function validateToken(request: NextRequest) {
   try {
     // Obter o token do cabeçalho Authorization
     const authHeader = request.headers.get("Authorization")
-
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      const response: ApiResponse<null> = {
-        success: false,
-        error: "Não autorizado",
-        message: "Token de autenticação não fornecido",
-      }
-
-      return NextResponse.json(response, { status: 401 })
+      return { valid: false, error: "Authorization token is required" }
     }
 
     const token = authHeader.split(" ")[1]
-
-    // Verificar o token
-    const decoded = verify(token, process.env.JWT_SECRET || "secret")
-
-    // Chamar o handler com o token decodificado
-    return handler(request, decoded)
-  } catch (error) {
-    console.error("Authentication error:", error)
-
-    const response: ApiResponse<null> = {
-      success: false,
-      error: "Não autorizado",
-      message: "Token de autenticação inválido ou expirado",
+    if (!token) {
+      return { valid: false, error: "Invalid token format" }
     }
 
-    return NextResponse.json(response, { status: 401 })
+    // Verificar o token
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || apiConfig.jwt.secret) as TokenPayload
+
+      // Verificar se o token expirou
+      const currentTime = Math.floor(Date.now() / 1000)
+      if (decoded.exp < currentTime) {
+        return { valid: false, error: "Token expired" }
+      }
+
+      // Token válido, retornar informações do usuário
+      return {
+        valid: true,
+        user: {
+          id: decoded.id,
+          name: decoded.name,
+          email: decoded.email,
+          role: decoded.role,
+        },
+      }
+    } catch (error) {
+      return { valid: false, error: "Invalid token" }
+    }
+  } catch (error) {
+    console.error("Error validating token:", error)
+    return { valid: false, error: "Error validating token" }
   }
 }
 
-// Middleware para verificar permissões de administrador
-export async function withAdminAuth(
-  request: NextRequest,
-  handler: (req: NextRequest, decodedToken: any) => Promise<NextResponse>,
-) {
-  return withAuth(request, async (req, decoded) => {
-    // Verificar se o usuário é um administrador
-    if (decoded.role !== "admin" && decoded.role !== "superadmin") {
-      const response: ApiResponse<null> = {
-        success: false,
-        error: "Acesso negado",
-        message: "Você não tem permissão para acessar este recurso",
-      }
-
-      return NextResponse.json(response, { status: 403 })
+export function checkRole(allowedRoles: string[]) {
+  return async (request: NextRequest) => {
+    const tokenValidation = await validateToken(request)
+    if (!tokenValidation.valid) {
+      return { valid: false, error: tokenValidation.error }
     }
 
-    // Chamar o handler com o token decodificado
-    return handler(req, decoded)
-  })
+    const userRole = tokenValidation.user?.role
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      return { valid: false, error: "Insufficient permissions" }
+    }
+
+    return { valid: true, user: tokenValidation.user }
+  }
+}
+
+export function rateLimiter() {
+  // Implementação simples de rate limiting
+  // Em produção, use uma solução mais robusta como Redis
+  const requests: Record<string, { count: number; timestamp: number }> = {}
+
+  return (request: NextRequest) => {
+    const ip = request.headers.get("x-forwarded-for") || "unknown"
+    const now = Date.now()
+    const windowMs = apiConfig.rateLimit.windowMs
+
+    // Limpar entradas antigas
+    for (const key in requests) {
+      if (now - requests[key].timestamp > windowMs) {
+        delete requests[key]
+      }
+    }
+
+    // Verificar e atualizar contagem
+    if (!requests[ip]) {
+      requests[ip] = { count: 1, timestamp: now }
+      return { limited: false }
+    }
+
+    if (requests[ip].count >= apiConfig.rateLimit.max) {
+      return {
+        limited: true,
+        error: "Too many requests, please try again later",
+        resetTime: requests[ip].timestamp + windowMs,
+      }
+    }
+
+    requests[ip].count++
+    return { limited: false }
+  }
 }
