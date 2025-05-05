@@ -74,7 +74,8 @@
     "@prisma/client": "latest",
     "bcryptjs": "latest",
     "uuid": "latest",
-    "jspdf": "latest"
+    "jspdf": "latest",
+    "jsonwebtoken": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
