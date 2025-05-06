@@ -1,441 +1,515 @@
-# API do Colégio Matola - Documentação
+# API do Colégio Privado da Matola
 
-## Visão Geral
-
-Esta API fornece acesso aos dados e funcionalidades do sistema do Colégio Matola. Ela permite gerenciar estudantes, professores, materiais de estudo, aulas gravadas e muito mais.
+Esta documentação descreve os endpoints disponíveis na API do Colégio Privado da Matola.
 
 ## Base URL
 
 \`\`\`
-https://colegiomatola.vercel.app/api/v1
+https://escolaprivada.co.mz/api/v1
 \`\`\`
 
 ## Autenticação
 
-A maioria dos endpoints requer autenticação. Para autenticar, envie um token JWT no cabeçalho `Authorization`:
+A API utiliza autenticação baseada em tokens JWT. Para acessar endpoints protegidos, você deve incluir o token no cabeçalho `Authorization`:
 
 \`\`\`
 Authorization: Bearer seu_token_jwt
 \`\`\`
 
-Para obter um token, use o endpoint de login:
+### Obter Token
 
-\`\`\`
-POST /auth/login
-\`\`\`
+**Endpoint:** `POST /auth/login`
 
-### Exemplo de Requisição de Login
-
+**Corpo da Requisição:**
 \`\`\`json
 {
-  "email": "usuario@colegiomatola.com",
-  "password": "senha_segura"
+  "username": "seu_usuario",
+  "password": "sua_senha"
 }
 \`\`\`
 
-### Exemplo de Resposta de Login
-
+**Resposta de Sucesso:**
 \`\`\`json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "name": "Nome do Usuário",
-    "email": "usuario@colegiomatola.com",
-    "role": "teacher"
+  "success": true,
+  "data": {
+    "user": {
+      "id": "user_id",
+      "name": "Nome do Usuário",
+      "email": "email@exemplo.com",
+      "profileImage": "url_da_imagem",
+      "role": "student|teacher|admin"
+    },
+    "token": "seu_token_jwt"
+  },
+  "message": "Login realizado com sucesso"
+}
+\`\`\`
+
+## Alunos
+
+### Listar Alunos
+
+**Endpoint:** `GET /students`
+
+**Parâmetros de Consulta:**
+- `page` (opcional): Número da página (padrão: 1)
+- `limit` (opcional): Limite de itens por página (padrão: 10)
+- `sortBy` (opcional): Campo para ordenação (padrão: name)
+- `sortOrder` (opcional): Ordem de classificação (asc ou desc, padrão: asc)
+- `search` (opcional): Termo de pesquisa para nome ou email
+- `class` (opcional): Filtrar por classe
+- `status` (opcional): Filtrar por status (active, inactive, suspended)
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "students": [
+      {
+        "id": "student_id",
+        "name": "Nome do Aluno",
+        "email": "aluno@exemplo.com",
+        "profileImage": "url_da_imagem",
+        "class": "10ª Classe",
+        "grade": "A",
+        "status": "active",
+        "createdAt": "2023-01-01T00:00:00.000Z",
+        "updatedAt": "2023-01-01T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 100,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 10,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
   }
 }
 \`\`\`
 
-## Paginação
+### Obter Aluno
 
-Endpoints que retornam listas de recursos suportam paginação através dos parâmetros de consulta:
+**Endpoint:** `GET /students/:id`
 
-- `page`: Número da página (padrão: 1)
-- `limit`: Número de itens por página (padrão: 10, máximo: 100)
-
-### Exemplo de Resposta Paginada
-
+**Resposta de Sucesso:**
 \`\`\`json
 {
-  "data": [...],
-  "pagination": {
-    "total": 50,
-    "page": 1,
-    "limit": 10,
-    "pages": 5
+  "success": true,
+  "data": {
+    "id": "student_id",
+    "name": "Nome do Aluno",
+    "email": "aluno@exemplo.com",
+    "profileImage": "url_da_imagem",
+    "class": "10ª Classe",
+    "grade": "A",
+    "parentName": "Nome do Responsável",
+    "parentContact": "Contato do Responsável",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-01-01T00:00:00.000Z"
   }
 }
 \`\`\`
 
-## Endpoints
+### Criar Aluno
 
-### Estudantes
+**Endpoint:** `POST /students`
 
-#### Listar Estudantes
-
-\`\`\`
-GET /students
-\`\`\`
-
-Parâmetros de consulta:
-- `grade`: Filtrar por série
-- `name`: Filtrar por nome (pesquisa parcial)
-
-#### Obter Estudante por ID
-
-\`\`\`
-GET /students/{id}
+**Corpo da Requisição:**
+\`\`\`json
+{
+  "name": "Nome do Aluno",
+  "email": "aluno@exemplo.com",
+  "class": "10ª Classe",
+  "grade": "A",
+  "profileImage": "url_da_imagem",
+  "parentName": "Nome do Responsável",
+  "parentContact": "Contato do Responsável",
+  "status": "active"
+}
 \`\`\`
 
-#### Criar Estudante
-
-\`\`\`
-POST /students
-\`\`\`
-
-#### Atualizar Estudante
-
-\`\`\`
-PUT /students/{id}
-\`\`\`
-
-#### Excluir Estudante
-
-\`\`\`
-DELETE /students/{id}
-\`\`\`
-
-#### Listar Notas de um Estudante
-
-\`\`\`
-GET /students/{id}/grades
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "id": "student_id",
+    "name": "Nome do Aluno",
+    "email": "aluno@exemplo.com",
+    "profileImage": "url_da_imagem",
+    "class": "10ª Classe",
+    "grade": "A",
+    "parentName": "Nome do Responsável",
+    "parentContact": "Contato do Responsável",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-01-01T00:00:00.000Z"
+  },
+  "message": "Aluno criado com sucesso"
+}
 \`\`\`
 
-### Professores
+### Atualizar Aluno
 
-#### Listar Professores
+**Endpoint:** `PUT /students/:id`
 
-\`\`\`
-GET /teachers
-\`\`\`
-
-Parâmetros de consulta:
-- `subject`: Filtrar por disciplina
-
-#### Obter Professor por ID
-
-\`\`\`
-GET /teachers/{id}
-\`\`\`
-
-#### Criar Professor
-
-\`\`\`
-POST /teachers
+**Corpo da Requisição:**
+\`\`\`json
+{
+  "name": "Nome Atualizado",
+  "email": "email_atualizado@exemplo.com",
+  "class": "11ª Classe",
+  "grade": "A+",
+  "profileImage": "nova_url_da_imagem",
+  "parentName": "Novo Nome do Responsável",
+  "parentContact": "Novo Contato do Responsável",
+  "status": "active"
+}
 \`\`\`
 
-#### Atualizar Professor
-
-\`\`\`
-PUT /teachers/{id}
-\`\`\`
-
-#### Excluir Professor
-
-\`\`\`
-DELETE /teachers/{id}
-\`\`\`
-
-### Materiais de Estudo
-
-#### Listar Materiais
-
-\`\`\`
-GET /materials
-\`\`\`
-
-Parâmetros de consulta:
-- `subject`: Filtrar por disciplina
-- `grade`: Filtrar por série
-
-#### Obter Material por ID
-
-\`\`\`
-GET /materials/{id}
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "id": "student_id",
+    "name": "Nome Atualizado",
+    "email": "email_atualizado@exemplo.com",
+    "profileImage": "nova_url_da_imagem",
+    "class": "11ª Classe",
+    "grade": "A+",
+    "parentName": "Novo Nome do Responsável",
+    "parentContact": "Novo Contato do Responsável",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "updatedAt": "2023-01-01T00:00:00.000Z"
+  },
+  "message": "Aluno atualizado com sucesso"
+}
 \`\`\`
 
-#### Criar Material
+### Excluir Aluno
 
-\`\`\`
-POST /materials
-\`\`\`
+**Endpoint:** `DELETE /students/:id`
 
-#### Atualizar Material
-
-\`\`\`
-PUT /materials/{id}
-\`\`\`
-
-#### Excluir Material
-
-\`\`\`
-DELETE /materials/{id}
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "message": "Aluno excluído com sucesso"
+}
 \`\`\`
 
-### Aulas Gravadas
+### Obter Notas do Aluno
 
-#### Listar Aulas Gravadas
+**Endpoint:** `GET /students/:id/grades`
 
-\`\`\`
-GET /recorded-lessons
-\`\`\`
+**Parâmetros de Consulta:**
+- `term` (opcional): Filtrar por trimestre
+- `subject` (opcional): Filtrar por disciplina
 
-Parâmetros de consulta:
-- `subject`: Filtrar por disciplina
-- `grade`: Filtrar por série
-- `teacher`: Filtrar por professor
-
-#### Obter Aula Gravada por ID
-
-\`\`\`
-GET /recorded-lessons/{id}
-\`\`\`
-
-#### Criar Aula Gravada
-
-\`\`\`
-POST /recorded-lessons
-\`\`\`
-
-#### Atualizar Aula Gravada
-
-\`\`\`
-PUT /recorded-lessons/{id}
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "grade_id",
+      "studentId": "student_id",
+      "teacherId": "teacher_id",
+      "teacherName": "Nome do Professor",
+      "subject": "Matemática",
+      "value": 16.5,
+      "term": "1º Trimestre",
+      "comments": "Excelente desempenho",
+      "date": "2023-01-01T00:00:00.000Z"
+    }
+  ]
+}
 \`\`\`
 
-#### Excluir Aula Gravada
+## Professores
 
+### Listar Professores
+
+**Endpoint:** `GET /teachers`
+
+**Parâmetros de Consulta:**
+- `page` (opcional): Número da página (padrão: 1)
+- `limit` (opcional): Limite de itens por página (padrão: 10)
+- `sortBy` (opcional): Campo para ordenação (padrão: name)
+- `sortOrder` (opcional): Ordem de classificação (asc ou desc, padrão: asc)
+- `search` (opcional): Termo de pesquisa para nome ou email
+- `subject` (opcional): Filtrar por disciplina
+- `status` (opcional): Filtrar por status (active, inactive)
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "teachers": [
+      {
+        "id": "teacher_id",
+        "name": "Nome do Professor",
+        "email": "professor@exemplo.com",
+        "profileImage": "url_da_imagem",
+        "subject": "Matemática",
+        "status": "active",
+        "createdAt": "2023-01-01T00:00:00.000Z",
+        "updatedAt": "2023-01-01T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 50,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 5,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}
 \`\`\`
-DELETE /recorded-lessons/{id}
+
+## Materiais
+
+### Listar Materiais
+
+**Endpoint:** `GET /materials`
+
+**Parâmetros de Consulta:**
+- `page` (opcional): Número da página (padrão: 1)
+- `limit` (opcional): Limite de itens por página (padrão: 10)
+- `sortBy` (opcional): Campo para ordenação (padrão: uploadDate)
+- `sortOrder` (opcional): Ordem de classificação (asc ou desc, padrão: desc)
+- `search` (opcional): Termo de pesquisa para título ou descrição
+- `subject` (opcional): Filtrar por disciplina
+- `class` (opcional): Filtrar por classe alvo
+- `teacherId` (opcional): Filtrar por professor
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "materials": [
+      {
+        "id": "material_id",
+        "title": "Título do Material",
+        "description": "Descrição do Material",
+        "subject": "Matemática",
+        "fileUrl": "url_do_arquivo",
+        "classTarget": "10ª Classe",
+        "teacherId": "teacher_id",
+        "teacherName": "Nome do Professor",
+        "uploadDate": "2023-01-01T00:00:00.000Z",
+        "downloads": 42
+      }
+    ],
+    "pagination": {
+      "total": 200,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 20,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}
 \`\`\`
 
-#### Listar Comentários de uma Aula
+## Aulas Gravadas
 
+### Listar Aulas Gravadas
+
+**Endpoint:** `GET /recorded-lessons`
+
+**Parâmetros de Consulta:**
+- `page` (opcional): Número da página (padrão: 1)
+- `limit` (opcional): Limite de itens por página (padrão: 10)
+- `sortBy` (opcional): Campo para ordenação (padrão: uploadDate)
+- `sortOrder` (opcional): Ordem de classificação (asc ou desc, padrão: desc)
+- `search` (opcional): Termo de pesquisa para título ou descrição
+- `subject` (opcional): Filtrar por disciplina
+- `class` (opcional): Filtrar por classe alvo
+- `teacherId` (opcional): Filtrar por professor
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "lessons": [
+      {
+        "id": "lesson_id",
+        "title": "Título da Aula",
+        "description": "Descrição da Aula",
+        "subject": "Matemática",
+        "videoUrl": "url_do_video",
+        "thumbnailUrl": "url_da_miniatura",
+        "duration": 2700,
+        "classTarget": "10ª Classe",
+        "teacherId": "teacher_id",
+        "teacherName": "Nome do Professor",
+        "  "10ª Classe",
+        "teacherId": "teacher_id",
+        "teacherName": "Nome do Professor",
+        "uploadDate": "2023-01-01T00:00:00.000Z",
+        "views": 128
+      }
+    ],
+    "pagination": {
+      "total": 150,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 15,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}
 \`\`\`
-GET /recorded-lessons/{id}/comments
+
+## Notas
+
+### Listar Notas
+
+**Endpoint:** `GET /grades`
+
+**Parâmetros de Consulta:**
+- `page` (opcional): Número da página (padrão: 1)
+- `limit` (opcional): Limite de itens por página (padrão: 10)
+- `sortBy` (opcional): Campo para ordenação (padrão: date)
+- `sortOrder` (opcional): Ordem de classificação (asc ou desc, padrão: desc)
+- `studentId` (opcional): Filtrar por aluno
+- `teacherId` (opcional): Filtrar por professor
+- `subject` (opcional): Filtrar por disciplina
+- `term` (opcional): Filtrar por trimestre
+- `class` (opcional): Filtrar por classe
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "grades": [
+      {
+        "id": "grade_id",
+        "studentId": "student_id",
+        "studentName": "Nome do Aluno",
+        "teacherId": "teacher_id",
+        "teacherName": "Nome do Professor",
+        "subject": "Matemática",
+        "value": 16.5,
+        "term": "1º Trimestre",
+        "comments": "Excelente desempenho",
+        "date": "2023-01-01T00:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 500,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 50,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}
 \`\`\`
 
-#### Adicionar Comentário a uma Aula
+## Eventos
 
+### Listar Eventos
+
+**Endpoint:** `GET /events`
+
+**Parâmetros de Consulta:**
+- `page` (opcional): Número da página (padrão: 1)
+- `limit` (opcional): Limite de itens por página (padrão: 10)
+- `sortBy` (opcional): Campo para ordenação (padrão: date)
+- `sortOrder` (opcional): Ordem de classificação (asc ou desc, padrão: asc)
+- `search` (opcional): Termo de pesquisa para título ou descrição
+- `type` (opcional): Filtrar por tipo (academic, cultural, sports, other)
+- `startDate` (opcional): Filtrar por data de início
+- `endDate` (opcional): Filtrar por data de término
+- `targetClass` (opcional): Filtrar por classe alvo
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "events": [
+      {
+        "id": "event_id",
+        "title": "Título do Evento",
+        "description": "Descrição do Evento",
+        "date": "2023-01-01T00:00:00.000Z",
+        "location": "Local do Evento",
+        "type": "academic",
+        "targetClass": "10ª Classe"
+      }
+    ],
+    "pagination": {
+      "total": 30,
+      "page": 1,
+      "limit": 10,
+      "totalPages": 3,
+      "hasNextPage": true,
+      "hasPrevPage": false
+    }
+  }
+}
 \`\`\`
-POST /recorded-lessons/{id}/comments
+
+## Estatísticas
+
+### Obter Estatísticas
+
+**Endpoint:** `GET /statistics`
+
+**Resposta de Sucesso:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "totalStudents": 500,
+    "totalTeachers": 50,
+    "totalCourses": 20,
+    "activeClasses": 15,
+    "pendingAdmissions": 25,
+    "monthlyRevenue": "150000",
+    "updatedAt": "2023-01-01T00:00:00.000Z"
+  }
+}
 \`\`\`
-
-### Estatísticas
-
-#### Obter Estatísticas do Sistema
-
-\`\`\`
-GET /statistics
-\`\`\`
-
-Requer permissão de administrador ou diretor.
 
 ## Códigos de Status
 
 - `200 OK`: Requisição bem-sucedida
 - `201 Created`: Recurso criado com sucesso
-- `400 Bad Request`: Parâmetros inválidos ou ausentes
-- `401 Unauthorized`: Autenticação necessária ou inválida
-- `403 Forbidden`: Permissão insuficiente
+- `400 Bad Request`: Requisição inválida ou dados ausentes
+- `401 Unauthorized`: Autenticação necessária ou falha na autenticação
+- `403 Forbidden`: Acesso negado ao recurso
 - `404 Not Found`: Recurso não encontrado
-- `429 Too Many Requests`: Limite de taxa excedido
-- `500 Internal Server Error`: Erro no servidor
+- `409 Conflict`: Conflito com o estado atual do recurso
+- `500 Internal Server Error`: Erro interno do servidor
 
-## Limites de Taxa
+## Formato de Resposta
 
-A API tem um limite de 100 requisições por IP a cada 15 minutos. Se você exceder esse limite, receberá um código de status 429.
-
-## Formatos de Dados
-
-### Estudante
+Todas as respostas seguem o mesmo formato:
 
 \`\`\`json
 {
-  "id": 1,
-  "name": "Nome do Estudante",
-  "email": "estudante@email.com",
-  "grade": "9º Ano",
-  "enrollmentDate": "2023-01-15",
-  "parentName": "Nome do Responsável",
-  "contactNumber": "+258 84 123 4567",
-  "address": "Av. Principal, 123, Matola",
-  "dateOfBirth": "2008-05-20"
+  "success": true|false,
+  "data": {...},  // Presente apenas em respostas bem-sucedidas
+  "error": "...",  // Presente apenas em respostas de erro
+  "message": "..."  // Mensagem informativa opcional
 }
-\`\`\`
-
-### Nota
-
-\`\`\`json
-{
-  "id": 1,
-  "studentId": 1,
-  "subject": "Matemática",
-  "grade": 16.5,
-  "term": "1º Trimestre",
-  "date": "2023-03-25",
-  "teacherName": "Gabriel Silva",
-  "comments": "Excelente desempenho nos exercícios"
-}
-\`\`\`
-
-### Professor
-
-\`\`\`json
-{
-  "id": 1,
-  "name": "Gabriel Silva",
-  "email": "gabriel.silva@colegiomatola.com",
-  "subject": "Matemática",
-  "bio": "Professor de Matemática com 10 anos de experiência",
-  "education": "Mestrado em Matemática Aplicada",
-  "joinedAt": "2018-03-15"
-}
-\`\`\`
-
-### Material de Estudo
-
-\`\`\`json
-{
-  "id": 1,
-  "title": "Matemática Básica",
-  "subject": "Matemática",
-  "grade": "8º Ano",
-  "type": "PDF",
-  "url": "/materials/matematica-basica.pdf",
-  "description": "Material completo sobre operações básicas de matemática",
-  "pages": 45,
-  "uploadedBy": "Gabriel Silva",
-  "uploadedAt": "2023-05-10",
-  "downloads": 128
-}
-\`\`\`
-
-### Aula Gravada
-
-\`\`\`json
-{
-  "id": 1,
-  "title": "Equações do 2º Grau",
-  "subject": "Matemática",
-  "grade": "9º Ano",
-  "teacher": "Gabriel Silva",
-  "duration": "45:30",
-  "url": "/videos/equacoes-2-grau.mp4",
-  "thumbnail": "/thumbnails/equacoes-2-grau.jpg",
-  "description": "Nesta aula, o professor Gabriel explica como resolver equações do segundo grau usando a fórmula de Bhaskara e outros métodos.",
-  "uploadedAt": "2023-08-10",
-  "views": 256,
-  "likes": 45
-}
-\`\`\`
-
-### Comentário
-
-\`\`\`json
-{
-  "id": 1,
-  "lessonId": 1,
-  "user": "Nome do Usuário",
-  "text": "Excelente aula, professor!",
-  "date": "2023-08-11"
-}
-\`\`\`
-
-### Estatísticas
-
-\`\`\`json
-{
-  "students": {
-    "total": 850,
-    "byGrade": {
-      "1º Ano": 65,
-      "2º Ano": 72,
-      "...": "..."
-    },
-    "gender": {
-      "male": 430,
-      "female": 420
-    },
-    "newEnrollments": {
-      "lastMonth": 15,
-      "lastYear": 120
-    }
-  },
-  "teachers": {
-    "total": 45,
-    "bySubject": {
-      "Matemática": 8,
-      "Português": 7,
-      "...": "..."
-    },
-    "gender": {
-      "male": 22,
-      "female": 23
-    }
-  },
-  "content": {
-    "recordedLessons": 156,
-    "materials": 320,
-    "mostViewedLessons": [
-      { "id": 1, "title": "Equações do 2º Grau", "views": 256 },
-      "..."
-    ],
-    "mostDownloadedMaterials": [
-      { "id": 2, "title": "Gramática Portuguesa", "downloads": 185 },
-      "..."
-    ]
-  },
-  "performance": {
-    "averageGrades": {
-      "Matemática": 14.2,
-      "Português": 15.5,
-      "...": "..."
-    },
-    "passRate": 92.5,
-    "topPerformingClass": "10º Ano",
-    "improvementAreas": ["Matemática", "Inglês"]
-  },
-  "system": {
-    "activeUsers": {
-      "daily": 320,
-      "weekly": 720,
-      "monthly": 820
-    },
-    "peakUsageTimes": ["10:00", "14:00", "19:00"],
-    "deviceUsage": {
-      "desktop": 45,
-      "mobile": 40,
-      "tablet": 15
-    }
-  }
-}
-\`\`\`
-
-## Erros
-
-### Exemplo de Resposta de Erro
-
-\`\`\`json
-{
-  "error": "Mensagem de erro detalhada"
-}
-\`\`\`
-
-## Suporte
-
-Para suporte técnico, entre em contato com a equipe de TI do Colégio Matola:
-
-- Email: suporte@colegiomatola.com
-- Telefone: +258 21 123 456

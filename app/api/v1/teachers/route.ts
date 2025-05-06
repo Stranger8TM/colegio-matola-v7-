@@ -1,72 +1,189 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { apiConfig } from "@/lib/api-config"
-import { validateToken } from "@/lib/api-middleware"
+import type { ApiResponse, Teacher } from "@/types/api"
+import prisma from "@/lib/prisma"
+import { withAdminAuth } from "@/lib/api-middleware"
 
+// GET /api/v1/teachers - Listar todos os professores
 export async function GET(request: NextRequest) {
   try {
-    // Opcional: validar token para endpoints que precisam de autenticação
-    // const tokenValidation = await validateToken(request);
-    // if (!tokenValidation.valid) {
-    //   return NextResponse.json({ error: tokenValidation.error }, { status: 401 });
-    // }
+    const { searchParams } = new URL(request.url)
 
-    // Simulação de dados de professores
-    const teachers = [
-      { id: 1, name: "Gabriel Silva", subject: "Matemática", email: "gabriel.silva@colegiomatola.com" },
-      { id: 2, name: "Maria Oliveira", subject: "Português", email: "maria.oliveira@colegiomatola.com" },
-      { id: 3, name: "João Santos", subject: "Ciências", email: "joao.santos@colegiomatola.com" },
-    ]
+    // Parâmetros de paginação
+    const page = Number.parseInt(searchParams.get("page") || "1")
+    const limit = Number.parseInt(searchParams.get("limit") || "10")
+    const sortBy = searchParams.get("sortBy") || "name"
+    const sortOrder = searchParams.get("sortOrder") || "asc"
 
-    // Implementar paginação
-    const url = new URL(request.url)
-    const page = Number.parseInt(url.searchParams.get("page") || "1")
-    const limit = Number.parseInt(url.searchParams.get("limit") || apiConfig.pagination.defaultLimit.toString())
-    const startIndex = (page - 1) * limit
-    const endIndex = page * limit
-    const paginatedTeachers = teachers.slice(startIndex, endIndex)
+    // Parâmetros de filtro
+    const search = searchParams.get("search") || ""
+    const subject = searchParams.get("subject") || ""
+    const status = searchParams.get("status") || ""
 
-    return NextResponse.json({
-      data: paginatedTeachers,
+    // Construir a consulta
+    const skip = (page - 1) * limit
+    const where: any = {
+      role: "teacher",
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ]
+    }
+
+    if (subject) {
+      where.subject = subject
+    }
+
+    if (status) {
+      where.status = status
+    }
+
+    // Executar a consulta
+    const [teachers, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profileImage: true,
+          subject: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+      }),
+      prisma.user.count({ where }),
+    ])
+
+    // Calcular metadados de paginação
+    const totalPages = Math.ceil(total / limit)
+    const hasNextPage = page < totalPages
+    const hasPrevPage = page > 1
+
+    const response: ApiResponse<{
+      teachers: Teacher[]
       pagination: {
-        total: teachers.length,
-        page,
-        limit,
-        pages: Math.ceil(teachers.length / limit),
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+        hasNextPage: boolean
+        hasPrevPage: boolean
+      }
+    }> = {
+      success: true,
+      data: {
+        teachers: teachers as Teacher[],
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+        },
       },
-    })
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Error fetching teachers:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+
+    const response: ApiResponse<null> = {
+      success: false,
+      error: "Falha ao buscar professores",
+      message: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
+    }
+
+    return NextResponse.json(response, { status: 500 })
   }
 }
 
+// POST /api/v1/teachers - Criar um novo professor (apenas admin)
 export async function POST(request: NextRequest) {
-  try {
-    // Validar token para endpoints que precisam de autenticação
-    const tokenValidation = await validateToken(request)
-    if (!tokenValidation.valid) {
-      return NextResponse.json({ error: tokenValidation.error }, { status: 401 })
+  return withAdminAuth(request, async (req, decodedToken) => {
+    try {
+      const body = await req.json()
+
+      // Validar dados obrigatórios
+      if (!body.name || !body.email || !body.subject) {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: "Dados inválidos",
+          message: "Nome, email e disciplina são obrigatórios",
+        }
+
+        return NextResponse.json(response, { status: 400 })
+      }
+
+      // Verificar se o email já está em uso
+      const existingUser = await prisma.user.findUnique({
+        where: { email: body.email },
+      })
+
+      if (existingUser) {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: "Email já cadastrado",
+          message: "Este email já está sendo utilizado por outro usuário",
+        }
+
+        return NextResponse.json(response, { status: 409 })
+      }
+
+      // Criar o professor
+      const teacher = await prisma.user.create({
+        data: {
+          name: body.name,
+          email: body.email,
+          subject: body.subject,
+          profileImage: body.profileImage,
+          bio: body.bio || "",
+          qualifications: body.qualifications || [],
+          hireDate: body.hireDate ? new Date(body.hireDate) : new Date(),
+          status: body.status || "active",
+          role: "teacher",
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profileImage: true,
+          subject: true,
+          bio: true,
+          qualifications: true,
+          hireDate: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+
+      const response: ApiResponse<Teacher> = {
+        success: true,
+        data: teacher as Teacher,
+        message: "Professor criado com sucesso",
+      }
+
+      return NextResponse.json(response, { status: 201 })
+    } catch (error) {
+      console.error("Error creating teacher:", error)
+
+      const response: ApiResponse<null> = {
+        success: false,
+        error: "Falha ao criar professor",
+        message: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
+      }
+
+      return NextResponse.json(response, { status: 500 })
     }
-
-    const body = await request.json()
-
-    // Validar dados
-    if (!body.name || !body.subject || !body.email) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    // Simulação de criação de professor
-    const newTeacher = {
-      id: Date.now(),
-      name: body.name,
-      subject: body.subject,
-      email: body.email,
-      createdAt: new Date().toISOString(),
-    }
-
-    return NextResponse.json({ data: newTeacher }, { status: 201 })
-  } catch (error) {
-    console.error("Error creating teacher:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
-  }
+  })
 }

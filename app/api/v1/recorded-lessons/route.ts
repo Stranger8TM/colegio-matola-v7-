@@ -1,121 +1,246 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { apiConfig } from "@/lib/api-config"
-import { validateToken } from "@/lib/api-middleware"
+import type { ApiResponse, RecordedLesson } from "@/types/api"
+import prisma from "@/lib/prisma"
+import { withAuth } from "@/lib/api-middleware"
 
+// GET /api/v1/recorded-lessons - Listar todas as aulas gravadas
 export async function GET(request: NextRequest) {
   try {
-    // Simulação de dados de aulas gravadas
-    const lessons = [
-      {
-        id: 1,
-        title: "Equações do 2º Grau",
-        subject: "Matemática",
-        grade: "9º Ano",
-        teacher: "Gabriel Silva",
-        duration: "45:30",
-        url: "/videos/equacoes-2-grau.mp4",
-        thumbnail: "/thumbnails/equacoes-2-grau.jpg",
-        uploadedAt: "2023-08-10",
-        views: 256,
-      },
-      {
-        id: 2,
-        title: "Análise de Texto",
-        subject: "Português",
-        grade: "8º Ano",
-        teacher: "Maria Oliveira",
-        duration: "38:15",
-        url: "/videos/analise-texto.mp4",
-        thumbnail: "/thumbnails/analise-texto.jpg",
-        uploadedAt: "2023-09-05",
-        views: 189,
-      },
-      {
-        id: 3,
-        title: "Sistema Solar",
-        subject: "Ciências",
-        grade: "7º Ano",
-        teacher: "João Santos",
-        duration: "52:20",
-        url: "/videos/sistema-solar.mp4",
-        thumbnail: "/thumbnails/sistema-solar.jpg",
-        uploadedAt: "2023-10-12",
-        views: 312,
-      },
-    ]
+    const { searchParams } = new URL(request.url)
 
-    // Implementar paginação
-    const url = new URL(request.url)
-    const page = Number.parseInt(url.searchParams.get("page") || "1")
-    const limit = Number.parseInt(url.searchParams.get("limit") || apiConfig.pagination.defaultLimit.toString())
+    // Parâmetros de paginação
+    const page = Number.parseInt(searchParams.get("page") || "1")
+    const limit = Number.parseInt(searchParams.get("limit") || "10")
+    const sortBy = searchParams.get("sortBy") || "uploadDate"
+    const sortOrder = searchParams.get("sortOrder") || "desc"
 
-    // Implementar filtros
-    const subject = url.searchParams.get("subject")
-    const grade = url.searchParams.get("grade")
-    const teacher = url.searchParams.get("teacher")
+    // Parâmetros de filtro
+    const search = searchParams.get("search") || ""
+    const subject = searchParams.get("subject") || ""
+    const classTarget = searchParams.get("class") || ""
+    const teacherId = searchParams.get("teacherId") || ""
 
-    let filteredLessons = lessons
+    // Construir a consulta
+    const skip = (page - 1) * limit
+    const where: any = {}
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ]
+    }
+
     if (subject) {
-      filteredLessons = filteredLessons.filter((l) => l.subject.toLowerCase() === subject.toLowerCase())
-    }
-    if (grade) {
-      filteredLessons = filteredLessons.filter((l) => l.grade.toLowerCase() === grade.toLowerCase())
-    }
-    if (teacher) {
-      filteredLessons = filteredLessons.filter((l) => l.teacher.toLowerCase().includes(teacher.toLowerCase()))
+      where.subject = subject
     }
 
-    const startIndex = (page - 1) * limit
-    const endIndex = page * limit
-    const paginatedLessons = filteredLessons.slice(startIndex, endIndex)
+    if (classTarget) {
+      where.classTarget = classTarget
+    }
 
-    return NextResponse.json({
-      data: paginatedLessons,
+    if (teacherId) {
+      where.teacherId = teacherId
+    }
+
+    // Executar a consulta
+    const [lessons, total] = await Promise.all([
+      prisma.recordedLesson.findMany({
+        where,
+        include: {
+          teacher: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+      }),
+      prisma.recordedLesson.count({ where }),
+    ])
+
+    // Formatar os dados
+    const formattedLessons = lessons.map((lesson) => ({
+      id: lesson.id,
+      title: lesson.title,
+      description: lesson.description,
+      subject: lesson.subject,
+      videoUrl: lesson.videoUrl,
+      thumbnailUrl: lesson.thumbnailUrl,
+      duration: lesson.duration,
+      classTarget: lesson.classTarget,
+      teacherId: lesson.teacherId,
+      teacherName: lesson.teacher.name,
+      uploadDate: lesson.uploadDate,
+      views: lesson.views,
+    }))
+
+    // Calcular metadados de paginação
+    const totalPages = Math.ceil(total / limit)
+    const hasNextPage = page < totalPages
+    const hasPrevPage = page > 1
+
+    const response: ApiResponse<{
+      lessons: RecordedLesson[]
       pagination: {
-        total: filteredLessons.length,
-        page,
-        limit,
-        pages: Math.ceil(filteredLessons.length / limit),
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+        hasNextPage: boolean
+        hasPrevPage: boolean
+      }
+    }> = {
+      success: true,
+      data: {
+        lessons: formattedLessons as RecordedLesson[],
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages,
+          hasNextPage,
+          hasPrevPage,
+        },
       },
-    })
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Error fetching recorded lessons:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+
+    const response: ApiResponse<null> = {
+      success: false,
+      error: "Falha ao buscar aulas gravadas",
+      message: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
+    }
+
+    return NextResponse.json(response, { status: 500 })
   }
 }
 
+// POST /api/v1/recorded-lessons - Criar uma nova aula gravada (apenas professores e admin)
 export async function POST(request: NextRequest) {
-  try {
-    // Validar token para endpoints que precisam de autenticação
-    const tokenValidation = await validateToken(request)
-    if (!tokenValidation.valid) {
-      return NextResponse.json({ error: tokenValidation.error }, { status: 401 })
+  return withAuth(request, async (req, decodedToken) => {
+    try {
+      // Verificar se o usuário é professor ou admin
+      if (decodedToken.role !== "teacher" && decodedToken.role !== "admin" && decodedToken.role !== "superadmin") {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: "Acesso negado",
+          message: "Apenas professores e administradores podem adicionar aulas gravadas",
+        }
+
+        return NextResponse.json(response, { status: 403 })
+      }
+
+      const body = await req.json()
+
+      // Validar dados obrigatórios
+      if (!body.title || !body.subject || !body.videoUrl || !body.classTarget || !body.duration) {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: "Dados inválidos",
+          message: "Título, disciplina, URL do vídeo, classe alvo e duração são obrigatórios",
+        }
+
+        return NextResponse.json(response, { status: 400 })
+      }
+
+      // Definir o ID do professor (se for admin, usar o teacherId fornecido)
+      const teacherId = decodedToken.role === "teacher" ? decodedToken.id : body.teacherId
+
+      // Se for admin e não forneceu teacherId
+      if (decodedToken.role !== "teacher" && !teacherId) {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: "Dados inválidos",
+          message: "ID do professor é obrigatório",
+        }
+
+        return NextResponse.json(response, { status: 400 })
+      }
+
+      // Verificar se o professor existe
+      if (decodedToken.role !== "teacher") {
+        const teacher = await prisma.user.findUnique({
+          where: {
+            id: teacherId,
+            role: "teacher",
+          },
+        })
+
+        if (!teacher) {
+          const response: ApiResponse<null> = {
+            success: false,
+            error: "Professor não encontrado",
+            message: "O professor especificado não foi encontrado",
+          }
+
+          return NextResponse.json(response, { status: 404 })
+        }
+      }
+
+      // Criar a aula gravada
+      const lesson = await prisma.recordedLesson.create({
+        data: {
+          title: body.title,
+          description: body.description || "",
+          subject: body.subject,
+          videoUrl: body.videoUrl,
+          thumbnailUrl: body.thumbnailUrl || "",
+          duration: body.duration,
+          classTarget: body.classTarget,
+          teacherId: teacherId,
+          uploadDate: new Date(),
+          views: 0,
+        },
+        include: {
+          teacher: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      })
+
+      // Formatar a resposta
+      const formattedLesson = {
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        subject: lesson.subject,
+        videoUrl: lesson.videoUrl,
+        thumbnailUrl: lesson.thumbnailUrl,
+        duration: lesson.duration,
+        classTarget: lesson.classTarget,
+        teacherId: lesson.teacherId,
+        teacherName: lesson.teacher.name,
+        uploadDate: lesson.uploadDate,
+        views: lesson.views,
+      }
+
+      const response: ApiResponse<RecordedLesson> = {
+        success: true,
+        data: formattedLesson as RecordedLesson,
+        message: "Aula gravada criada com sucesso",
+      }
+
+      return NextResponse.json(response, { status: 201 })
+    } catch (error) {
+      console.error("Error creating recorded lesson:", error)
+
+      const response: ApiResponse<null> = {
+        success: false,
+        error: "Falha ao criar aula gravada",
+        message: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
+      }
+
+      return NextResponse.json(response, { status: 500 })
     }
-
-    const body = await request.json()
-
-    // Validar dados
-    if (!body.title || !body.subject || !body.grade || !body.url) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    // Simulação de criação de aula gravada
-    const newLesson = {
-      id: Date.now(),
-      title: body.title,
-      subject: body.subject,
-      grade: body.grade,
-      teacher: tokenValidation.user?.name || "Professor",
-      duration: body.duration || "00:00",
-      url: body.url,
-      thumbnail: body.thumbnail || null,
-      uploadedAt: new Date().toISOString(),
-      views: 0,
-    }
-
-    return NextResponse.json({ data: newLesson }, { status: 201 })
-  } catch (error) {
-    console.error("Error creating recorded lesson:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
-  }
+  })
 }
