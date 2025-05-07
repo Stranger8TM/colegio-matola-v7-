@@ -93,6 +93,22 @@
 }
 
 /* Animação para o popup de manutenção */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.maintenance-popup-animation {
+  animation: fadeInDown 0.3s ease-out forwards;
+}
+
+/* Animação para o popup de manutenção */
 @keyframes fadeIn {
   from {
     opacity: 0;

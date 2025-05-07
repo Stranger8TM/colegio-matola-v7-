@@ -1,49 +1,40 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { X, AlertTriangle, Settings, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+import { AlertTriangle, Info, X, CheckCircle } from "lucide-react"
 
-interface MaintenancePopupProps {
-  show?: boolean
+type MaintenancePopupProps = {
   message?: string
-  type?: "error" | "maintenance" | "info"
-  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left" | "center"
+  type?: "error" | "maintenance" | "info" | "success"
+  position?: "top" | "bottom"
   autoHide?: boolean
-  autoHideDelay?: number
+  hideAfter?: number // em milissegundos
 }
 
 export function MaintenancePopup({
-  show = false,
-  message = "Estamos realizando manutenção em nosso site. Alguns recursos podem estar temporariamente indisponíveis.",
+  message = "O site está em manutenção. Algumas funcionalidades podem estar indisponíveis.",
   type = "maintenance",
-  position = "bottom-right",
+  position = "top",
   autoHide = false,
-  autoHideDelay = 10000,
+  hideAfter = 5000,
 }: MaintenancePopupProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [popupMessage, setPopupMessage] = useState(message)
   const [popupType, setPopupType] = useState(type)
 
   useEffect(() => {
-    // Verificar se deve mostrar o popup
-    const shouldShow = show || process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true"
-
-    if (shouldShow) {
-      // Pequeno delay para garantir que o popup apareça após o carregamento da página
-      const timer = setTimeout(() => {
-        setIsVisible(true)
-      }, 1000)
-
-      return () => clearTimeout(timer)
+    // Verificar se estamos em modo de manutenção via variável de ambiente
+    if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true") {
+      setIsVisible(true)
+      setPopupType("maintenance")
+      setPopupMessage("O site está em manutenção programada. Algumas funcionalidades podem estar indisponíveis.")
     }
 
     // Escutar eventos de manutenção
     const handleMaintenanceEvent = (event: CustomEvent) => {
-      const { message, type } = event.detail
-      setPopupMessage(message)
-      setPopupType(type)
       setIsVisible(true)
+      setPopupMessage(event.detail.message || message)
+      setPopupType(event.detail.type || type)
     }
 
     window.addEventListener("maintenanceRequired", handleMaintenanceEvent as EventListener)
@@ -51,66 +42,68 @@ export function MaintenancePopup({
     return () => {
       window.removeEventListener("maintenanceRequired", handleMaintenanceEvent as EventListener)
     }
-  }, [show, message, type])
+  }, [message, type])
 
-  // Auto-esconder o popup após um tempo
+  // Auto-esconder após o tempo especificado
   useEffect(() => {
-    if (isVisible && autoHide) {
+    if (autoHide && isVisible) {
       const timer = setTimeout(() => {
         setIsVisible(false)
-      }, autoHideDelay)
+      }, hideAfter)
 
       return () => clearTimeout(timer)
     }
-  }, [isVisible, autoHide, autoHideDelay])
+  }, [autoHide, hideAfter, isVisible])
 
   if (!isVisible) return null
 
-  const bgColor = {
-    error: "bg-red-600",
-    maintenance: "bg-amber-600",
-    info: "bg-blue-600",
-  }[popupType]
+  // Definir ícone com base no tipo
+  const getIcon = () => {
+    switch (popupType) {
+      case "error":
+        return <AlertTriangle className="h-5 w-5 text-red-500" />
+      case "maintenance":
+        return <Info className="h-5 w-5 text-yellow-500" />
+      case "info":
+        return <Info className="h-5 w-5 text-blue-500" />
+      case "success":
+        return <CheckCircle className="h-5 w-5 text-green-500" />
+      default:
+        return <Info className="h-5 w-5 text-blue-500" />
+    }
+  }
 
-  const icon = {
-    error: <AlertTriangle className="w-6 h-6 text-white" />,
-    maintenance: <Settings className="w-6 h-6 text-white" />,
-    info: <Info className="w-6 h-6 text-white" />,
-  }[popupType]
-
-  const positionClasses = {
-    "bottom-right": "bottom-4 right-4",
-    "bottom-left": "bottom-4 left-4",
-    "top-right": "top-4 right-4",
-    "top-left": "top-4 left-4",
-    center: "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
-  }[position]
+  // Definir cores com base no tipo
+  const getColors = () => {
+    switch (popupType) {
+      case "error":
+        return "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-200"
+      case "maintenance":
+        return "bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-800 dark:text-yellow-200"
+      case "info":
+        return "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200"
+      case "success":
+        return "bg-green-50 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-800 dark:text-green-200"
+      default:
+        return "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-200"
+    }
+  }
 
   return (
-    <div className={`fixed ${positionClasses} z-50 max-w-md`}>
-      <div className={`${bgColor} rounded-lg shadow-lg overflow-hidden animate-fade-in`}>
-        <div className="p-4 flex items-start">
-          <div className="flex-shrink-0 mr-3">{icon}</div>
-          <div className="flex-1">
-            <h3 className="text-white font-medium">
-              {popupType === "error" ? "Erro" : popupType === "maintenance" ? "Manutenção" : "Informação"}
-            </h3>
-            <p className="text-white/90 mt-1">{popupMessage}</p>
-            <div className="mt-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsVisible(false)}
-                className="bg-white/20 hover:bg-white/30 text-white"
-              >
-                Entendi
-              </Button>
-            </div>
-          </div>
-          <button onClick={() => setIsVisible(false)} className="flex-shrink-0 ml-2 text-white/80 hover:text-white">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <div
+      className={`fixed ${
+        position === "top" ? "top-4" : "bottom-4"
+      } left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 maintenance-popup-animation`}
+    >
+      <div className={`rounded-lg shadow-lg border p-4 flex items-start space-x-3 ${getColors()}`}>
+        <div className="flex-shrink-0">{getIcon()}</div>
+        <div className="flex-1 pt-0.5">{popupMessage}</div>
+        <button
+          onClick={() => setIsVisible(false)}
+          className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-500 focus:outline-none"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
     </div>
   )

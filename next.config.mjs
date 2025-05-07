@@ -28,8 +28,38 @@ const nextConfig = {
         tls: false,
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
+        path: false,
+        os: false,
       };
     }
+    
+    // Otimizar o tamanho do bundle
+    if (process.env.NODE_ENV === 'production') {
+      // Habilitar compressão de código
+      config.optimization.minimize = true;
+      
+      // Dividir chunks para melhor cache
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        maxInitialRequests: Infinity,
+        minSize: 20000,
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name(module) {
+              // Obter o nome do pacote
+              const packageName = module.context.match(
+                /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+              )[1];
+              
+              // Retornar nome do pacote para melhor debugging
+              return `npm.${packageName.replace('@', '')}`;
+            },
+          },
+        },
+      };
+    }
+    
     return config;
   },
 };

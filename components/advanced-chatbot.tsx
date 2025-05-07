@@ -2,86 +2,128 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Search, Send } from "lucide-react"
+import { MessageSquare, Search, Send, Lightbulb, FileText } from "lucide-react"
+import type { ChatMessage } from "@/lib/groq-service"
 
 interface Message {
-  role: "user" | "assistant"
+  role: "user" | "assistant" | "system" | "function" | "thinking"
   content: string
+  name?: string
 }
 
-export default function AdvancedChatbot() {
+export function AdvancedChatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content:
-        "Olá! Sou a IA avançada do Colégio Privado da Matola. Posso pesquisar informações na internet para ajudar com suas dúvidas. Como posso ajudar você hoje?",
+        "Olá! Sou a IA avançada do Colégio Privado da Matola. Posso pesquisar informações, analisar textos e resolver problemas passo a passo. Como posso ajudar você hoje?",
     },
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
+  const [currentFunction, setCurrentFunction] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Função para simular pesquisa na internet
-  const simulateInternetSearch = async (query: string) => {
-    setIsSearching(true)
+  // Função para enviar mensagem para a API
+  const sendMessageToAPI = async (chatMessages: ChatMessage[]) => {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: chatMessages }),
+      })
 
-    // Simular tempo de pesquisa
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Erro ao comunicar com a API")
+      }
 
-    // Respostas baseadas em palavras-chave
-    if (query.toLowerCase().includes("matemática") || query.toLowerCase().includes("matematica")) {
-      return "Encontrei vários recursos sobre matemática! Recomendo o Khan Academy (khanacademy.org) que tem excelentes explicações sobre álgebra, geometria e cálculo. Também há o Wolfram Alpha (wolframalpha.com) que pode resolver problemas matemáticos passo a passo."
-    } else if (query.toLowerCase().includes("história") || query.toLowerCase().includes("historia")) {
-      return "Sobre história, recomendo o site História Digital (historiadigital.org) e o canal de YouTube 'Nerdologia História'. Para história de Moçambique especificamente, o Portal do Governo de Moçambique tem uma seção dedicada à história do país."
-    } else if (query.toLowerCase().includes("física") || query.toLowerCase().includes("fisica")) {
-      return "Para física, o site HyperPhysics (hyperphysics.gsu.edu) é excelente para consultas. O canal 'Física e Afins' no YouTube também tem ótimas explicações em português. Para experimentos práticos, o PhET (phet.colorado.edu) oferece simulações interativas."
-    } else if (query.toLowerCase().includes("química") || query.toLowerCase().includes("quimica")) {
-      return "Para química, recomendo o site Química em Ação (quimicaemacao.com.br) e o Royal Society of Chemistry (edu.rsc.org) que tem recursos educacionais gratuitos. O canal 'Manual do Mundo' também tem experimentos interessantes de química."
-    } else if (query.toLowerCase().includes("biologia")) {
-      return "Para biologia, o site Khan Academy tem excelentes recursos. O BioMania (biomania.com.br) também é muito bom para estudantes. Para visualizações 3D de células e organismos, recomendo o BioDigital Human (biodigital.com)."
-    } else if (query.toLowerCase().includes("literatura")) {
-      return "Para literatura, o site Domínio Público (dominiopublico.gov.br) tem milhares de obras em português para download gratuito. O LitCharts (litcharts.com) é excelente para análises literárias, embora seja em inglês."
-    } else if (query.toLowerCase().includes("geografia")) {
-      return "Para geografia, o site GeoEdu (geoedu.com.br) tem bons recursos. O Google Earth (earth.google.com) é uma ferramenta incrível para explorar a geografia mundial. O National Geographic (nationalgeographic.com) também tem conteúdo educacional excelente."
-    } else if (query.toLowerCase().includes("programação") || query.toLowerCase().includes("programacao")) {
-      return "Para aprender programação, recomendo o Codecademy (codecademy.com), o freeCodeCamp (freecodecamp.org) e o W3Schools (w3schools.com). São plataformas gratuitas com cursos interativos para iniciantes e avançados."
-    } else {
-      return `Pesquisei sobre "${query}" e encontrei algumas informações relevantes. Recomendo consultar fontes confiáveis como enciclopédias online, sites educacionais e artigos acadêmicos para obter informações mais detalhadas sobre este tema.`
+      return await response.json()
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error)
+      throw error
     }
   }
 
+  // Função para enviar mensagem
   const handleSendMessage = async () => {
     if (!input.trim()) return
 
     // Adiciona a mensagem do usuário
-    const userMessage = { role: "user", content: input }
+    const userMessage: Message = { role: "user", content: input }
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
 
     try {
-      // Simular pesquisa na internet
-      const response = await simulateInternetSearch(input)
+      // Adicionar mensagem de "pensando"
+      setMessages((prev) => [...prev, { role: "thinking", content: "Pensando..." }])
 
-      // Adicionar resposta do assistente
-      const assistantMessage = {
-        role: "assistant",
-        content: response,
+      // Preparar mensagens para a API (excluindo as de "thinking")
+      const apiMessages = messages.filter((msg) => msg.role !== "thinking").concat(userMessage) as ChatMessage[]
+
+      // Enviar mensagens para a API
+      const response = await sendMessageToAPI(apiMessages)
+
+      // Remover mensagem de "pensando"
+      setMessages((prev) => prev.filter((msg) => msg.role !== "thinking"))
+
+      // Verificar se há uma chamada de função
+      const assistantMessage = response.choices[0].message
+      if (assistantMessage.function_call) {
+        // Extrair nome da função
+        const functionName = assistantMessage.function_call.name
+
+        // Atualizar estado para mostrar qual função está sendo executada
+        setCurrentFunction(functionName)
+
+        // Adicionar mensagem indicando a função que está sendo chamada
+        let functionMessage = ""
+        switch (functionName) {
+          case "search_internet":
+            functionMessage = "🔍 Pesquisando na internet..."
+            break
+          case "analyze_text":
+            functionMessage = "📝 Analisando texto..."
+            break
+          case "think_step_by_step":
+            functionMessage = "💭 Pensando passo a passo..."
+            break
+          default:
+            functionMessage = `⚙️ Executando função: ${functionName}...`
+        }
+
+        setMessages((prev) => [...prev, { role: "function", name: functionName, content: functionMessage }])
+
+        // Aguardar um pouco para simular o processamento
+        await new Promise((resolve) => setTimeout(resolve, 1500))
       }
 
-      setMessages((prev) => [...prev, assistantMessage])
+      // Adicionar resposta do assistente
+      const assistantResponse = response.choices[0].message.content
+      setMessages((prev) => [
+        ...prev.filter((msg) => !(msg.role === "function" && msg.name === currentFunction)),
+        { role: "assistant", content: assistantResponse },
+      ])
+
+      // Limpar função atual
+      setCurrentFunction(null)
     } catch (error) {
+      console.error("Erro:", error)
+      // Remover mensagem de "pensando"
+      setMessages((prev) => prev.filter((msg) => msg.role !== "thinking"))
+
       // Em caso de erro
       const errorMessage = {
         role: "assistant",
         content:
-          "Desculpe, tive um problema ao pesquisar essa informação. Poderia tentar novamente com uma pergunta diferente?",
+          "Desculpe, tive um problema ao processar sua mensagem. Poderia tentar novamente com uma pergunta diferente?",
       }
       setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
-      setIsSearching(false)
     }
   }
 
@@ -90,8 +132,24 @@ export default function AdvancedChatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
+  // Função para renderizar ícones baseados no tipo de mensagem
+  const renderMessageIcon = (message: Message) => {
+    if (message.role === "thinking") {
+      return <Lightbulb className="h-4 w-4 text-yellow-500" />
+    } else if (message.role === "function") {
+      if (message.name === "search_internet") {
+        return <Search className="h-4 w-4 text-blue-500" />
+      } else if (message.name === "analyze_text") {
+        return <FileText className="h-4 w-4 text-green-500" />
+      } else if (message.name === "think_step_by_step") {
+        return <Lightbulb className="h-4 w-4 text-yellow-500" />
+      }
+    }
+    return null
+  }
+
   return (
-    <div className="flex flex-col h-[600px] bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col h-[600px] bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg">
       <div className="bg-blue-800 dark:bg-blue-900 text-white p-4">
         <div className="flex items-center">
           <div className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mr-3">
@@ -99,7 +157,7 @@ export default function AdvancedChatbot() {
           </div>
           <div>
             <h3 className="font-medium">IA Avançada</h3>
-            <p className="text-xs text-blue-100">Pesquisa na internet • Responde perguntas complexas</p>
+            <p className="text-xs text-blue-100">Powered by Groq • Pesquisa • Análise • Raciocínio</p>
           </div>
         </div>
       </div>
@@ -111,38 +169,44 @@ export default function AdvancedChatbot() {
               className={`max-w-[80%] p-4 rounded-xl ${
                 message.role === "user"
                   ? "bg-blue-800 text-white"
-                  : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  : message.role === "thinking" || message.role === "function"
+                    ? "bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
+                    : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               }`}
             >
-              {message.content}
+              {renderMessageIcon(message) && (
+                <div className="flex items-center mb-2">
+                  {renderMessageIcon(message)}
+                  <span className="ml-2 text-sm font-medium">
+                    {message.role === "function" && message.name === "search_internet" && "Pesquisa na Internet"}
+                    {message.role === "function" && message.name === "analyze_text" && "Análise de Texto"}
+                    {message.role === "function" && message.name === "think_step_by_step" && "Raciocínio Passo a Passo"}
+                    {message.role === "thinking" && "Pensando..."}
+                  </span>
+                </div>
+              )}
+              <div className={message.role === "thinking" ? "animate-pulse" : ""}>{message.content}</div>
             </div>
           </div>
         ))}
 
-        {isLoading && (
+        {isLoading && !messages.some((msg) => msg.role === "thinking") && (
           <div className="flex justify-start">
             <div className="max-w-[80%] p-4 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-              {isSearching ? (
-                <div className="flex items-center space-x-2">
-                  <Search className="h-4 w-4 text-blue-500 animate-pulse" />
-                  <span>Pesquisando na internet...</span>
-                </div>
-              ) : (
-                <div className="flex space-x-2">
-                  <div
-                    className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  ></div>
-                </div>
-              )}
+              <div className="flex space-x-2">
+                <div
+                  className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
             </div>
           </div>
         )}
@@ -155,11 +219,16 @@ export default function AdvancedChatbot() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            onKeyPress={(e) => e.key === "Enter" && !isLoading && handleSendMessage()}
             placeholder="Pergunte algo..."
-            className="flex-grow px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            disabled={isLoading}
+            className="flex-grow px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-70"
           />
-          <Button onClick={handleSendMessage} className="bg-blue-800 hover:bg-blue-700 text-white rounded-xl">
+          <Button
+            onClick={handleSendMessage}
+            disabled={isLoading || !input.trim()}
+            className="bg-blue-800 hover:bg-blue-700 text-white rounded-xl disabled:opacity-70"
+          >
             <Send className="h-5 w-5" />
           </Button>
         </div>
