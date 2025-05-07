@@ -2,24 +2,18 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  images: {
-    domains: ['placeholder.com', 'v0.blob.vercel-storage.com'],
-    unoptimized: true,
-  },
-  // Garantir que o SWC seja usado
-  experimental: {
-    // Configurações experimentais para melhorar a compatibilidade
-    serverComponentsExternalPackages: ['bcryptjs', '@prisma/client'],
-    optimizeCss: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Configurar webpack para não tentar resolver módulos específicos do servidor no cliente
+  images: {
+    domains: ['localhost', 'vercel.app'],
+    unoptimized: true,
+  },
   webpack: (config, { isServer }) => {
+    // Fix for crypto-browserify and stream-browserify
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -28,38 +22,49 @@ const nextConfig = {
         tls: false,
         crypto: require.resolve('crypto-browserify'),
         stream: require.resolve('stream-browserify'),
-        path: false,
-        os: false,
+        url: require.resolve('url'),
+        zlib: require.resolve('browserify-zlib'),
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        assert: require.resolve('assert'),
+        os: require.resolve('os-browserify'),
+        path: require.resolve('path-browserify'),
+        'process/browser': require.resolve('process/browser'),
       };
-    }
-    
-    // Otimizar o tamanho do bundle
-    if (process.env.NODE_ENV === 'production') {
-      // Habilitar compressão de código
-      config.optimization.minimize = true;
       
-      // Dividir chunks para melhor cache
-      config.optimization.splitChunks = {
+      config.plugins.push(
+        new (require('webpack')).ProvidePlugin({
+          process: 'process/browser',
+          Buffer: ['buffer', 'Buffer'],
+        })
+      );
+    }
+
+    // Optimize bundle size
+    config.optimization = {
+      ...config.optimization,
+      moduleIds: 'deterministic',
+      runtimeChunk: {
+        name: 'runtime',
+      },
+      splitChunks: {
         chunks: 'all',
-        maxInitialRequests: Infinity,
-        minSize: 20000,
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name(module) {
-              // Obter o nome do pacote
-              const packageName = module.context.match(
-                /[\\/]node_modules[\\/](.*?)([\\/]|$)/
-              )[1];
+              // get the name. E.g. node_modules/packageName/not/this/part.js
+              // or node_modules/packageName
+              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
               
-              // Retornar nome do pacote para melhor debugging
+              // npm package names are URL-safe, but some servers don't like @ symbols
               return `npm.${packageName.replace('@', '')}`;
             },
           },
         },
-      };
-    }
-    
+      },
+    };
+
     return config;
   },
 };

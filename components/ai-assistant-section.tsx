@@ -2,7 +2,7 @@
 
 import { AdvancedChatbot } from "./advanced-chatbot"
 
-export function AIAssistantSection() {
+export default function AiAssistantSection() {
   return (
     <section id="ai-assistant" className="py-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4">
@@ -28,3 +28,6 @@ export function AIAssistantSection() {
     </section>
   )
 }
+
+// Também exportamos como uma exportação nomeada para compatibilidade com código existente
+export { AiAssistantSection }

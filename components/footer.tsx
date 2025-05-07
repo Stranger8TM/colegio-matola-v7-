@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Youtube, Linkedin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-export function Footer() {
+export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
@@ -179,3 +179,6 @@ export function Footer() {
     </footer>
   )
 }
+
+// Também exportamos como uma exportação nomeada para compatibilidade com código existente
+export { Footer }

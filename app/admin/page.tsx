@@ -131,9 +131,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
       <Admin3DBackground />
-      
+
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <aside className="hidden lg:flex lg:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-10">
@@ -585,4 +585,137 @@ export default function AdminDashboard() {
                   <div className="flex items-center space-x-2">
                     <Button className="bg-blue-800 hover:bg-blue-700">
                       <Plus className="mr-2 h-4 w-4" />
-                      Novo Al\
+                      Novo Aluno
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de alunos */}
+                <p>Conteúdo da gestão de alunos será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "teachers" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Professores</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Professor
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de professores */}
+                <p>Conteúdo da gestão de professores será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "courses" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Cursos</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Curso
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de cursos */}
+                <p>Conteúdo da gestão de cursos será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "calendar" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Calendário Escolar</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Evento
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de calendário */}
+                <p>Conteúdo do calendário escolar será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "reports" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Relatórios</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Exportar Relatórios
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de relatórios */}
+                <p>Conteúdo de relatórios será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "settings" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Configurações</h1>
+                </div>
+                {/* Conteúdo da aba de configurações */}
+                <p>Conteúdo de configurações será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "logs" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Logs do Sistema</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Exportar Logs
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de logs */}
+                <p>Conteúdo de logs do sistema será implementado em breve.</p>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
