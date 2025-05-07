@@ -6,7 +6,7 @@ import Link from "next/link"
 import { ArrowRight, Calendar, Phone } from "lucide-react"
 import Image from "next/image"
 
-export default function CTASection() {
+export function CTASection() {
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background com gradiente e padrão */}

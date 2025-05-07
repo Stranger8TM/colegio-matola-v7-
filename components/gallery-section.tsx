@@ -97,7 +97,7 @@ const galleryImages = [
   },
 ]
 
-export default function GallerySection() {
+export function GallerySection() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   const [filter, setFilter] = useState("Nosso Colégio")
 

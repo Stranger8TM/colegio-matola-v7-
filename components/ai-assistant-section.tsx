@@ -8,7 +8,7 @@ interface Message {
   content: string
 }
 
-const AIAssistantSection: React.FC = () => {
+export const AIAssistantSection: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Olá! Como posso ajudar você hoje?" },
   ])
@@ -72,5 +72,3 @@ const AIAssistantSection: React.FC = () => {
     </div>
   )
 }
-
-export default AIAssistantSection

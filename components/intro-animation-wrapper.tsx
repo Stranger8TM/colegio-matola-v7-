@@ -8,7 +8,7 @@ const IntroAnimation = dynamic(() => import("@/components/intro-animation"), {
   ssr: false,
 })
 
-export default function IntroAnimationWrapper() {
+export function IntroAnimationWrapper() {
   return (
     <Suspense fallback={null}>
       <IntroAnimation />

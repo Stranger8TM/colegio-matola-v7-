@@ -42,7 +42,7 @@ const inspirationalPhrases = [
   },
 ]
 
-export default function HeroSection() {
+export function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [currentPhrase, setCurrentPhrase] = useState(0)
 

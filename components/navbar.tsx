@@ -43,7 +43,7 @@ const menuItems = [
   },
 ]
 
-export default function Navbar() {
+export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
