@@ -312,6 +312,9 @@ model AttendanceRecord {
   class       Class     @relation(fields: [classId], references: [id])
   teacher     Teacher   @relation(fields: [teacherId], references: [id])
   attendance  Attendance[]
+
+  // Adicionando chave composta para garantir unicidade por classe e data
+  @@unique([classId, date], name: "classId_date")
 }
 
 model Attendance {

@@ -51,12 +51,12 @@ export const ActivityEnrollmentSchema = z.object({
 
 // Presença
 export const AttendanceRecordSchema = z.object({
-  studentId: z.string().uuid("ID do estudante inválido"),
-  classId: z.string().uuid("ID da turma inválido"),
+  classId: z.string().uuid(),
+  teacherId: z.string().uuid(),
   date: z.date(),
+  studentId: z.string().uuid(),
   status: z.enum(["present", "absent", "late", "excused"]),
-  notes: z.string().optional(),
-  recordedBy: z.string().uuid("ID do registrador inválido"),
+  justification: z.string().optional(),
 })
 
 // Calendário Acadêmico

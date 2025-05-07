@@ -1,15 +1,24 @@
+"use client"
+
 import Link from "next/link"
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Youtube, Linkedin } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
 
-export default function Footer() {
+export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 pt-20 pb-8">
       <div className="container mx-auto px-4">
         {/* Newsletter */}
-        <div className="bg-blue-800 dark:bg-blue-900 rounded-2xl p-8 md:p-12 mb-16 relative overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          viewport={{ once: true }}
+          className="bg-blue-800 dark:bg-blue-900 rounded-2xl p-8 md:p-12 mb-16 relative overflow-hidden"
+        >
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-700 dark:bg-blue-800 rounded-full -translate-y-1/2 translate-x-1/4"></div>
           <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-700 dark:bg-blue-800 rounded-full translate-y-1/2 -translate-x-1/4"></div>
 
@@ -36,11 +45,16 @@ export default function Footer() {
               </form>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Coluna 1 - Sobre */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            viewport={{ once: true }}
+          >
             <div className="flex items-center mb-6">
               <div className="w-[40px] h-[40px] bg-yellow-500 rounded-xl flex items-center justify-center text-blue-900 font-bold text-sm">
                 CPM
@@ -69,10 +83,15 @@ export default function Footer() {
                 </Link>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Coluna 2 - Links Rápidos */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             <h3 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-6">Links Rápidos</h3>
             <ul className="space-y-3">
               {[
@@ -97,10 +116,15 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Coluna 3 - Cursos */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            viewport={{ once: true }}
+          >
             <h3 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-6">Nossos Cursos</h3>
             <ul className="space-y-3">
               {[
@@ -122,10 +146,15 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* Coluna 4 - Contacto */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
             <h3 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-6">Contacto</h3>
             <ul className="space-y-4">
               <li className="flex items-start">
@@ -150,7 +179,7 @@ export default function Footer() {
                 </Button>
               </li>
             </ul>
-          </div>
+          </motion.div>
         </div>
 
         {/* Linha divisória */}
@@ -180,5 +209,5 @@ export default function Footer() {
   )
 }
 
-// Também exportamos como uma exportação nomeada para compatibilidade com código existente
-export { Footer }
+// Adicionando exportação padrão para compatibilidade
+export default Footer

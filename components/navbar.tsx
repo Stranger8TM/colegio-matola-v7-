@@ -2,57 +2,36 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useTheme } from "next-themes"
+import { usePathname } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, Menu, X, Phone, ChevronDown } from "lucide-react"
+import { Logo } from "@/components/logo"
+import {
+  Menu,
+  X,
+  ChevronDown,
+  Sun,
+  Moon,
+  BookOpen,
+  Users,
+  Phone,
+  Home,
+  GraduationCap,
+  ImageIcon,
+  FileText,
+  LogIn,
+} from "lucide-react"
+import { useTheme } from "next-themes"
 
-// Atualizar o array menuItems para mudar "Painel de Professores" para "Painel"
-const menuItems = [
-  {
-    name: "Home",
-    path: "/",
-  },
-  {
-    name: "Sobre Nós",
-    path: "#",
-    submenu: [
-      { name: "Nossa História", path: "/sobre/historia" },
-      { name: "Equipe", path: "/sobre/equipe" },
-      { name: "Infraestrutura", path: "/sobre/infraestrutura" },
-    ],
-  },
-  {
-    name: "Cursos",
-    path: "/cursos",
-  },
-  {
-    name: "Admissão",
-    path: "/admissao",
-  },
-  {
-    name: "Portal do Aluno",
-    path: "/portal",
-  },
-  {
-    name: "Painel",
-    path: "/painel",
-  },
-  {
-    name: "Contacto",
-    path: "/contacto",
-  },
-]
-
-export default function Navbar() {
+export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+  const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
+  // Efeito para detectar rolagem
   useEffect(() => {
-    setMounted(true)
-
     const handleScroll = () => {
       if (window.scrollY > 10) {
         setIsScrolled(true)
@@ -65,77 +44,78 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
+  // Efeito para montar o tema
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }
+  // Fechar menu ao navegar
+  useEffect(() => {
+    setIsOpen(false)
+  }, [pathname])
 
-  const toggleSubmenu = (name: string) => {
-    setOpenSubmenu(openSubmenu === name ? null : name)
-  }
-
-  // Não renderize nada até que o componente esteja montado no cliente
-  if (!mounted) {
-    return null
-  }
+  // Links de navegação
+  const navLinks = [
+    { name: "Home", href: "/", icon: <Home className="h-4 w-4" /> },
+    {
+      name: "Cursos",
+      href: "/cursos",
+      icon: <BookOpen className="h-4 w-4" />,
+      submenu: [
+        { name: "Ensino Primário", href: "/cursos#primario" },
+        { name: "Ensino Secundário", href: "/cursos#secundario" },
+        { name: "Pré-Universitário", href: "/cursos#pre-universitario" },
+        { name: "Atividades Extracurriculares", href: "/cursos#atividades" },
+      ],
+    },
+    { name: "Professores", href: "/professores", icon: <Users className="h-4 w-4" /> },
+    { name: "Admissão", href: "/admissao", icon: <GraduationCap className="h-4 w-4" /> },
+    { name: "Galeria", href: "/galeria", icon: <ImageIcon className="h-4 w-4" /> },
+    { name: "Notícias", href: "/noticias", icon: <FileText className="h-4 w-4" /> },
+    { name: "Contacto", href: "/contacto", icon: <Phone className="h-4 w-4" /> },
+  ]
 
   return (
-    <nav
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-3" : "bg-transparent py-6"
+        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-2" : "bg-transparent py-4"
       }`}
     >
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 z-10">
-            <div className="w-[50px] h-[50px] relative">
-              <div className="w-[50px] h-[50px] bg-yellow-500 rounded-xl flex items-center justify-center text-blue-900 font-bold text-xl shadow-md">
-                CPM
-              </div>
-            </div>
-            <div>
-              <span className="text-blue-900 dark:text-white font-bold text-xl block leading-tight">
-                Colégio Privado
-              </span>
-              <span className="text-blue-700 dark:text-blue-400 text-sm block leading-tight">da Matola</span>
-            </div>
-          </Link>
+          <Logo variant={isScrolled ? "default" : "white"} withText />
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center space-x-1">
-            {menuItems.map((item) => (
-              <div key={item.name} className="relative group">
-                {item.submenu ? (
-                  <button
-                    onClick={() => toggleSubmenu(item.name)}
-                    className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 font-medium transition-colors duration-200"
-                  >
-                    {item.name}
-                    <ChevronDown className="ml-1 h-4 w-4" />
-                  </button>
-                ) : (
-                  <Link
-                    href={item.path}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 font-medium transition-colors duration-200"
-                  >
-                    {item.name}
-                  </Link>
-                )}
+          {/* Links de navegação - Desktop */}
+          <nav className="hidden lg:flex items-center space-x-1">
+            {navLinks.map((link) => (
+              <div key={link.name} className="relative group">
+                <Link
+                  href={link.href}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
+                    pathname === link.href
+                      ? "text-blue-800 dark:text-blue-400"
+                      : isScrolled
+                        ? "text-gray-700 hover:text-blue-800 dark:text-gray-300 dark:hover:text-blue-400"
+                        : "text-white hover:text-blue-100"
+                  }`}
+                >
+                  {link.icon && <span className="mr-1">{link.icon}</span>}
+                  {link.name}
+                  {link.submenu && <ChevronDown className="ml-1 h-4 w-4" />}
+                </Link>
 
-                {item.submenu && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-left">
-                    <div className="py-2">
-                      {item.submenu.map((subitem) => (
+                {/* Submenu */}
+                {link.submenu && (
+                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="py-1">
+                      {link.submenu.map((subItem) => (
                         <Link
-                          key={subitem.name}
-                          href={subitem.path}
-                          className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-800 dark:hover:text-blue-400"
+                          key={subItem.name}
+                          href={subItem.href}
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
-                          {subitem.name}
+                          {subItem.name}
                         </Link>
                       ))}
                     </div>
@@ -143,125 +123,151 @@ export default function Navbar() {
                 )}
               </div>
             ))}
-          </div>
+          </nav>
 
-          {/* Contact and Theme Toggle */}
+          {/* Botões de ação - Desktop */}
           <div className="hidden lg:flex items-center space-x-4">
-            <a
-              href="tel:+258841234567"
-              className="flex items-center text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400"
-            >
-              <Phone className="h-5 w-5 mr-2" />
-              <span>+258 84 039 3525 </span>
-            </a>
+            {/* Alternador de tema */}
+            {mounted && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className={`rounded-full ${isScrolled ? "text-gray-700 dark:text-gray-300" : "text-white"}`}
+              >
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+            )}
 
+            {/* Botão de login */}
             <Button
+              asChild
               variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label="Alternar tema"
-              className="rounded-full"
+              className={`${
+                isScrolled
+                  ? "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  : "text-white hover:bg-white/10"
+              }`}
             >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 text-yellow-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-blue-800" />
-              )}
+              <Link href="/portal">
+                <LogIn className="mr-2 h-4 w-4" />
+                Portal
+              </Link>
             </Button>
 
-            <Button className="bg-blue-800 hover:bg-blue-700 text-white rounded-xl">
-              <Link href="/admissao">Matricule-se</Link>
+            {/* Botão de contato */}
+            <Button asChild className="bg-blue-800 hover:bg-blue-700 text-white">
+              <Link href="/contacto">
+                <Phone className="mr-2 h-4 w-4" />
+                Contacte-nos
+              </Link>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center space-x-4 lg:hidden">
+          {/* Botão do menu - Mobile */}
+          <div className="lg:hidden flex items-center">
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleTheme}
-              aria-label="Alternar tema"
-              className="rounded-full"
+              onClick={() => setIsOpen(!isOpen)}
+              className={`${isScrolled ? "text-gray-700 dark:text-gray-300" : "text-white"}`}
             >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 text-yellow-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-blue-800" />
-              )}
-            </Button>
-
-            <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Menu">
-              {isOpen ? (
-                <X className="h-6 w-6 text-blue-800 dark:text-blue-400" />
-              ) : (
-                <Menu className="h-6 w-6 text-blue-800 dark:text-blue-400" />
-              )}
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
+      {/* Menu mobile */}
+      <AnimatePresence>
         {isOpen && (
-          <div className="lg:hidden pt-4 pb-6 space-y-2 transition-all duration-300 ease-in-out">
-            {menuItems.map((item) => (
-              <div key={item.name}>
-                {item.submenu ? (
-                  <div>
-                    <button
-                      onClick={() => toggleSubmenu(item.name)}
-                      className="flex items-center justify-between w-full py-2 px-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
+          >
+            <div className="container mx-auto px-4 py-4">
+              <nav className="flex flex-col space-y-2">
+                {navLinks.map((link) => (
+                  <div key={link.name}>
+                    <Link
+                      href={link.href}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
+                        pathname === link.href
+                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
                     >
-                      <span>{item.name}</span>
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform ${openSubmenu === item.name ? "rotate-180" : ""}`}
-                      />
-                    </button>
+                      {link.icon && <span className="mr-2">{link.icon}</span>}
+                      {link.name}
+                    </Link>
 
-                    {openSubmenu === item.name && (
-                      <div className="pl-6 mt-1 space-y-1">
-                        {item.submenu.map((subitem) => (
+                    {/* Submenu no mobile */}
+                    {link.submenu && (
+                      <div className="ml-6 mt-1 space-y-1">
+                        {link.submenu.map((subItem) => (
                           <Link
-                            key={subitem.name}
-                            href={subitem.path}
-                            className="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
-                            onClick={() => setIsOpen(false)}
+                            key={subItem.name}
+                            href={subItem.href}
+                            className="px-3 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center"
                           >
-                            {subitem.name}
+                            <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>
+                            {subItem.name}
                           </Link>
                         ))}
                       </div>
                     )}
                   </div>
-                ) : (
-                  <Link
-                    href={item.path}
-                    className="block py-2 px-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
-                    onClick={() => setIsOpen(false)}
+                ))}
+              </nav>
+
+              <div className="mt-4 flex flex-col space-y-2">
+                {/* Alternador de tema - Mobile */}
+                {mounted && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="w-full justify-start"
                   >
-                    {item.name}
-                  </Link>
+                    {theme === "dark" ? (
+                      <>
+                        <Sun className="mr-2 h-4 w-4" />
+                        Modo Claro
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="mr-2 h-4 w-4" />
+                        Modo Escuro
+                      </>
+                    )}
+                  </Button>
                 )}
+
+                {/* Botão de login - Mobile */}
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link href="/portal">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Portal do Aluno
+                  </Link>
+                </Button>
+
+                {/* Botão de contato - Mobile */}
+                <Button asChild className="w-full justify-start bg-blue-800 hover:bg-blue-700 text-white">
+                  <Link href="/contacto">
+                    <Phone className="mr-2 h-4 w-4" />
+                    Contacte-nos
+                  </Link>
+                </Button>
               </div>
-            ))}
-
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <a href="tel:+258841234567" className="flex items-center py-2 px-4 text-gray-700 dark:text-gray-200">
-                <Phone className="h-5 w-5 mr-2" />
-                <span>+258 84 123 4567</span>
-              </a>
-
-              <Button className="w-full mt-4 bg-blue-800 hover:bg-blue-700 text-white">
-                <Link href="/admissao" onClick={() => setIsOpen(false)}>
-                  Matricule-se
-                </Link>
-              </Button>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
-    </nav>
+      </AnimatePresence>
+    </header>
   )
 }
 
-// Também exportamos como uma exportação nomeada para compatibilidade com código existente
-export { Navbar }
+// Adicionando exportação padrão para compatibilidade
+export default Navbar

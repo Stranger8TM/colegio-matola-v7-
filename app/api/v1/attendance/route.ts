@@ -23,7 +23,9 @@ export async function GET(req: NextRequest) {
     const filter: any = {}
 
     if (classId) {
-      filter.classId = classId
+      filter.attendanceRecord = {
+        classId,
+      }
     }
 
     if (studentId) {
@@ -32,9 +34,12 @@ export async function GET(req: NextRequest) {
 
     if (date) {
       const dateObj = new Date(date)
-      filter.date = {
-        gte: new Date(dateObj.setHours(0, 0, 0, 0)),
-        lt: new Date(dateObj.setHours(23, 59, 59, 999)),
+      filter.attendanceRecord = {
+        ...filter.attendanceRecord,
+        date: {
+          gte: new Date(dateObj.setHours(0, 0, 0, 0)),
+          lt: new Date(dateObj.setHours(23, 59, 59, 999)),
+        },
       }
     }
 
@@ -43,11 +48,18 @@ export async function GET(req: NextRequest) {
     }
 
     // Buscar registros de presença com paginação
-    const attendanceRecords = await prisma.attendanceRecord.findMany({
+    const attendance = await prisma.attendance.findMany({
       where: filter,
       skip,
       take: limit,
-      orderBy: [{ date: "desc" }, { studentId: "asc" }],
+      orderBy: [
+        {
+          attendanceRecord: {
+            date: "desc",
+          },
+        },
+        { studentId: "asc" },
+      ],
       include: {
         student: {
           select: {
@@ -57,21 +69,24 @@ export async function GET(req: NextRequest) {
             grade: true,
           },
         },
-        class: {
-          select: {
-            id: true,
-            name: true,
-            grade: true,
+        attendanceRecord: {
+          include: {
+            class: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },
     })
 
     // Contar total de registros para paginação
-    const total = await prisma.attendanceRecord.count({ where: filter })
+    const total = await prisma.attendance.count({ where: filter })
 
     return successResponse({
-      data: attendanceRecords,
+      data: attendance,
       pagination: {
         page,
         limit,
@@ -117,28 +132,45 @@ export async function POST(req: NextRequest) {
       return errorResponse("Turma não encontrada", 404)
     }
 
-    // Verificar se já existe um registro para este estudante, turma e data
-    const existingRecord = await prisma.attendanceRecord.findFirst({
+    // Criar ou encontrar o registro de presença para a data e turma
+    const attendanceRecord = await prisma.attendanceRecord.upsert({
       where: {
-        studentId: attendanceData.studentId,
-        classId: attendanceData.classId,
-        date: {
-          gte: new Date(attendanceData.date.setHours(0, 0, 0, 0)),
-          lt: new Date(attendanceData.date.setHours(23, 59, 59, 999)),
+        classId_date: {
+          classId: attendanceData.classId,
+          date: new Date(attendanceData.date),
         },
+      },
+      update: {},
+      create: {
+        classId: attendanceData.classId,
+        date: new Date(attendanceData.date),
+        teacherId: attendanceData.teacherId,
       },
     })
 
-    if (existingRecord) {
-      return errorResponse("Já existe um registro de presença para este estudante, turma e data", 409)
-    }
-
-    // Criar o registro de presença
-    const attendanceRecord = await prisma.attendanceRecord.create({
-      data: attendanceData,
+    // Verificar se já existe um registro para este estudante neste registro de presença
+    const existingAttendance = await prisma.attendance.findFirst({
+      where: {
+        attendanceRecordId: attendanceRecord.id,
+        studentId: attendanceData.studentId,
+      },
     })
 
-    return successResponse(attendanceRecord, 201)
+    if (existingAttendance) {
+      return errorResponse("Já existe um registro de presença para este estudante nesta data e turma", 409)
+    }
+
+    // Criar o registro de presença individual
+    const attendance = await prisma.attendance.create({
+      data: {
+        studentId: attendanceData.studentId,
+        attendanceRecordId: attendanceRecord.id,
+        status: attendanceData.status,
+        justification: attendanceData.justification,
+      },
+    })
+
+    return successResponse(attendance, 201)
   } catch (error) {
     console.error("Erro ao criar registro de presença:", error)
     return errorResponse("Erro ao criar registro de presença", 500)
