@@ -23,7 +23,7 @@ const sliderImages = [
   },
 ]
 
-// Frases inspiradoras para o slider
+// Frases inspiradoras para o slider com menção à data de fundação
 const inspirationalPhrases = [
   {
     title: "Educação que <span class='text-yellow-500'>transforma</span> o futuro",
@@ -33,12 +33,12 @@ const inspirationalPhrases = [
   {
     title: "Construindo <span class='text-yellow-500'>sonhos</span> e realizações",
     subtitle:
-      "Acreditamos que cada estudante tem um potencial único. Nossa missão é despertar talentos e cultivar mentes brilhantes para um Moçambique melhor.",
+      "Desde nossa fundação em 2017, acreditamos que cada estudante tem um potencial único. Nossa missão é despertar talentos e cultivar mentes brilhantes para um Moçambique melhor.",
   },
   {
     title: "Educação de <span class='text-yellow-500'>excelência</span> para um mundo em transformação",
     subtitle:
-      "Combinamos tradição e inovação para formar cidadãos globais, preparados para os desafios do século XXI com raízes fortes em nossa cultura.",
+      "Há 7 anos combinamos tradição e inovação para formar cidadãos globais, preparados para os desafios do século XXI com raízes fortes em nossa cultura.",
   },
 ]
 

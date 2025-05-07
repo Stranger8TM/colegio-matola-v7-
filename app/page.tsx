@@ -4,7 +4,7 @@ import { TestimonialsSection } from "@/components/testimonials-section"
 import { NewsSection } from "@/components/news-section"
 import { StatisticsSection } from "@/components/statistics-section"
 import { GallerySection } from "@/components/gallery-section"
-import { CtaSection } from "@/components/cta-section"
+import { CTASection } from "@/components/cta-section"
 import { AiAssistantSection } from "@/components/ai-assistant-section"
 import { IntroAnimationWrapper } from "@/components/intro-animation-wrapper"
 
@@ -13,13 +13,13 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <IntroAnimationWrapper>
         <HeroSection />
-        <FeaturesSection />
         <StatisticsSection />
-        <TestimonialsSection />
+        <FeaturesSection />
         <GallerySection />
+        <TestimonialsSection />
         <NewsSection />
         <AiAssistantSection />
-        <CtaSection />
+        <CTASection />
       </IntroAnimationWrapper>
     </div>
   )

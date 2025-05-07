@@ -11,6 +11,9 @@ import { Slider } from "@/components/ui/slider"
 import { Check, Save, RefreshCw, AlertTriangle } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 
+// Adicionar importação para a função de teste
+import { testErrorHandler } from "@/lib/test-error-handler"
+
 export default function SettingsComponent() {
   // Configurações gerais
   const [schoolName, setSchoolName] = useState("Colégio Privado da Matola")
@@ -137,7 +140,7 @@ export default function SettingsComponent() {
               <div className="space-y-2">
                 <Label htmlFor=\"school-address">Endereço</Label>
                 <Input
-                  id="school-address"        value={schoolAddress} 
+                  id="school-address" value={schoolAddress}hoolAddress} 
                   onChange={(e) => setSchoolAddress(e.target.value)} 
                 />
               </div>
@@ -356,6 +359,17 @@ export default function SettingsComponent() {
             )}
           </Button>
         </div>
+        {/* Adicionar um botão de teste no componente de configurações */}
+        <Button 
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              testErrorHandler()
+            }
+          }}
+          className="mt-4 bg-amber-600 hover:bg-amber-700"
+        >
+          Testar Sistema de Notificação
+        </Button>
       </CardContent>
     </Card>
   )
