@@ -6,36 +6,35 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Star, Send, Lightbulb, ThumbsUp } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Star, Send, MessageSquare } from "lucide-react"
 
-export function FeedbackSection() {
+export default function FeedbackSection() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
-  const [message, setMessage] = useState("")
+  const [feedback, setFeedback] = useState("")
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
   const [submitted, setSubmitted] = useState(false)
-  const [activeTab, setActiveTab] = useState("feedback") // feedback ou sugestão
+  const [type, setType] = useState("feedback") // feedback ou sugestão
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Aqui você implementaria a lógica para enviar o feedback ou sugestão
-    console.log({ name, email, message, rating, type: activeTab })
+    // Aqui você implementaria a lógica para enviar o feedback
+    console.log({ name, email, feedback, rating, type })
     setSubmitted(true)
 
     // Reset form
     setTimeout(() => {
       setName("")
       setEmail("")
-      setMessage("")
+      setFeedback("")
       setRating(0)
       setSubmitted(false)
     }, 3000)
   }
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <section className="py-24 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.div
@@ -72,7 +71,7 @@ export function FeedbackSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Formulário de Feedback/Sugestão */}
+          {/* Formulário de Feedback */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -82,17 +81,8 @@ export function FeedbackSection() {
             <Card className="border-0 shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-100 dark:border-gray-800">
                 <CardTitle className="flex items-center">
-                  {activeTab === "feedback" ? (
-                    <>
-                      <ThumbsUp className="h-6 w-6 mr-2 text-blue-800 dark:text-blue-400" />
-                      Deixe seu Feedback
-                    </>
-                  ) : (
-                    <>
-                      <Lightbulb className="h-6 w-6 mr-2 text-yellow-500" />
-                      Envie uma Sugestão
-                    </>
-                  )}
+                  <MessageSquare className="h-6 w-6 mr-2 text-blue-800 dark:text-blue-400" />
+                  Deixe seu Feedback ou Sugestão
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -109,31 +99,36 @@ export function FeedbackSection() {
                       </svg>
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                      {activeTab === "feedback" ? "Obrigado pelo seu feedback!" : "Obrigado pela sua sugestão!"}
+                      Obrigado pelo seu feedback!
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400">Sua opinião é muito importante para nós.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <Tabs defaultValue="feedback" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                      <TabsList className="grid w-full grid-cols-2 mb-6">
-                        <TabsTrigger value="feedback">Feedback</TabsTrigger>
-                        <TabsTrigger value="sugestao">Sugestão</TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="feedback" className="mt-0">
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                          Compartilhe sua experiência com o Colégio Privado da Matola. Seu feedback nos ajuda a melhorar
-                          nossos serviços.
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="sugestao" className="mt-0">
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                          Tem uma ideia para melhorar nossa escola? Compartilhe sua sugestão conosco!
-                        </div>
-                      </TabsContent>
-                    </Tabs>
+                    <div className="flex gap-4 mb-6">
+                      <button
+                        type="button"
+                        onClick={() => setType("feedback")}
+                        className={`flex-1 py-3 px-4 rounded-xl text-center transition-colors ${
+                          type === "feedback"
+                            ? "bg-blue-800 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        Feedback
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setType("sugestao")}
+                        className={`flex-1 py-3 px-4 rounded-xl text-center transition-colors ${
+                          type === "sugestao"
+                            ? "bg-blue-800 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                        }`}
+                      >
+                        Sugestão
+                      </button>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -172,7 +167,7 @@ export function FeedbackSection() {
                       </div>
                     </div>
 
-                    {activeTab === "feedback" && (
+                    {type === "feedback" && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Avaliação
@@ -185,7 +180,7 @@ export function FeedbackSection() {
                               onClick={() => setRating(star)}
                               onMouseEnter={() => setHoverRating(star)}
                               onMouseLeave={() => setHoverRating(0)}
-                              className="p-1 transition-transform hover:scale-110"
+                              className="p-1"
                             >
                               <Star
                                 className={`h-8 w-8 ${
@@ -202,19 +197,19 @@ export function FeedbackSection() {
 
                     <div>
                       <label
-                        htmlFor="message"
+                        htmlFor="feedback"
                         className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                       >
-                        {activeTab === "feedback" ? "Seu Feedback" : "Sua Sugestão"}
+                        {type === "feedback" ? "Seu Feedback" : "Sua Sugestão"}
                       </label>
                       <textarea
-                        id="message"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        id="feedback"
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
                         rows={5}
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                         placeholder={
-                          activeTab === "feedback"
+                          type === "feedback"
                             ? "Conte-nos sobre sua experiência..."
                             : "Compartilhe suas ideias para melhorarmos..."
                         }
@@ -224,7 +219,7 @@ export function FeedbackSection() {
 
                     <Button type="submit" className="w-full bg-blue-800 hover:bg-blue-700 text-white py-3 rounded-xl">
                       <Send className="mr-2 h-4 w-4" />
-                      Enviar {activeTab === "feedback" ? "Feedback" : "Sugestão"}
+                      Enviar {type === "feedback" ? "Feedback" : "Sugestão"}
                     </Button>
                   </form>
                 )}
@@ -242,7 +237,7 @@ export function FeedbackSection() {
           >
             <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border-0">
               <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-4">
-                Por que sua opinião é importante?
+                Por que seu feedback é importante?
               </h3>
               <p className="text-gray-700 dark:text-gray-300 mb-6">
                 No Colégio Privado da Matola, valorizamos a opinião de pais, alunos e toda a comunidade escolar. Seu
@@ -300,5 +295,3 @@ export function FeedbackSection() {
     </section>
   )
 }
-
-// Também exportamos como uma exportação nomeada para compatibilidade com código existente

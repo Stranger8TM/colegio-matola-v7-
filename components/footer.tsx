@@ -1,206 +1,185 @@
-"use client"
-
 import Link from "next/link"
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Youtube, Linkedin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { motion } from "framer-motion"
+import Image from "next/image"
+import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone, MapPin } from "lucide-react"
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
-
   return (
-    <footer className="bg-gray-100 dark:bg-gray-900 pt-20 pb-8">
-      <div className="container mx-auto px-4">
-        {/* Newsletter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="bg-blue-800 dark:bg-blue-900 rounded-2xl p-8 md:p-12 mb-16 relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-700 dark:bg-blue-800 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-          <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-700 dark:bg-blue-800 rounded-full translate-y-1/2 -translate-x-1/4"></div>
-
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="md:w-1/2">
-              <h3 className="text-3xl font-bold text-white mb-4">Receba Nossas Novidades</h3>
-              <p className="text-blue-100 text-lg mb-0">
-                Inscreva-se em nossa newsletter para receber atualizações sobre eventos, notícias e informações
-                importantes do colégio.
-              </p>
-            </div>
-
-            <div className="md:w-1/2 w-full">
-              <form className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  placeholder="Seu email"
-                  className="flex-grow px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  aria-label="Seu email"
-                />
-                <Button className="bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-medium px-6 py-3 rounded-xl">
-                  Inscrever-se
-                </Button>
-              </form>
+    <footer className="bg-gray-900 text-white">
+      <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div>
+            <Link href="/" className="flex items-center mb-4">
+              <Image src="/logo.png" alt="Colégio Matola" width={50} height={50} className="rounded" />
+              <div className="ml-3">
+                <h2 className="text-xl font-bold text-blue-400">Colégio Matola</h2>
+                <p className="text-xs text-gray-400">Educação de Excelência</p>
+              </div>
+            </Link>
+            <p className="text-gray-400 mb-4">
+              Formando líderes e inovadores para o futuro de Moçambique e do mundo, com uma educação de qualidade e
+              valores sólidos.
+            </p>
+            <div className="flex space-x-4">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+              >
+                <Facebook className="h-5 w-5" />
+                <span className="sr-only">Facebook</span>
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+                <span className="sr-only">Instagram</span>
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+              >
+                <Twitter className="h-5 w-5" />
+                <span className="sr-only">Twitter</span>
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-blue-400 transition-colors"
+              >
+                <Linkedin className="h-5 w-5" />
+                <span className="sr-only">LinkedIn</span>
+              </a>
             </div>
           </div>
-        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Coluna 1 - Sobre */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex items-center mb-6">
-              <div className="w-[40px] h-[40px] bg-yellow-500 rounded-xl flex items-center justify-center text-blue-900 font-bold text-sm">
-                CPM
-              </div>
-              <h3 className="text-xl font-bold text-blue-800 dark:text-blue-400 ml-2">Colégio Privado da Matola</h3>
-            </div>
-            <p className="text-gray-700 dark:text-gray-300 mb-6">
-              Educação de excelência para o futuro de Moçambique, formando cidadãos preparados para os desafios do mundo
-              moderno com valores éticos e competências globais.
-            </p>
-            <div className="flex space-x-3">
-              {[
-                { icon: <Facebook className="h-5 w-5" />, label: "Facebook" },
-                { icon: <Instagram className="h-5 w-5" />, label: "Instagram" },
-                { icon: <Twitter className="h-5 w-5" />, label: "Twitter" },
-                { icon: <Youtube className="h-5 w-5" />, label: "Youtube" },
-                { icon: <Linkedin className="h-5 w-5" />, label: "LinkedIn" },
-              ].map((social, index) => (
-                <Link
-                  key={index}
-                  href="#"
-                  className="w-9 h-9 rounded-full bg-blue-100 dark:bg-gray-800 flex items-center justify-center text-blue-800 dark:text-blue-400 hover:bg-blue-800 hover:text-white dark:hover:bg-blue-700 transition-colors"
-                  aria-label={social.label}
-                >
-                  {social.icon}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Links Rápidos</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/" className="text-gray-400 hover:text-white transition-colors">
+                  Início
                 </Link>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Coluna 2 - Links Rápidos */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-6">Links Rápidos</h3>
-            <ul className="space-y-3">
-              {[
-                { name: "Home", path: "/" },
-                { name: "Sobre Nós", path: "/sobre" },
-                { name: "Cursos", path: "/cursos" },
-                { name: "Admissão", path: "/admissao" },
-                { name: "Portal do Aluno", path: "/portal" },
-                { name: "Painel de Professores", path: "/professores" },
-                { name: "Notícias", path: "/noticias" },
-                { name: "Galeria", path: "/galeria" },
-                { name: "Contacto", path: "/contacto" },
-              ].map((link, index) => (
-                <li key={index}>
-                  <Link
-                    href={link.path}
-                    className="text-gray-700 dark:text-gray-300 hover:text-blue-800 dark:hover:text-blue-400 transition-colors flex items-center"
-                  >
-                    <span className="w-2 h-2 bg-blue-800 dark:bg-blue-400 rounded-full mr-2"></span>
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Coluna 3 - Cursos */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-6">Nossos Cursos</h3>
-            <ul className="space-y-3">
-              {[
-                { name: "Ensino Primário", path: "/cursos#primario" },
-                { name: "Ensino Secundário", path: "/cursos#secundario" },
-                { name: "Pré-Universitário", path: "/cursos#pre-universitario" },
-                { name: "Atividades Extracurriculares", path: "/cursos#atividades" },
-                { name: "Reforço Escolar", path: "/cursos#reforco" },
-                { name: "Idiomas", path: "/cursos#idiomas" },
-              ].map((course, index) => (
-                <li key={index}>
-                  <Link
-                    href={course.path}
-                    className="text-gray-700 dark:text-gray-300 hover:text-blue-800 dark:hover:text-blue-400 transition-colors flex items-center"
-                  >
-                    <span className="w-2 h-2 bg-blue-800 dark:bg-blue-400 rounded-full mr-2"></span>
-                    {course.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Coluna 4 - Contacto */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-lg font-bold text-blue-800 dark:text-blue-400 mb-6">Contacto</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start">
-                <MapPin className="h-5 w-5 text-blue-800 dark:text-blue-400 mr-3 mt-1" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  Rua da Mozal, Parcela Nº 6096
-                  <br />
-                  Matola Rio, Maputo, Moçambique
-                </span>
-              </li>
-              <li className="flex items-center">
-                <Phone className="h-5 w-5 text-blue-800 dark:text-blue-400 mr-3" />
-                <span className="text-gray-700 dark:text-gray-300">+258 84 039 3525</span>
-              </li>
-              <li className="flex items-center">
-                <Mail className="h-5 w-5 text-blue-800 dark:text-blue-400 mr-3" />
-                <span className="text-gray-700 dark:text-gray-300">info@colegiomatola.co.mz</span>
               </li>
               <li>
-                <Button className="mt-2 bg-blue-800 hover:bg-blue-700 text-white">
-                  <Link href="/contacto">Entre em Contacto</Link>
-                </Button>
+                <Link href="/sobre/historia" className="text-gray-400 hover:text-white transition-colors">
+                  Nossa História
+                </Link>
+              </li>
+              <li>
+                <Link href="/cursos" className="text-gray-400 hover:text-white transition-colors">
+                  Cursos
+                </Link>
+              </li>
+              <li>
+                <Link href="/admissao/processo" className="text-gray-400 hover:text-white transition-colors">
+                  Admissões
+                </Link>
+              </li>
+              <li>
+                <Link href="/professores" className="text-gray-400 hover:text-white transition-colors">
+                  Professores
+                </Link>
+              </li>
+              <li>
+                <Link href="/contacto" className="text-gray-400 hover:text-white transition-colors">
+                  Contacto
+                </Link>
               </li>
             </ul>
-          </motion.div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Portais</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/portal" className="text-gray-400 hover:text-white transition-colors">
+                  Portal do Aluno
+                </Link>
+              </li>
+              <li>
+                <Link href="/professores" className="text-gray-400 hover:text-white transition-colors">
+                  Portal do Professor
+                </Link>
+              </li>
+              <li>
+                <Link href="/admin" className="text-gray-400 hover:text-white transition-colors">
+                  Administração
+                </Link>
+              </li>
+              <li>
+                <Link href="/biblioteca" className="text-gray-400 hover:text-white transition-colors">
+                  Biblioteca Digital
+                </Link>
+              </li>
+              <li>
+                <Link href="/calendario" className="text-gray-400 hover:text-white transition-colors">
+                  Calendário Escolar
+                </Link>
+              </li>
+              <li>
+                <Link href="/noticias" className="text-gray-400 hover:text-white transition-colors">
+                  Notícias e Eventos
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Contacto</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <MapPin className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
+                <span className="text-gray-400">Av. Principal, 123, Matola, Maputo, Moçambique</span>
+              </li>
+              <li className="flex items-center">
+                <Phone className="h-5 w-5 text-blue-400 mr-2" />
+                <a href="tel:+258841234567" className="text-gray-400 hover:text-white transition-colors">
+                  +258 84 123 4567
+                </a>
+              </li>
+              <li className="flex items-center">
+                <Mail className="h-5 w-5 text-blue-400 mr-2" />
+                <a href="mailto:info@colegiomatola.co.mz" className="text-gray-400 hover:text-white transition-colors">
+                  info@colegiomatola.co.mz
+                </a>
+              </li>
+            </ul>
+            <div className="mt-6">
+              <h4 className="text-sm font-semibold mb-2 text-gray-300">Aplicativo Móvel</h4>
+              <div className="flex space-x-2">
+                <a href="#" className="block">
+                  <Image src="/app-store.png" alt="App Store" width={120} height={40} />
+                </a>
+                <a href="#" className="block">
+                  <Image src="/google-play.png" alt="Google Play" width={120} height={40} />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Linha divisória */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+        <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 md:mb-0">
-              &copy; {currentYear} Colégio Privado da Matola. Todos os direitos reservados.
+            <p className="text-gray-400 text-sm">
+              &copy; {new Date().getFullYear()} Colégio Matola. Todos os direitos reservados.
             </p>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <Link href="/politica-privacidade" className="hover:text-blue-800 dark:hover:text-blue-400">
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <Link href="/privacidade" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Política de Privacidade
               </Link>
-              <Link href="/termos-uso" className="hover:text-blue-800 dark:hover:text-blue-400">
+              <Link href="/termos" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Termos de Uso
               </Link>
-              <span>
-                Desenvolvido por{" "}
-                <a href="#" className="text-blue-800 dark:text-blue-400 font-bold">
-                  Gabriel Vieira
-                </a>
-              </span>
+              <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Política de Cookies
+              </Link>
             </div>
           </div>
         </div>
@@ -209,5 +188,4 @@ export function Footer() {
   )
 }
 
-// Adicionando exportação padrão para compatibilidade
 export default Footer

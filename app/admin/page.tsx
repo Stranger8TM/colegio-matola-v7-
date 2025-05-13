@@ -131,7 +131,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
       <Admin3DBackground />
 
       <div className="flex h-screen overflow-hidden">
@@ -589,8 +589,19 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 </div>
-                {/* Conteúdo da aba de alunos */}
-                <p>Conteúdo da gestão de alunos será implementado em breve.</p>
+
+                {/* Students content would go here */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Lista de Alunos</CardTitle>
+                    <CardDescription>Gerencie todos os alunos matriculados</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Conteúdo da gestão de alunos em desenvolvimento...
+                    </p>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
 
@@ -610,12 +621,29 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 </div>
-                {/* Conteúdo da aba de professores */}
-                <p>Conteúdo da gestão de professores será implementado em breve.</p>
+
+                {/* Teachers content would go here */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Lista de Professores</CardTitle>
+                    <CardDescription>Gerencie o corpo docente da escola</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Conteúdo da gestão de professores em desenvolvimento...
+                    </p>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
 
-            {activeTab === "courses" && (
+            {/* Other tabs would follow the same pattern */}
+            {(activeTab === "courses" ||
+              activeTab === "calendar" ||
+              activeTab === "documents" ||
+              activeTab === "reports" ||
+              activeTab === "settings" ||
+              activeTab === "logs") && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -623,99 +651,36 @@ export default function AdminDashboard() {
                 className="space-y-6"
               >
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Cursos</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Curso
-                    </Button>
-                  </div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {activeTab === "courses" && "Gestão de Cursos"}
+                    {activeTab === "calendar" && "Calendário Escolar"}
+                    {activeTab === "documents" && "Documentos"}
+                    {activeTab === "reports" && "Relatórios"}
+                    {activeTab === "settings" && "Configurações"}
+                    {activeTab === "logs" && "Logs do Sistema"}
+                  </h1>
                 </div>
-                {/* Conteúdo da aba de cursos */}
-                <p>Conteúdo da gestão de cursos será implementado em breve.</p>
-              </motion.div>
-            )}
 
-            {activeTab === "calendar" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Calendário Escolar</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Evento
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de calendário */}
-                <p>Conteúdo do calendário escolar será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "reports" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Relatórios</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Exportar Relatórios
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de relatórios */}
-                <p>Conteúdo de relatórios será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "settings" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Configurações</h1>
-                </div>
-                {/* Conteúdo da aba de configurações */}
-                <p>Conteúdo de configurações será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "logs" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Logs do Sistema</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Exportar Logs
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de logs */}
-                <p>Conteúdo de logs do sistema será implementado em breve.</p>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {activeTab === "courses" && "Lista de Cursos"}
+                      {activeTab === "calendar" && "Eventos do Calendário"}
+                      {activeTab === "documents" && "Documentos da Escola"}
+                      {activeTab === "reports" && "Relatórios Disponíveis"}
+                      {activeTab === "settings" && "Configurações do Sistema"}
+                      {activeTab === "logs" && "Registros de Atividade"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-500 dark:text-gray-400">Conteúdo em desenvolvimento...</p>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

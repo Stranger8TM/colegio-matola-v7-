@@ -2,20 +2,27 @@
 
 import type React from "react"
 
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
+import { ThemeProvider } from "@/components/theme-provider"
+import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
 import { MaintenancePopup } from "@/components/maintenance-popup"
-import { setupErrorHandler } from "@/lib/error-handler"
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
+  const [showMaintenancePopup, setShowMaintenancePopup] = useState(false)
+
   useEffect(() => {
-    // Inicializar o detector de erros
-    setupErrorHandler()
+    // Check if maintenance mode is enabled
+    const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true"
+    setShowMaintenancePopup(maintenanceMode)
   }, [])
 
   return (
-    <>
-      {children}
-      <MaintenancePopup />
-    </>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <Navbar />
+      <main className="min-h-screen">{children}</main>
+      <Footer />
+      {showMaintenancePopup && <MaintenancePopup />}
+    </ThemeProvider>
   )
 }

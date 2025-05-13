@@ -10,80 +10,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Usuários e Autenticação
 model User {
-  id                String    @id @default(uuid())
-  username          String    @unique
-  password          String
-  name              String
-  email             String    @unique
-  profileImage      String?
-  class             String
-  grade             String
-  role              String    @default("student")
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  // Informações pessoais adicionais
-  dateOfBirth       DateTime?
-  address           String?
-  phoneNumber       String?
-  parentName        String?
-  parentEmail       String?
-  parentPhone       String?
-  emergencyContact  String?
-  
-  // Relações
-  tasks             Task[]
-  notifications     Notification[]
-  grades            Grade[]
-  lessonProgress    LessonProgress[]
-  attendance        Attendance[]
-  bookLoans         BookLoan[]
-  payments          Payment[]
-  healthRecords     HealthRecord[]
-  extracurriculars  ExtracurricularEnrollment[]
-  transportRoutes   TransportEnrollment[]
-  messages          Message[]              @relation("MessageRecipient")
-  sentMessages      Message[]              @relation("MessageSender")
-  examResults       ExamResult[]
-  assignments       Assignment[]
-  projects          ProjectParticipant[]
+  id           String    @id @default(uuid())
+  username     String    @unique
+  password     String
+  name         String
+  email        String    @unique
+  profileImage String?
+  class        String
+  grade        String
+  role         String    @default("student")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tasks           Task[]
+  notifications   Notification[]
+  grades          Grade[]
+  lessonProgress  LessonProgress[]
 }
 
 model Teacher {
-  id                String    @id @default(uuid())
-  name              String
-  email             String    @unique
-  password          String
-  profileImage      String?
-  subject           String
-  bio               String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  // Informações profissionais adicionais
-  qualification     String?
-  yearsOfExperience Int?
-  specialization    String?
-  department        String?
-  officeHours       String?
-  contractType      String?   @default("full-time")
-  
-  // Relações
-  materials         Material[]
-  notifications     Notification[]
-  grades            Grade[]
-  recordedLessons   RecordedLesson[]
-  classes           Class[]
-  exams             Exam[]
-  assignments       Assignment[]
-  projects          Project[]
-  messages          Message[]              @relation("TeacherMessages")
-  attendanceRecords AttendanceRecord[]
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  password     String
+  profileImage String?
+  subject      String
+  bio          String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  materials       Material[]
+  notifications   Notification[]
+  grades          Grade[]
+  recordedLessons RecordedLesson[]
 }
 
-// Materiais e Recursos Educacionais
 model Material {
   id          String    @id @default(uuid())
   title       String
@@ -93,15 +55,87 @@ model Material {
   classTarget String
   uploadDate  DateTime  @default(now())
   teacherId   String
-  
-  // Campos adicionais
-  fileType    String?
-  fileSize    Int?
-  downloads   Int       @default(0)
-  isPublic    Boolean   @default(true)
-  tags        String[]
-  
+
   teacher     Teacher   @relation(fields: [teacherId], references: [id])
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  completed   Boolean   @default(false)
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  title       String
+  content     String
+  date        DateTime  @default(now())
+  isRead      Boolean   @default(false)
+  teacherId   String
+  targetClass String?
+
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
+  users       User[]
+}
+
+model Grade {
+  id          String    @id @default(uuid())
+  studentId   String
+  teacherId   String
+  subject     String
+  value       Float
+  term        String
+  date        DateTime  @default(now())
+  comments    String?
+
+  student     User      @relation(fields: [studentId], references: [id])
+  teacher     Teacher   @relation(fields: [teacherId], references: [id])
+}
+
+model Course {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Event {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  date        DateTime
+  location    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Document {
+  id          String    @id @default(uuid())
+  title       String
+  fileUrl     String
+  fileType    String
+  fileSize    Int
+  uploadDate  DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Statistic {
+  id                String    @id @default(uuid())
+  totalStudents     Int
+  totalTeachers     Int
+  totalCourses      Int
+  activeClasses     Int
+  pendingAdmissions Int
+  monthlyRevenue    String
+  updatedAt         DateTime  @updatedAt
 }
 
 model RecordedLesson {
@@ -115,13 +149,7 @@ model RecordedLesson {
   classTarget  String
   uploadDate   DateTime  @default(now())
   teacherId    String
-  
-  // Campos adicionais
-  transcriptUrl String?
-  resourcesUrl  String?
-  viewCount     Int       @default(0)
-  isPublished   Boolean   @default(true)
-  
+
   teacher      Teacher   @relation(fields: [teacherId], references: [id])
   progress     LessonProgress[]
 }
@@ -133,445 +161,9 @@ model LessonProgress {
   completed   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
-  // Campos adicionais
-  lastPosition Float?
-  notes        String?
-  rating       Int?
-  
+
   user        User      @relation(fields: [userId], references: [id])
   lesson      RecordedLesson @relation(fields: [lessonId], references: [id])
 
   @@id([userId, lessonId])
-}
-
-// Tarefas e Atividades
-model Task {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  dueDate     DateTime
-  completed   Boolean   @default(false)
-  userId      String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // Campos adicionais
-  priority    String?   @default("medium") // high, medium, low
-  category    String?
-  reminder    DateTime?
-  
-  user        User      @relation(fields: [userId], references: [id])
-}
-
-// Notificações e Comunicações
-model Notification {
-  id          String    @id @default(uuid())
-  title       String
-  content     String
-  date        DateTime  @default(now())
-  isRead      Boolean   @default(false)
-  teacherId   String
-  targetClass String?
-  
-  // Campos adicionais
-  type        String?   @default("info") // info, warning, urgent
-  expiresAt   DateTime?
-  
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  users       User[]
-}
-
-model Message {
-  id          String    @id @default(uuid())
-  subject     String
-  content     String
-  sentAt      DateTime  @default(now())
-  isRead      Boolean   @default(false)
-  senderId    String
-  recipientId String
-  teacherId   String?
-  
-  // Campos adicionais
-  attachments String[]
-  isStarred   Boolean   @default(false)
-  isArchived  Boolean   @default(false)
-  
-  sender      User      @relation("MessageSender", fields: [senderId], references: [id])
-  recipient   User      @relation("MessageRecipient", fields: [recipientId], references: [id])
-  teacher     Teacher?  @relation("TeacherMessages", fields: [teacherId], references: [id])
-}
-
-// Avaliações e Notas
-model Grade {
-  id          String    @id @default(uuid())
-  studentId   String
-  teacherId   String
-  subject     String
-  value       Float
-  term        String
-  date        DateTime  @default(now())
-  comments    String?
-  
-  // Campos adicionais
-  maxValue    Float     @default(100)
-  weight      Float     @default(1)
-  category    String?   // prova, trabalho, participação
-  
-  student     User      @relation(fields: [studentId], references: [id])
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-}
-
-model Exam {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  subject     String
-  date        DateTime
-  duration    Int       // em minutos
-  maxScore    Float
-  teacherId   String
-  classId     String
-  
-  // Campos adicionais
-  examType    String    @default("written") // written, oral, practical
-  instructions String?
-  isPublished Boolean   @default(false)
-  
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  class       Class     @relation(fields: [classId], references: [id])
-  results     ExamResult[]
-}
-
-model ExamResult {
-  id          String    @id @default(uuid())
-  examId      String
-  studentId   String
-  score       Float
-  feedback    String?
-  submittedAt DateTime  @default(now())
-  
-  // Campos adicionais
-  answers     Json?     // respostas do aluno
-  corrections Json?     // correções do professor
-  
-  exam        Exam      @relation(fields: [examId], references: [id])
-  student     User      @relation(fields: [studentId], references: [id])
-}
-
-// Cursos e Classes
-model Course {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // Campos adicionais
-  code        String?   @unique
-  level       String?
-  credits     Int?
-  duration    String?   // ex: "1 semestre", "1 ano"
-  syllabus    String?
-  
-  classes     Class[]
-}
-
-model Class {
-  id          String    @id @default(uuid())
-  name        String
-  courseId    String
-  teacherId   String
-  schedule    String?
-  room        String?
-  startDate   DateTime
-  endDate     DateTime
-  
-  // Campos adicionais
-  capacity    Int?
-  enrolledCount Int      @default(0)
-  isActive    Boolean   @default(true)
-  
-  course      Course    @relation(fields: [courseId], references: [id])
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  exams       Exam[]
-  attendanceRecords AttendanceRecord[]
-  assignments Assignment[]
-}
-
-// Presença e Frequência
-model AttendanceRecord {
-  id          String    @id @default(uuid())
-  classId     String
-  teacherId   String
-  date        DateTime  @default(now())
-  
-  // Campos adicionais
-  notes       String?
-  
-  class       Class     @relation(fields: [classId], references: [id])
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  attendance  Attendance[]
-
-  // Adicionando chave composta para garantir unicidade por classe e data
-  @@unique([classId, date], name: "classId_date")
-}
-
-model Attendance {
-  id                String    @id @default(uuid())
-  attendanceRecordId String
-  studentId         String
-  status            String    // present, absent, late, excused
-  
-  // Campos adicionais
-  arrivalTime       DateTime?
-  departureTime     DateTime?
-  justification     String?
-  
-  attendanceRecord  AttendanceRecord @relation(fields: [attendanceRecordId], references: [id])
-  student           User      @relation(fields: [studentId], references: [id])
-}
-
-// Biblioteca
-model Book {
-  id          String    @id @default(uuid())
-  title       String
-  author      String
-  isbn        String?   @unique
-  publisher   String?
-  publishYear Int?
-  category    String?
-  description String?
-  coverImage  String?
-  quantity    Int       @default(1)
-  available   Int       @default(1)
-  
-  // Campos adicionais
-  location    String?   // prateleira, seção
-  language    String?
-  pages       Int?
-  tags        String[]
-  
-  loans       BookLoan[]
-}
-
-model BookLoan {
-  id          String    @id @default(uuid())
-  bookId      String
-  userId      String
-  loanDate    DateTime  @default(now())
-  dueDate     DateTime
-  returnDate  DateTime?
-  
-  // Campos adicionais
-  status      String    @default("active") // active, returned, overdue, lost
-  renewals    Int       @default(0)
-  fineAmount  Float?
-  
-  book        Book      @relation(fields: [bookId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
-}
-
-// Eventos e Calendário
-model Event {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  date        DateTime
-  endDate     DateTime?
-  location    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // Campos adicionais
-  type        String?   // academic, holiday, extracurricular
-  isPublic    Boolean   @default(true)
-  organizer   String?
-  contactInfo String?
-  maxAttendees Int?
-  registeredAttendees Int @default(0)
-}
-
-// Documentos e Arquivos
-model Document {
-  id          String    @id @default(uuid())
-  title       String
-  fileUrl     String
-  fileType    String
-  fileSize    Int
-  uploadDate  DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  // Campos adicionais
-  category    String?
-  tags        String[]
-  isPublic    Boolean   @default(false)
-  author      String?
-  version     String?   @default("1.0")
-}
-
-// Estatísticas
-model Statistic {
-  id                String    @id @default(uuid())
-  totalStudents     Int
-  totalTeachers     Int
-  totalCourses      Int
-  activeClasses     Int
-  pendingAdmissions Int
-  monthlyRevenue    String
-  updatedAt         DateTime  @updatedAt
-  
-  // Campos adicionais
-  averageGrade      Float?
-  attendanceRate    Float?
-  graduationRate    Float?
-  yearlyComparison  Json?     // comparação com anos anteriores
-}
-
-// Atividades Extracurriculares
-model Extracurricular {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  schedule    String?
-  location    String?
-  maxCapacity Int?
-  
-  // Campos adicionais
-  category    String?   // sports, arts, academic
-  instructor  String?
-  cost        Float?
-  startDate   DateTime?
-  endDate     DateTime?
-  
-  enrollments ExtracurricularEnrollment[]
-}
-
-model ExtracurricularEnrollment {
-  id                String    @id @default(uuid())
-  extracurricularId String
-  studentId         String
-  enrollmentDate    DateTime  @default(now())
-  
-  // Campos adicionais
-  status            String    @default("active") // active, completed, dropped
-  performance       String?
-  
-  extracurricular   Extracurricular @relation(fields: [extracurricularId], references: [id])
-  student           User      @relation(fields: [studentId], references: [id])
-}
-
-// Transporte Escolar
-model TransportRoute {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  driver      String?
-  vehicle     String?
-  capacity    Int?
-  
-  // Campos adicionais
-  departureTime DateTime?
-  returnTime    DateTime?
-  stops         Json?     // array de paradas com horários
-  
-  enrollments   TransportEnrollment[]
-}
-
-model TransportEnrollment {
-  id              String    @id @default(uuid())
-  transportRouteId String
-  studentId       String
-  enrollmentDate  DateTime  @default(now())
-  
-  // Campos adicionais
-  pickupAddress   String?
-  dropoffAddress  String?
-  
-  transportRoute  TransportRoute @relation(fields: [transportRouteId], references: [id])
-  student         User      @relation(fields: [studentId], references: [id])
-}
-
-// Pagamentos e Finanças
-model Payment {
-  id          String    @id @default(uuid())
-  studentId   String
-  amount      Float
-  description String
-  paymentDate DateTime?
-  dueDate     DateTime
-  
-  // Campos adicionais
-  status      String    @default("pending") // pending, paid, overdue, cancelled
-  paymentMethod String?
-  receiptUrl  String?
-  
-  student     User      @relation(fields: [studentId], references: [id])
-}
-
-// Saúde e Bem-estar
-model HealthRecord {
-  id          String    @id @default(uuid())
-  studentId   String
-  bloodType   String?
-  allergies   String?
-  medications String?
-  conditions  String?
-  
-  // Campos adicionais
-  emergencyContact String?
-  insuranceInfo    String?
-  lastCheckup      DateTime?
-  
-  student     User      @relation(fields: [studentId], references: [id])
-}
-
-// Trabalhos e Projetos
-model Assignment {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  dueDate     DateTime
-  classId     String
-  teacherId   String
-  
-  // Campos adicionais
-  maxScore    Float     @default(100)
-  attachments String[]
-  submissionType String? // online, physical, presentation
-  
-  class       Class     @relation(fields: [classId], references: [id])
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  submissions User[]
-}
-
-model Project {
-  id          String    @id @default(uuid())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  teacherId   String
-  
-  // Campos adicionais
-  objectives  String?
-  resources   String?
-  status      String    @default("planning") // planning, active, completed
-  
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  participants ProjectParticipant[]
-}
-
-model ProjectParticipant {
-  id          String    @id @default(uuid())
-  projectId   String
-  studentId   String
-  role        String?
-  
-  // Campos adicionais
-  joinDate    DateTime  @default(now())
-  contributions String?
-  
-  project     Project   @relation(fields: [projectId], references: [id])
-  student     User      @relation(fields: [studentId], references: [id])
 }

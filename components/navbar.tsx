@@ -2,35 +2,14 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Logo } from "@/components/logo"
-import {
-  Menu,
-  X,
-  ChevronDown,
-  Sun,
-  Moon,
-  BookOpen,
-  Users,
-  Phone,
-  Home,
-  GraduationCap,
-  ImageIcon,
-  FileText,
-  LogIn,
-} from "lucide-react"
-import { useTheme } from "next-themes"
+import { Menu, X, ChevronDown } from "lucide-react"
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
 
-  // Efeito para detectar rolagem
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -41,233 +20,232 @@ export function Navbar() {
     }
 
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
   }, [])
-
-  // Efeito para montar o tema
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Fechar menu ao navegar
-  useEffect(() => {
-    setIsOpen(false)
-  }, [pathname])
-
-  // Links de navegação
-  const navLinks = [
-    { name: "Home", href: "/", icon: <Home className="h-4 w-4" /> },
-    {
-      name: "Cursos",
-      href: "/cursos",
-      icon: <BookOpen className="h-4 w-4" />,
-      submenu: [
-        { name: "Ensino Primário", href: "/cursos#primario" },
-        { name: "Ensino Secundário", href: "/cursos#secundario" },
-        { name: "Pré-Universitário", href: "/cursos#pre-universitario" },
-        { name: "Atividades Extracurriculares", href: "/cursos#atividades" },
-      ],
-    },
-    { name: "Professores", href: "/professores", icon: <Users className="h-4 w-4" /> },
-    { name: "Admissão", href: "/admissao", icon: <GraduationCap className="h-4 w-4" /> },
-    { name: "Galeria", href: "/galeria", icon: <ImageIcon className="h-4 w-4" /> },
-    { name: "Notícias", href: "/noticias", icon: <FileText className="h-4 w-4" /> },
-    { name: "Contacto", href: "/contacto", icon: <Phone className="h-4 w-4" /> },
-  ]
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-2" : "bg-transparent py-4"
+        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Logo variant={isScrolled ? "default" : "white"} withText />
-
-          {/* Links de navegação - Desktop */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <div key={link.name} className="relative group">
-                <Link
-                  href={link.href}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
-                    pathname === link.href
-                      ? "text-blue-800 dark:text-blue-400"
-                      : isScrolled
-                        ? "text-gray-700 hover:text-blue-800 dark:text-gray-300 dark:hover:text-blue-400"
-                        : "text-white hover:text-blue-100"
-                  }`}
-                >
-                  {link.icon && <span className="mr-1">{link.icon}</span>}
-                  {link.name}
-                  {link.submenu && <ChevronDown className="ml-1 h-4 w-4" />}
-                </Link>
-
-                {/* Submenu */}
-                {link.submenu && (
-                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="py-1">
-                      {link.submenu.map((subItem) => (
-                        <Link
-                          key={subItem.name}
-                          href={subItem.href}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          {subItem.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center">
+              <Image src="/logo.png" alt="Colégio Matola" width={50} height={50} className="rounded" />
+              <div className="ml-3">
+                <h1 className="text-xl font-bold text-blue-900 dark:text-blue-400">Colégio Matola</h1>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Educação de Excelência</p>
               </div>
-            ))}
-          </nav>
-
-          {/* Botões de ação - Desktop */}
-          <div className="hidden lg:flex items-center space-x-4">
-            {/* Alternador de tema */}
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className={`rounded-full ${isScrolled ? "text-gray-700 dark:text-gray-300" : "text-white"}`}
-              >
-                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-            )}
-
-            {/* Botão de login */}
-            <Button
-              asChild
-              variant="ghost"
-              className={`${
-                isScrolled
-                  ? "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  : "text-white hover:bg-white/10"
-              }`}
-            >
-              <Link href="/portal">
-                <LogIn className="mr-2 h-4 w-4" />
-                Portal
-              </Link>
-            </Button>
-
-            {/* Botão de contato */}
-            <Button asChild className="bg-blue-800 hover:bg-blue-700 text-white">
-              <Link href="/contacto">
-                <Phone className="mr-2 h-4 w-4" />
-                Contacte-nos
-              </Link>
-            </Button>
+            </Link>
           </div>
 
-          {/* Botão do menu - Mobile */}
-          <div className="lg:hidden flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(!isOpen)}
-              className={`${isScrolled ? "text-gray-700 dark:text-gray-300" : "text-white"}`}
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            <Link
+              href="/"
+              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
+              Início
+            </Link>
+            <div className="relative group">
+              <button className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium flex items-center">
+                Sobre Nós
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <Link
+                  href="/sobre/historia"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Nossa História
+                </Link>
+                <Link
+                  href="/sobre/missao"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Missão e Valores
+                </Link>
+                <Link
+                  href="/sobre/equipe"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Nossa Equipe
+                </Link>
+              </div>
+            </div>
+            <Link
+              href="/cursos"
+              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
+            >
+              Cursos
+            </Link>
+            <div className="relative group">
+              <button className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium flex items-center">
+                Admissões
+                <ChevronDown className="ml-1 h-4 w-4" />
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <Link
+                  href="/admissao/processo"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Processo de Admissão
+                </Link>
+                <Link
+                  href="/admissao/requisitos"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Requisitos
+                </Link>
+                <Link
+                  href="/admissao/taxas"
+                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Taxas e Propinas
+                </Link>
+              </div>
+            </div>
+            <Link
+              href="/professores"
+              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
+            >
+              Professores
+            </Link>
+            <Link
+              href="/contacto"
+              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
+            >
+              Contacto
+            </Link>
+          </nav>
+
+          <div className="hidden md:flex items-center space-x-4">
+            <Link href="/portal">
+              <Button variant="outline" className="border-blue-800 text-blue-800 hover:bg-blue-800 hover:text-white">
+                Portal do Aluno
+              </Button>
+            </Link>
+            <Link href="/admissao">
+              <Button className="bg-blue-800 hover:bg-blue-700">Inscreva-se</Button>
+            </Link>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 focus:outline-none"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <span className="sr-only">Abrir menu principal</span>
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Menu mobile */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
-          >
-            <div className="container mx-auto px-4 py-4">
-              <nav className="flex flex-col space-y-2">
-                {navLinks.map((link) => (
-                  <div key={link.name}>
-                    <Link
-                      href={link.href}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
-                        pathname === link.href
-                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      {link.icon && <span className="mr-2">{link.icon}</span>}
-                      {link.name}
-                    </Link>
-
-                    {/* Submenu no mobile */}
-                    {link.submenu && (
-                      <div className="ml-6 mt-1 space-y-1">
-                        {link.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            className="px-3 py-1 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center"
-                          >
-                            <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </nav>
-
-              <div className="mt-4 flex flex-col space-y-2">
-                {/* Alternador de tema - Mobile */}
-                {mounted && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="w-full justify-start"
-                  >
-                    {theme === "dark" ? (
-                      <>
-                        <Sun className="mr-2 h-4 w-4" />
-                        Modo Claro
-                      </>
-                    ) : (
-                      <>
-                        <Moon className="mr-2 h-4 w-4" />
-                        Modo Escuro
-                      </>
-                    )}
-                  </Button>
-                )}
-
-                {/* Botão de login - Mobile */}
-                <Button asChild variant="outline" className="w-full justify-start">
-                  <Link href="/portal">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Portal do Aluno
-                  </Link>
-                </Button>
-
-                {/* Botão de contato - Mobile */}
-                <Button asChild className="w-full justify-start bg-blue-800 hover:bg-blue-700 text-white">
-                  <Link href="/contacto">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Contacte-nos
-                  </Link>
-                </Button>
-              </div>
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <Link
+              href="/"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Início
+            </Link>
+            <div className="space-y-1 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+              <Link
+                href="/sobre/historia"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Nossa História
+              </Link>
+              <Link
+                href="/sobre/missao"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Missão e Valores
+              </Link>
+              <Link
+                href="/sobre/equipe"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Nossa Equipe
+              </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <Link
+              href="/cursos"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Cursos
+            </Link>
+            <div className="space-y-1 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+              <Link
+                href="/admissao/processo"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Processo de Admissão
+              </Link>
+              <Link
+                href="/admissao/requisitos"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Requisitos
+              </Link>
+              <Link
+                href="/admissao/taxas"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Taxas e Propinas
+              </Link>
+            </div>
+            <Link
+              href="/professores"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Professores
+            </Link>
+            <Link
+              href="/contacto"
+              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contacto
+            </Link>
+          </div>
+          <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-center space-x-4 px-4">
+              <Link href="/portal" onClick={() => setIsMenuOpen(false)}>
+                <Button
+                  variant="outline"
+                  className="w-full border-blue-800 text-blue-800 hover:bg-blue-800 hover:text-white"
+                >
+                  Portal do Aluno
+                </Button>
+              </Link>
+              <Link href="/admissao" onClick={() => setIsMenuOpen(false)}>
+                <Button className="w-full bg-blue-800 hover:bg-blue-700">Inscreva-se</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }
 
-// Adicionando exportação padrão para compatibilidade
 export default Navbar
