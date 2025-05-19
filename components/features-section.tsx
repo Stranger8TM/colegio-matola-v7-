@@ -51,7 +51,7 @@ const features = [
   },
 ]
 
-export function FeaturesSection() {
+export default function FeaturesSection() {
   return (
     <section className="py-24 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4">

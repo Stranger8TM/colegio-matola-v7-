@@ -11,7 +11,7 @@ const stats = [
   { value: 45, label: "Professores Qualificados", suffix: "" },
 ]
 
-export function StatisticsSection() {
+export default function StatisticsSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.3 })
   const [counts, setCounts] = useState(stats.map(() => 0))

@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ArrowRight, Calendar, Phone, BookOpen, GraduationCap, Globe } from "lucide-react"
+import { ChevronRight, ArrowRight, Calendar, Phone } from "lucide-react"
 
 // Imagens para o slider
 const sliderImages = [
@@ -23,34 +23,13 @@ const sliderImages = [
   },
 ]
 
-// Frases inspiradoras para o slider com menção à data de fundação
-const inspirationalPhrases = [
-  {
-    title: "Educação que <span class='text-yellow-500'>transforma</span> o futuro",
-    subtitle:
-      "No Colégio Privado da Matola, formamos líderes com excelência acadêmica, valores éticos e preparação para os desafios globais desde 2017.",
-  },
-  {
-    title: "Construindo <span class='text-yellow-500'>sonhos</span> e realizações",
-    subtitle:
-      "Desde nossa fundação em 2017, acreditamos que cada estudante tem um potencial único. Nossa missão é despertar talentos e cultivar mentes brilhantes para um Moçambique melhor.",
-  },
-  {
-    title: "Educação de <span class='text-yellow-500'>excelência</span> para um mundo em transformação",
-    subtitle:
-      "Há 7 anos combinamos tradição e inovação para formar cidadãos globais, preparados para os desafios do século XXI com raízes fortes em nossa cultura.",
-  },
-]
-
-export function HeroSection() {
+export default function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [currentPhrase, setCurrentPhrase] = useState(0)
 
   // Efeito para alternar os slides automaticamente
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === sliderImages.length - 1 ? 0 : prev + 1))
-      setCurrentPhrase((prev) => (prev === inspirationalPhrases.length - 1 ? 0 : prev + 1))
     }, 5000)
     return () => clearInterval(interval)
   }, [])
@@ -87,10 +66,7 @@ export function HeroSection() {
         {sliderImages.map((_, index) => (
           <button
             key={index}
-            onClick={() => {
-              setCurrentSlide(index)
-              setCurrentPhrase(index)
-            }}
+            onClick={() => setCurrentSlide(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               currentSlide === index ? "bg-white w-10" : "bg-white/50"
             }`}
@@ -105,27 +81,17 @@ export function HeroSection() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <div className="inline-flex items-center bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 px-4 py-1 rounded-full text-sm font-medium mb-6">
               <span className="flex h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-2"></span>
-              Matrículas Abertas 2025 • Vagas Limitadas
+              Matrículas Abertas 2025
             </div>
 
-            {inspirationalPhrases.map((phrase, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                  opacity: currentPhrase === index ? 1 : 0,
-                  y: currentPhrase === index ? 0 : 20,
-                  display: currentPhrase === index ? "block" : "none",
-                }}
-                transition={{ duration: 0.8 }}
-              >
-                <h1
-                  className="text-5xl md:text-6xl lg:text-7xl font-bold text-blue-900 dark:text-white mb-6 leading-tight"
-                  dangerouslySetInnerHTML={{ __html: phrase.title }}
-                ></h1>
-                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 mb-8 max-w-xl">{phrase.subtitle}</p>
-              </motion.div>
-            ))}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-blue-900 dark:text-white mb-6 leading-tight">
+              Educação que <span className="text-yellow-500">transforma</span> o futuro
+            </h1>
+
+            <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 mb-8 max-w-xl">
+              No Colégio Privado da Matola, formamos líderes com excelência acadêmica, valores éticos e preparação para
+              os desafios globais desde 2017.
+            </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="bg-blue-800 hover:bg-blue-700 text-white px-8 py-6 text-lg rounded-xl">
@@ -163,26 +129,11 @@ export function HeroSection() {
 
               <ul className="space-y-4 mb-6">
                 {[
-                  {
-                    text: "Corpo docente altamente qualificado e apaixonado pelo ensino",
-                    icon: <GraduationCap className="h-4 w-4 text-green-600 dark:text-green-400" />,
-                  },
-                  {
-                    text: "Infraestrutura moderna com laboratórios, biblioteca e espaços de convivência",
-                    icon: <BookOpen className="h-4 w-4 text-green-600 dark:text-green-400" />,
-                  },
-                  {
-                    text: "Metodologia de ensino inovadora centrada no aluno",
-                    icon: <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />,
-                  },
-                  {
-                    text: "Formação bilíngue (Português e Inglês) para um mundo globalizado",
-                    icon: <Globe className="h-4 w-4 text-green-600 dark:text-green-400" />,
-                  },
-                  {
-                    text: "Atividades extracurriculares que desenvolvem talentos e habilidades",
-                    icon: <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />,
-                  },
+                  "Corpo docente altamente qualificado",
+                  "Infraestrutura moderna e segura",
+                  "Metodologia de ensino inovadora",
+                  "Formação bilíngue (Português e Inglês)",
+                  "Atividades extracurriculares diversificadas",
                 ].map((item, index) => (
                   <motion.li
                     key={index}
@@ -192,9 +143,9 @@ export function HeroSection() {
                     className="flex items-start"
                   >
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-0.5 mr-3">
-                      {item.icon}
+                      <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
                     </div>
-                    <span className="text-gray-700 dark:text-gray-300">{item.text}</span>
+                    <span className="text-gray-700 dark:text-gray-300">{item}</span>
                   </motion.li>
                 ))}
               </ul>

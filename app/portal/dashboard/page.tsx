@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import MotivationalMessage from "@/components/motivational-message"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -178,9 +177,6 @@ export default function StudentDashboard() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
-              {/* Mensagem Motivacional */}
-              <MotivationalMessage type="student" userName={student.name} />
-
               {/* Boas-vindas */}
               <Card className="border-0 shadow-lg rounded-2xl overflow-hidden mb-6">
                 <div className="bg-gradient-to-r from-purple-700 to-purple-600 dark:from-purple-800 dark:to-purple-700 p-6 text-white">

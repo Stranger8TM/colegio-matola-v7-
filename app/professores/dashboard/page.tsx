@@ -6,7 +6,6 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import MotivationalMessage from "@/components/motivational-message"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -532,9 +531,6 @@ export default function TeacherDashboard() {
       <Navbar />
 
       <div className="container mx-auto px-4 py-32">
-        {/* Mensagem Motivacional */}
-        <MotivationalMessage type="teacher" userName={teacher.name} />
-
         <Card className="border-0 shadow-lg rounded-2xl overflow-hidden">
           <CardContent className="p-6">
             <h1 className="text-2xl font-bold mb-4">Bem-vindo, Professor {teacher.name}!</h1>

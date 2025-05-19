@@ -55,7 +55,6 @@
     "expo-gl": "latest",
     "framer-motion": "latest",
     "input-otp": "1.4.1",
-    "jsonwebtoken": "latest",
     "jspdf": "latest",
     "lucide-react": "^0.454.0",
     "nanoid": "latest",
