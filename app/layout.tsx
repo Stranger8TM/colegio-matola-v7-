@@ -1,10 +1,6 @@
 import type React from "react"
-import "./globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import ClientLayout from "./ClientLayout"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Colégio Privado da Matola - Educação de Excelência desde 2017",
@@ -19,11 +15,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <html lang="pt" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ClientLayout>{children}</ClientLayout>
-      </body>
-    </html>
-  )
+  return <ClientLayout>{children}</ClientLayout>
 }
+
+
+import './globals.css'

@@ -2,15 +2,57 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { Moon, Sun, Menu, X, Phone, ChevronDown } from "lucide-react"
+
+// Atualizar o array menuItems para mudar "Painel de Professores" para "Painel"
+const menuItems = [
+  {
+    name: "Home",
+    path: "/",
+  },
+  {
+    name: "Sobre Nós",
+    path: "#",
+    submenu: [
+      { name: "Nossa História", path: "/sobre/historia" },
+      { name: "Equipe", path: "/sobre/equipe" },
+      { name: "Infraestrutura", path: "/sobre/infraestrutura" },
+    ],
+  },
+  {
+    name: "Cursos",
+    path: "/cursos",
+  },
+  {
+    name: "Admissão",
+    path: "/admissao",
+  },
+  {
+    name: "Portal do Aluno",
+    path: "/portal",
+  },
+  {
+    name: "Painel",
+    path: "/painel",
+  },
+  {
+    name: "Contacto",
+    path: "/contacto",
+  },
+]
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+
     const handleScroll = () => {
       if (window.scrollY > 10) {
         setIsScrolled(true)
@@ -20,232 +62,203 @@ export function Navbar() {
     }
 
     window.addEventListener("scroll", handleScroll)
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-    }
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const toggleMenu = () => {
+    setIsOpen(!isOpen)
+  }
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
+
+  const toggleSubmenu = (name: string) => {
+    setOpenSubmenu(openSubmenu === name ? null : name)
+  }
+
+  // Não renderize nada até que o componente esteja montado no cliente
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <header
+    <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md" : "bg-transparent"
+        isScrolled ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md py-3" : "bg-transparent py-6"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <Image src="/logo.png" alt="Colégio Matola" width={50} height={50} className="rounded" />
-              <div className="ml-3">
-                <h1 className="text-xl font-bold text-blue-900 dark:text-blue-400">Colégio Matola</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Educação de Excelência</p>
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 z-10">
+            <div className="w-[50px] h-[50px] relative">
+              <div className="w-[50px] h-[50px] bg-yellow-500 rounded-xl flex items-center justify-center text-blue-900 font-bold text-xl shadow-md">
+                CPM
               </div>
-            </Link>
+            </div>
+            <div>
+              <span className="text-blue-900 dark:text-white font-bold text-xl block leading-tight">
+                Colégio Privado
+              </span>
+              <span className="text-blue-700 dark:text-blue-400 text-sm block leading-tight">da Matola</span>
+            </div>
+          </Link>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center space-x-1">
+            {menuItems.map((item) => (
+              <div key={item.name} className="relative group">
+                {item.submenu ? (
+                  <button
+                    onClick={() => toggleSubmenu(item.name)}
+                    className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 font-medium transition-colors duration-200"
+                  >
+                    {item.name}
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </button>
+                ) : (
+                  <Link
+                    href={item.path}
+                    className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 font-medium transition-colors duration-200"
+                  >
+                    {item.name}
+                  </Link>
+                )}
+
+                {item.submenu && (
+                  <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-left">
+                    <div className="py-2">
+                      {item.submenu.map((subitem) => (
+                        <Link
+                          key={subitem.name}
+                          href={subitem.path}
+                          className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-800 dark:hover:text-blue-400"
+                        >
+                          {subitem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            <Link
-              href="/"
-              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
+          {/* Contact and Theme Toggle */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <a
+              href="tel:+258841234567"
+              className="flex items-center text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400"
             >
-              Início
-            </Link>
-            <div className="relative group">
-              <button className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium flex items-center">
-                Sobre Nós
-                <ChevronDown className="ml-1 h-4 w-4" />
-              </button>
-              <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                <Link
-                  href="/sobre/historia"
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Nossa História
-                </Link>
-                <Link
-                  href="/sobre/missao"
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Missão e Valores
-                </Link>
-                <Link
-                  href="/sobre/equipe"
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Nossa Equipe
-                </Link>
-              </div>
-            </div>
-            <Link
-              href="/cursos"
-              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
-            >
-              Cursos
-            </Link>
-            <div className="relative group">
-              <button className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium flex items-center">
-                Admissões
-                <ChevronDown className="ml-1 h-4 w-4" />
-              </button>
-              <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                <Link
-                  href="/admissao/processo"
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Processo de Admissão
-                </Link>
-                <Link
-                  href="/admissao/requisitos"
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Requisitos
-                </Link>
-                <Link
-                  href="/admissao/taxas"
-                  className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Taxas e Propinas
-                </Link>
-              </div>
-            </div>
-            <Link
-              href="/professores"
-              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
-            >
-              Professores
-            </Link>
-            <Link
-              href="/contacto"
-              className="px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-sm font-medium"
-            >
-              Contacto
-            </Link>
-          </nav>
+              <Phone className="h-5 w-5 mr-2" />
+              <span>+258 84 039 3525 </span>
+            </a>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <Link href="/portal">
-              <Button variant="outline" className="border-blue-800 text-blue-800 hover:bg-blue-800 hover:text-white">
-                Portal do Aluno
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label="Alternar tema"
+              className="rounded-full"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-yellow-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-blue-800" />
+              )}
+            </Button>
+
+            <Button className="bg-blue-800 hover:bg-blue-700 text-white rounded-xl">
+              <Link href="/admissao">Matricule-se</Link>
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex items-center space-x-4 lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label="Alternar tema"
+              className="rounded-full"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-yellow-400" />
+              ) : (
+                <Moon className="h-5 w-5 text-blue-800" />
+              )}
+            </Button>
+
+            <Button variant="ghost" size="icon" onClick={toggleMenu} aria-label="Menu">
+              {isOpen ? (
+                <X className="h-6 w-6 text-blue-800 dark:text-blue-400" />
+              ) : (
+                <Menu className="h-6 w-6 text-blue-800 dark:text-blue-400" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="lg:hidden pt-4 pb-6 space-y-2 transition-all duration-300 ease-in-out">
+            {menuItems.map((item) => (
+              <div key={item.name}>
+                {item.submenu ? (
+                  <div>
+                    <button
+                      onClick={() => toggleSubmenu(item.name)}
+                      className="flex items-center justify-between w-full py-2 px-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                    >
+                      <span>{item.name}</span>
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${openSubmenu === item.name ? "rotate-180" : ""}`}
+                      />
+                    </button>
+
+                    {openSubmenu === item.name && (
+                      <div className="pl-6 mt-1 space-y-1">
+                        {item.submenu.map((subitem) => (
+                          <Link
+                            key={subitem.name}
+                            href={subitem.path}
+                            className="block py-2 px-4 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {subitem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.path}
+                    className="block py-2 px-4 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )}
+              </div>
+            ))}
+
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <a href="tel:+258841234567" className="flex items-center py-2 px-4 text-gray-700 dark:text-gray-200">
+                <Phone className="h-5 w-5 mr-2" />
+                <span>+258 84 123 4567</span>
+              </a>
+
+              <Button className="w-full mt-4 bg-blue-800 hover:bg-blue-700 text-white">
+                <Link href="/admissao" onClick={() => setIsOpen(false)}>
+                  Matricule-se
+                </Link>
               </Button>
-            </Link>
-            <Link href="/admissao">
-              <Button className="bg-blue-800 hover:bg-blue-700">Inscreva-se</Button>
-            </Link>
+            </div>
           </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 focus:outline-none"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <span className="sr-only">Abrir menu principal</span>
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
+        )}
       </div>
-
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              href="/"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Início
-            </Link>
-            <div className="space-y-1 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-              <Link
-                href="/sobre/historia"
-                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Nossa História
-              </Link>
-              <Link
-                href="/sobre/missao"
-                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Missão e Valores
-              </Link>
-              <Link
-                href="/sobre/equipe"
-                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Nossa Equipe
-              </Link>
-            </div>
-            <Link
-              href="/cursos"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Cursos
-            </Link>
-            <div className="space-y-1 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-              <Link
-                href="/admissao/processo"
-                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Processo de Admissão
-              </Link>
-              <Link
-                href="/admissao/requisitos"
-                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Requisitos
-              </Link>
-              <Link
-                href="/admissao/taxas"
-                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Taxas e Propinas
-              </Link>
-            </div>
-            <Link
-              href="/professores"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Professores
-            </Link>
-            <Link
-              href="/contacto"
-              className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-blue-800 dark:hover:text-blue-400 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contacto
-            </Link>
-          </div>
-          <div className="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-center space-x-4 px-4">
-              <Link href="/portal" onClick={() => setIsMenuOpen(false)}>
-                <Button
-                  variant="outline"
-                  className="w-full border-blue-800 text-blue-800 hover:bg-blue-800 hover:text-white"
-                >
-                  Portal do Aluno
-                </Button>
-              </Link>
-              <Link href="/admissao" onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full bg-blue-800 hover:bg-blue-700">Inscreva-se</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
+    </nav>
   )
 }
-
-export default Navbar
