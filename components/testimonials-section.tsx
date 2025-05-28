@@ -49,7 +49,7 @@ const testimonials = [
   },
 ]
 
-export default function TestimonialsSection() {
+export function TestimonialsSection() {
   const [activeIndex, setActiveIndex] = useState(0)
 
   const next = () => {

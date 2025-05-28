@@ -55,6 +55,7 @@
     "expo-gl": "latest",
     "framer-motion": "latest",
     "input-otp": "1.4.1",
+    "jsonwebtoken": "latest",
     "jspdf": "latest",
     "lucide-react": "^0.454.0",
     "nanoid": "latest",
@@ -74,7 +75,7 @@
     "three": "latest",
     "uuid": "latest",
     "vaul": "^0.9.6",
-    "zod": "^3.24.1"
+    "zod": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",

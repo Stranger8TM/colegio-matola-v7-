@@ -19,19 +19,22 @@ import {
   LogOut,
   Search,
   Plus,
-  Trash2,
-  Edit,
   CheckCircle,
   AlertCircle,
   Clock,
   DollarSign,
+  Activity,
 } from "lucide-react"
+import Admin3DBackground from "@/components/admin-3d-background"
+import AdminEntranceAnimation from "@/components/admin-entrance-animation"
+import { motion } from "framer-motion"
 
 export default function AdminDashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("dashboard")
   const [searchQuery, setSearchQuery] = useState("")
+  const [showAnimation, setShowAnimation] = useState(true)
 
   // Dados simulados
   const stats = {
@@ -89,28 +92,6 @@ export default function AdminDashboard() {
     { id: 5, name: "Eduardo Tembe", class: "8ª Classe", status: "Pendente", photo: "/avatar-5.jpg" },
   ]
 
-  const teachers = [
-    { id: 1, name: "Prof. Gabriel Matola", subject: "Matemática", photo: "/teacher-gabriel.jpg" },
-    { id: 2, name: "Profa. Maria Joaquim", subject: "Português", photo: "/teacher-maria.jpg" },
-    { id: 3, name: "Prof. António Mabjaia", subject: "Física", photo: "/avatar-3.jpg" },
-    { id: 4, name: "Profa. Carla Sitoe", subject: "Biologia", photo: "/avatar-4.jpg" },
-    { id: 5, name: "Prof. Dinis Cossa", subject: "História", photo: "/avatar-5.jpg" },
-  ]
-
-  const courses = [
-    { id: 1, name: "Ensino Primário", students: 450, classes: 15 },
-    { id: 2, name: "Ensino Secundário Geral", students: 580, classes: 18 },
-    { id: 3, name: "Ensino Técnico-Profissional", students: 220, classes: 9 },
-  ]
-
-  const documents = [
-    { id: 1, name: "Calendário Escolar 2023", type: "PDF", size: "2.4 MB", date: "15/01/2023" },
-    { id: 2, name: "Regulamento Interno", type: "DOCX", size: "1.8 MB", date: "10/02/2023" },
-    { id: 3, name: "Plano Curricular", type: "PDF", size: "3.2 MB", date: "05/03/2023" },
-    { id: 4, name: "Lista de Material Escolar", type: "XLSX", size: "1.1 MB", date: "20/01/2023" },
-    { id: 5, name: "Horários das Turmas", type: "PDF", size: "4.5 MB", date: "12/02/2023" },
-  ]
-
   const upcomingEvents = [
     { id: 1, name: "Reunião de Professores", date: "15/05/2023", time: "14:00", location: "Sala de Conferências" },
     { id: 2, name: "Feira de Ciências", date: "22/05/2023", time: "09:00", location: "Pátio Central" },
@@ -123,30 +104,44 @@ export default function AdminDashboard() {
       setLoading(false)
     }, 1000)
 
-    return () => clearTimeout(timer)
+    // Simulação da animação de entrada
+    const animationTimer = setTimeout(() => {
+      setShowAnimation(false)
+    }, 3000)
+
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(animationTimer)
+    }
   }, [])
 
-  if (loading) {
+  if (loading || showAnimation) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800 mx-auto mb-4"></div>
-          <p className="text-gray-700 dark:text-gray-300">Carregando painel administrativo...</p>
-        </div>
+        {showAnimation ? (
+          <AdminEntranceAnimation />
+        ) : (
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800 mx-auto mb-4"></div>
+            <p className="text-gray-700 dark:text-gray-300">Carregando painel administrativo...</p>
+          </div>
+        )}
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 relative">
+      <Admin3DBackground />
+
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+        <aside className="hidden lg:flex lg:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-10">
           <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 px-4">
             <div className="flex items-center space-x-2">
               <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded" />
               <div>
-                <h2 className="text-lg font-bold text-blue-900 dark:text-blue-400">Escola Privada</h2>
+                <h2 className="text-lg font-bold text-blue-900 dark:text-blue-400">Colégio Matola</h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Painel Administrativo</p>
               </div>
             </div>
@@ -233,6 +228,17 @@ export default function AdminDashboard() {
                 <Settings className="mr-2 h-5 w-5" />
                 Configurações
               </Button>
+              <Button
+                variant={activeTab === "logs" ? "default" : "ghost"}
+                className={`w-full justify-start rounded-lg py-2.5 ${
+                  activeTab === "logs" ? "bg-blue-800 text-white" : ""
+                }`}
+                onClick={() => setActiveTab("logs")}
+              >
+                <Activity className="mr-2 h-5 w-5" />
+                Logs do Sistema
+                <span className="ml-2 px-1.5 py-0.5 text-xs bg-yellow-500 text-white rounded">Beta</span>
+              </Button>
             </nav>
             <div className="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
               <Button variant="outline" className="w-full justify-start" onClick={() => router.push("/")}>
@@ -246,7 +252,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top Navigation */}
-          <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+          <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-10">
             <div className="flex items-center justify-between h-16 px-4 md:px-6">
               <div className="flex items-center lg:hidden">
                 <Button variant="ghost" size="icon" className="mr-2">
@@ -303,7 +309,12 @@ export default function AdminDashboard() {
           {/* Main Content Area */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-100 dark:bg-gray-900">
             {activeTab === "dashboard" && (
-              <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
                 <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
                   <div className="flex items-center space-x-2">
@@ -526,13 +537,18 @@ export default function AdminDashboard() {
                         <CardTitle>Professores</CardTitle>
                         <CardDescription>Corpo docente da escola</CardDescription>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => setActiveTab("teachers")}>
                         Ver Todos
                       </Button>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {teachers.slice(0, 4).map((teacher) => (
+                        {[
+                          { id: 1, name: "Prof. Gabriel Matola", subject: "Matemática", photo: "/teacher-gabriel.jpg" },
+                          { id: 2, name: "Profa. Maria Joaquim", subject: "Português", photo: "/teacher-maria.jpg" },
+                          { id: 3, name: "Prof. António Mabjaia", subject: "Física", photo: "/avatar-3.jpg" },
+                          { id: 4, name: "Profa. Carla Sitoe", subject: "Biologia", photo: "/avatar-4.jpg" },
+                        ].map((teacher) => (
                           <div key={teacher.id} className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               <Avatar>
@@ -554,11 +570,16 @@ export default function AdminDashboard() {
                     </CardContent>
                   </Card>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {activeTab === "students" && (
-              <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
                 <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Alunos</h1>
                   <div className="flex items-center space-x-2">
@@ -568,127 +589,133 @@ export default function AdminDashboard() {
                     </Button>
                   </div>
                 </div>
-
-                <Card className="border-0 shadow-md">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle>Lista de Alunos</CardTitle>
-                        <CardDescription>Gerencie todos os alunos matriculados</CardDescription>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="relative">
-                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                          <input
-                            type="search"
-                            placeholder="Pesquisar alunos..."
-                            className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                        <Button variant="outline">
-                          <FileText className="mr-2 h-4 w-4" />
-                          Exportar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              Nome
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              Classe
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              Data de Matrícula
-                            </th>
-                            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                              Ações
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {students.map((student) => (
-                            <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <Avatar className="h-8 w-8 mr-3">
-                                    <AvatarImage src={student.photo || "/placeholder.svg"} alt={student.name} />
-                                    <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                      {student.name}
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">ID: #{student.id}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900 dark:text-gray-100">{student.class}</div>
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap">
-                                <span
-                                  className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                                    student.status === "Ativo"
-                                      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                      : "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300"
-                                  }`}
-                                >
-                                  {student.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                01/02/2023
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div className="flex justify-end space-x-2">
-                                  <Button variant="ghost" size="sm">
-                                    <Edit className="h-4 w-4" />
-                                    <span className="sr-only">Editar</span>
-                                  </Button>
-                                  <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-800">
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Excluir</span>
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="flex items-center justify-between mt-6">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Mostrando <span className="font-medium">1</span> a{" "}
-                        <span className="font-medium">{students.length}</span> de{" "}
-                        <span className="font-medium">{stats.totalStudents}</span> alunos
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm" disabled>
-                          Anterior
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Próximo
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                {/* Conteúdo da aba de alunos */}
+                <p>Conteúdo da gestão de alunos será implementado em breve.</p>
+              </motion.div>
             )}
 
-            {/* Outros tabs seriam implementados de forma similar */}
+            {activeTab === "teachers" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Professores</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Professor
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de professores */}
+                <p>Conteúdo da gestão de professores será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "courses" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Cursos</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Curso
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de cursos */}
+                <p>Conteúdo da gestão de cursos será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "calendar" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Calendário Escolar</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Evento
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de calendário */}
+                <p>Conteúdo do calendário escolar será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "reports" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Relatórios</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Exportar Relatórios
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de relatórios */}
+                <p>Conteúdo de relatórios será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "settings" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Configurações</h1>
+                </div>
+                {/* Conteúdo da aba de configurações */}
+                <p>Conteúdo de configurações será implementado em breve.</p>
+              </motion.div>
+            )}
+
+            {activeTab === "logs" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Logs do Sistema</h1>
+                  <div className="flex items-center space-x-2">
+                    <Button className="bg-blue-800 hover:bg-blue-700">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Exportar Logs
+                    </Button>
+                  </div>
+                </div>
+                {/* Conteúdo da aba de logs */}
+                <p>Conteúdo de logs do sistema será implementado em breve.</p>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

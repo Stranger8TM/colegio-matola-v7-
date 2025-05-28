@@ -97,14 +97,14 @@ const galleryImages = [
   },
 ]
 
-export default function GallerySection() {
+export function GallerySection() {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   const [filter, setFilter] = useState("Nosso Colégio")
 
   const filteredImages = filter === "Todos" ? galleryImages : galleryImages.filter((img) => img.category === filter)
 
   return (
-    <section className="py-24 bg-white dark:bg-gray-800">
+    <section className="py-24 bg-white dark:bg-gray-800 relative overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.div
@@ -149,10 +149,12 @@ export default function GallerySection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setFilter(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 filter === category
-                  ? "bg-blue-800 text-white"
+                  ? "bg-blue-800 text-white shadow-lg"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
               }`}
             >
@@ -166,16 +168,26 @@ export default function GallerySection() {
           {filteredImages.map((image, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              initial={{ opacity: 0, scale: 0.9, rotateY: -10 }}
+              whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              whileHover={{ scale: 1.03 }}
+              whileHover={{
+                scale: 1.03,
+                rotateY: 5,
+                z: 50,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              }}
               className="relative overflow-hidden rounded-2xl cursor-pointer group h-64"
               onClick={() => setSelectedImage(index)}
             >
               <div className="h-full w-full relative">
-                <Image src={image.src || "/placeholder.svg"} alt={image.alt} fill className="object-cover" />
+                <Image
+                  src={image.src || "/placeholder.svg"}
+                  alt={image.alt}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                   <span className="inline-block px-3 py-1 bg-blue-800 rounded-full text-xs font-medium mb-2">
@@ -190,30 +202,43 @@ export default function GallerySection() {
 
         {/* Modal de visualização */}
         {selectedImage !== null && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          >
             <button
               onClick={() => setSelectedImage(null)}
-              className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors"
+              className="absolute top-6 right-6 text-white hover:text-gray-300 transition-colors z-10"
             >
               <X className="h-8 w-8" />
             </button>
 
-            <div className="relative max-w-4xl w-full max-h-[80vh]">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative max-w-4xl w-full max-h-[80vh]"
+            >
               <Image
                 src={filteredImages[selectedImage].src || "/placeholder.svg"}
                 alt={filteredImages[selectedImage].alt}
                 width={1200}
                 height={800}
-                className="object-contain max-h-[80vh] w-auto mx-auto"
+                className="object-contain max-h-[80vh] w-auto mx-auto rounded-lg"
               />
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white">
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 text-white rounded-b-lg">
                 <p className="font-medium text-lg">{filteredImages[selectedImage].alt}</p>
                 <p className="text-sm text-gray-300">{filteredImages[selectedImage].category}</p>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
       </div>
     </section>
   )
 }
+
+// Exportação padrão para compatibilidade
+export default GallerySection

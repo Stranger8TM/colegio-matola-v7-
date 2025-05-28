@@ -3,185 +3,204 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ArrowRight, Calendar, Phone } from "lucide-react"
+import { ArrowRight, Play, Users, Award, BookOpen, Star } from "lucide-react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import Hero3DBackground from "./hero-3d-background"
 
-// Imagens para o slider
-const sliderImages = [
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%2810%29.jpg-92ZvRMQZT3rb6QK76LnvEqocA6w6rj.jpeg",
-    alt: "Refeitório do colégio",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%286%29.jpg-AW4dpVszTS6olBGzEDrg7FxM5ffEd1.jpeg",
-    alt: "Biblioteca moderna",
-  },
-  {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/nossocolegio%20%287%29.jpg-Do5TcvdtaxKrkLBBQztFcnVIFm52yX.jpeg",
-    alt: "Ginásio poliesportivo",
-  },
+const heroImages = ["/hero-1.jpg", "/hero-2.jpg", "/hero-3.jpg"]
+
+const stats = [
+  { icon: Users, value: "1200+", label: "Alunos" },
+  { icon: Award, value: "15+", label: "Anos de Excelência" },
+  { icon: BookOpen, value: "50+", label: "Cursos" },
+  { icon: Star, value: "98%", label: "Taxa de Aprovação" },
 ]
 
-export default function HeroSection() {
-  const [currentSlide, setCurrentSlide] = useState(0)
+export function HeroSection() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 500], [0, 150])
+  const opacity = useTransform(scrollY, [0, 300], [1, 0])
 
-  // Efeito para alternar os slides automaticamente
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev === sliderImages.length - 1 ? 0 : prev + 1))
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length)
     }, 5000)
     return () => clearInterval(interval)
   }, [])
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 overflow-hidden">
-      {/* Background com efeito parallax */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-blue-900/10 dark:bg-blue-900/30 z-10"></div>
-        {sliderImages.map((image, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: currentSlide === index ? 1 : 0,
-              scale: currentSlide === index ? 1.05 : 1,
-            }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
-            <Image
-              src={image.src || "/placeholder.svg"}
-              alt={image.alt}
-              fill
-              priority={index === 0}
-              className="object-cover"
-            />
-          </motion.div>
-        ))}
-      </div>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+      {/* Fundo 3D */}
+      <Hero3DBackground />
 
-      {/* Indicadores de slide */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
-        {sliderImages.map((_, index) => (
-          <button
+      {/* Imagem de fundo com parallax */}
+      <motion.div className="absolute inset-0 z-10" style={{ y }}>
+        <div className="relative w-full h-full">
+          {heroImages.map((image, index) => (
+            <motion.div
+              key={image}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: index === currentImageIndex ? 0.3 : 0,
+                scale: index === currentImageIndex ? 1.05 : 1,
+              }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+            >
+              <Image
+                src={image || "/placeholder.svg"}
+                alt={`Hero ${index + 1}`}
+                fill
+                className="object-cover"
+                priority={index === 0}
+              />
+            </motion.div>
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 via-blue-800/60 to-transparent" />
+      </motion.div>
+
+      {/* Conteúdo principal */}
+      <motion.div className="relative z-20 container mx-auto px-4 text-center text-white" style={{ opacity }}>
+        <div className="max-w-4xl mx-auto">
+          {/* Título principal com animação */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="mb-8"
+          >
+            <motion.h1
+              className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              Colégio Privado Matola
+            </motion.h1>
+
+            <motion.p
+              className="text-xl md:text-2xl mb-4 text-blue-100"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              Excelência em Educação desde 2008
+            </motion.p>
+
+            <motion.p
+              className="text-lg md:text-xl text-blue-200 max-w-2xl mx-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.7 }}
+            >
+              Formando líderes do futuro com educação de qualidade, tecnologia avançada e valores sólidos na Rua da
+              Mozal, Matola.
+            </motion.p>
+          </motion.div>
+
+          {/* Botões de ação */}
+          <motion.div
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.9 }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                asChild
+                size="lg"
+                className="bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-semibold px-8 py-4 text-lg shadow-2xl"
+              >
+                <Link href="/admissao">
+                  Inscreva-se Agora
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-2 border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 text-lg backdrop-blur-sm"
+              >
+                <Link href="/cursos">
+                  <Play className="mr-2 h-5 w-5" />
+                  Conheça Nossos Cursos
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Estatísticas animadas */}
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.1 }}
+          >
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                className="text-center p-4 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 1.2 + index * 0.1 }}
+                whileHover={{
+                  scale: 1.05,
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                }}
+              >
+                <motion.div initial={{ rotateY: 0 }} whileHover={{ rotateY: 360 }} transition={{ duration: 0.6 }}>
+                  <stat.icon className="h-8 w-8 mx-auto mb-2 text-yellow-400" />
+                </motion.div>
+                <motion.div
+                  className="text-2xl md:text-3xl font-bold text-white mb-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 1.4 + index * 0.1 }}
+                >
+                  {stat.value}
+                </motion.div>
+                <div className="text-sm text-blue-200">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* Indicadores de imagem */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-2">
+        {heroImages.map((_, index) => (
+          <motion.button
             key={index}
-            onClick={() => setCurrentSlide(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              currentSlide === index ? "bg-white w-10" : "bg-white/50"
+              index === currentImageIndex ? "bg-yellow-400 scale-125" : "bg-white/50"
             }`}
-            aria-label={`Ir para slide ${index + 1}`}
+            onClick={() => setCurrentImageIndex(index)}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
           />
         ))}
       </div>
 
-      {/* Conteúdo principal */}
-      <div className="relative z-10 container mx-auto px-4 pt-40 pb-32 flex flex-col lg:flex-row items-center">
-        <div className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <div className="inline-flex items-center bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 px-4 py-1 rounded-full text-sm font-medium mb-6">
-              <span className="flex h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 mr-2"></span>
-              Matrículas Abertas 2025
-            </div>
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-blue-900 dark:text-white mb-6 leading-tight">
-              Educação que <span className="text-yellow-500">transforma</span> o futuro
-            </h1>
-
-            <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 mb-8 max-w-xl">
-              No Colégio Privado da Matola, formamos líderes com excelência acadêmica, valores éticos e preparação para
-              os desafios globais desde 2017.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-blue-800 hover:bg-blue-700 text-white px-8 py-6 text-lg rounded-xl">
-                <Calendar className="mr-2 h-5 w-5" />
-                Agende uma Visita
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-blue-800 text-blue-800 dark:text-white dark:border-white hover:bg-blue-800/10 px-8 py-6 text-lg rounded-xl"
-              >
-                <Phone className="mr-2 h-5 w-5" />
-                Fale Conosco
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Card flutuante com logo e informações */}
-        <div className="lg:w-1/2 flex justify-center">
+      {/* Scroll indicator */}
+      <motion.div
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+      >
+        <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative"
-          >
-            <div className="absolute -top-12 -left-12 w-24 h-24 bg-yellow-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <div className="text-blue-900 font-bold text-2xl">CPM</div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-8 max-w-md">
-              <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-400 mb-4">
-                Por que escolher o Colégio Privado da Matola?
-              </h3>
-
-              <ul className="space-y-4 mb-6">
-                {[
-                  "Corpo docente altamente qualificado",
-                  "Infraestrutura moderna e segura",
-                  "Metodologia de ensino inovadora",
-                  "Formação bilíngue (Português e Inglês)",
-                  "Atividades extracurriculares diversificadas",
-                ].map((item, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                    className="flex items-start"
-                  >
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mt-0.5 mr-3">
-                      <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="text-gray-700 dark:text-gray-300">{item}</span>
-                  </motion.li>
-                ))}
-              </ul>
-
-              <Link href="/admissao">
-                <Button className="w-full bg-gradient-to-r from-blue-800 to-blue-600 hover:from-blue-700 hover:to-blue-500 text-white rounded-xl py-6">
-                  Processo de Admissão
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
+            className="w-1 h-3 bg-white/70 rounded-full mt-2"
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+          />
         </div>
-      </div>
-
-      {/* Parceiros e reconhecimentos */}
-      <div className="relative z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-6 border-t border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <p className="text-gray-600 dark:text-gray-400 font-medium mb-4 md:mb-0">Reconhecido por:</p>
-            <div className="flex flex-wrap justify-center gap-8">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="grayscale hover:grayscale-0 transition-all duration-300">
-                  <Image
-                    src={`/partner-${i}.png`}
-                    alt={`Parceiro ${i}`}
-                    width={120}
-                    height={40}
-                    className="h-10 w-auto object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

@@ -51,9 +51,9 @@ const features = [
   },
 ]
 
-export default function FeaturesSection() {
+export function FeaturesSection() {
   return (
-    <section className="py-24 bg-gray-50 dark:bg-gray-900">
+    <section className="py-24 bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.div
@@ -93,26 +93,35 @@ export default function FeaturesSection() {
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              initial={{ opacity: 0, y: 30, rotateY: -15 }}
+              whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
-              whileHover={{ y: -10 }}
+              whileHover={{
+                y: -10,
+                rotateY: 5,
+                scale: 1.02,
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              }}
             >
-              <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white dark:bg-gray-800 rounded-2xl">
+              <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-500 border-0 bg-white dark:bg-gray-800 rounded-2xl group">
                 <div className="relative h-56 w-full overflow-hidden">
                   <Image
                     src={feature.image || "/placeholder.svg?height=300&width=400"}
                     alt={feature.title}
                     fill
-                    className="object-cover transition-transform duration-700 hover:scale-110"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-lg">
+                      <motion.div
+                        className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-lg"
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         {feature.icon}
-                      </div>
+                      </motion.div>
                       <h3 className="text-xl font-bold text-white">{feature.title}</h3>
                     </div>
                   </div>
@@ -128,3 +137,6 @@ export default function FeaturesSection() {
     </section>
   )
 }
+
+// Exportação padrão para compatibilidade
+export default FeaturesSection
