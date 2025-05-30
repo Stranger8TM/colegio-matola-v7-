@@ -12,6 +12,9 @@ const nextConfig = {
     domains: ['localhost', 'vercel.app'],
     unoptimized: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client', 'prisma']
+  },
   webpack: (config, { isServer }) => {
     // Fix for crypto-browserify and stream-browserify
     if (!isServer) {
@@ -40,6 +43,10 @@ const nextConfig = {
       );
     }
 
+    if (isServer) {
+      config.externals.push('@prisma/client')
+    }
+
     // Optimize bundle size
     config.optimization = {
       ...config.optimization,
@@ -66,6 +73,9 @@ const nextConfig = {
     };
 
     return config;
+  },
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 };
 
