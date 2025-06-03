@@ -108,3 +108,5 @@ export function MaintenancePopup({
     </div>
   )
 }
+
+export default MaintenancePopup

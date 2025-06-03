@@ -1,20 +1,19 @@
+// app/ClientLayout.tsx
 "use client"
 
 import type React from "react"
 
-import { useEffect } from "react"
+import { IntroAnimationWrapper } from "@/components/intro-animation-wrapper"
 import { MaintenancePopup } from "@/components/maintenance-popup"
-import { setupErrorHandler } from "@/lib/error-handler"
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    // Inicializar o detector de erros
-    setupErrorHandler()
-  }, [])
+interface ClientLayoutProps {
+  children: React.ReactNode
+}
 
+export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
     <>
-      {children}
+      <IntroAnimationWrapper>{children}</IntroAnimationWrapper>
       <MaintenancePopup />
     </>
   )

@@ -115,3 +115,4 @@ export function IntroAnimationWrapper({ children }: IntroAnimationWrapperProps) 
 }
 
 // Também exportamos como uma exportação nomeada para compatibilidade com código existente
+export default IntroAnimationWrapper
