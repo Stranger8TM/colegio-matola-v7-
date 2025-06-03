@@ -14,18 +14,12 @@ export interface BaseUser {
 export interface Student extends BaseUser {
   class: string
   grade: string
-  parentName?: string
-  parentContact?: string
-  enrollmentDate: Date
-  status: "active" | "inactive" | "suspended"
+  status: "active" | "inactive"
 }
 
 // Professor
 export interface Teacher extends BaseUser {
   subject: string
-  bio?: string
-  qualifications?: string[]
-  hireDate: Date
   status: "active" | "inactive"
 }
 
@@ -40,12 +34,13 @@ export interface Material {
   id: string
   title: string
   description?: string
-  subject: string
-  fileUrl: string
-  classTarget: string
+  type: "pdf" | "video" | "image" | "document"
+  url: string
   teacherId: string
-  uploadDate: Date
-  downloads: number
+  subject: string
+  grade: string
+  createdAt: string
+  updatedAt: string
 }
 
 // Aula gravada
@@ -142,28 +137,49 @@ export interface LessonProgress {
   updatedAt: Date
 }
 
-// Resposta padrão da API
+// Tipos para as respostas da API
 export interface ApiResponse<T> {
   success: boolean
   data?: T
   error?: string
   message?: string
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
 }
 
-// Parâmetros de paginação
-export interface PaginationParams {
-  page?: number
-  limit?: number
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
-}
-
-// Parâmetros de filtro
-export interface FilterParams {
-  search?: string
+// Tipos para autenticação
+export interface AuthUser {
+  id: string
+  name: string
+  email: string
+  role: "admin" | "teacher" | "student"
+  profileImage?: string
   class?: string
+  grade?: string
   subject?: string
-  startDate?: Date
-  endDate?: Date
-  status?: string
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+export interface LoginResponse {
+  user: AuthUser
+  token: string
+}
+
+// Tipos para presença
+export interface AttendanceRecord {
+  id: string
+  studentId: string
+  date: string
+  status: "present" | "absent" | "late" | "excused"
+  notes?: string
+  createdAt: string
+  updatedAt: string
 }
