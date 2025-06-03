@@ -1,200 +1,117 @@
-import { compare } from "bcryptjs"
-import { sign, verify } from "jsonwebtoken"
-import PrismaService from "./prisma-service"
+import prisma from "./prisma"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+
+export interface LoginCredentials {
+  email: string
+  password: string
+}
 
 export interface AuthUser {
   id: string
-  name: string
   email: string
+  name: string
   role: string
-  profileImage?: string
-  class?: string
-  grade?: string
-  subject?: string
 }
 
-export interface LoginResult {
+export interface AuthResponse {
   success: boolean
   user?: AuthUser
   token?: string
-  error?: string
   message?: string
-  isMock?: boolean
 }
 
 export class AuthService {
-  static async login(username: string, password: string): Promise<LoginResult> {
+  private static readonly JWT_SECRET = process.env.JWT_SECRET || "fallback-secret-key"
+  private static readonly JWT_EXPIRES_IN = "7d"
+
+  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      // Validar dados obrigatórios
-      if (!username || !password) {
-        return {
-          success: false,
-          error: "Dados inválidos",
-          message: "Nome de usuário e senha são obrigatórios",
-        }
-      }
+      const { email, password } = credentials
 
-      let user = null
-      let isMock = false
-
-      // Tentar obter o prisma client
-      const prisma = PrismaService.getInstance()
-
-      // Se o prisma estiver disponível, buscar o usuário no banco
-      if (prisma) {
-        try {
-          user = await prisma.user.findUnique({
-            where: { username },
-          })
-        } catch (dbError) {
-          console.error("Erro ao buscar usuário no banco:", dbError)
-          // Fallback para dados mock em caso de erro
-          user = this.getMockUser(username)
-          isMock = true
-        }
-      } else {
-        // Se o prisma não estiver disponível, usar dados mock
-        user = this.getMockUser(username)
-        isMock = true
-      }
+      // Buscar usuário no banco de dados (mock)
+      const user = await prisma.user.findUnique({
+        where: { email },
+      })
 
       if (!user) {
         return {
           success: false,
-          error: "Credenciais inválidas",
-          message: "Nome de usuário ou senha incorretos",
+          message: "Credenciais inválidas",
         }
       }
 
-      // Verificar a senha
-      const passwordMatch = await compare(password, user.password)
+      // Verificar senha (para dados mock, comparação direta)
+      const isValidPassword =
+        password === user.password || (await bcrypt.compare(password, user.password).catch(() => false))
 
-      if (!passwordMatch) {
+      if (!isValidPassword) {
         return {
           success: false,
-          error: "Credenciais inválidas",
-          message: "Nome de usuário ou senha incorretos",
-        }
-      }
-
-      // Verificar se o usuário está ativo
-      if (user.status === "inactive") {
-        return {
-          success: false,
-          error: "Conta inativa",
-          message: "Sua conta está inativa. Entre em contato com a administração.",
+          message: "Credenciais inválidas",
         }
       }
 
       // Gerar token JWT
-      const token = sign(
+      const token = jwt.sign(
         {
-          id: user.id,
-          name: user.name,
+          userId: user.id,
           email: user.email,
           role: user.role,
         },
-        process.env.JWT_SECRET || "secret",
-        { expiresIn: "1d" },
+        this.JWT_SECRET,
+        { expiresIn: this.JWT_EXPIRES_IN },
       )
-
-      // Dados do usuário para retornar
-      const userData: AuthUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileImage: user.profileImage,
-      }
-
-      // Se for aluno, adicionar dados específicos
-      if (user.role === "student") {
-        userData.class = user.class
-        userData.grade = user.grade
-      }
-
-      // Se for professor, adicionar dados específicos
-      if (user.role === "teacher" && !isMock && prisma) {
-        try {
-          const teacher = await prisma.teacher.findUnique({
-            where: { id: user.id },
-          })
-
-          if (teacher) {
-            userData.subject = teacher.subject
-          }
-        } catch (error) {
-          console.error("Erro ao buscar dados do professor:", error)
-          // Continuar sem os dados adicionais
-        }
-      } else if (user.role === "teacher" && isMock) {
-        userData.subject = "Matemática"
-      }
 
       return {
         success: true,
-        user: userData,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
         token,
-        message: "Login realizado com sucesso",
-        ...(isMock && { isMock: true }),
       }
     } catch (error) {
-      console.error("Error during login:", error)
+      console.error("Erro no login:", error)
       return {
         success: false,
-        error: "Falha na autenticação",
-        message: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
+        message: "Erro interno do servidor",
       }
     }
   }
 
-  static verifyToken(token: string): AuthUser | null {
+  static async verifyToken(token: string): Promise<AuthUser | null> {
     try {
-      const decoded = verify(token, process.env.JWT_SECRET || "secret")
-      return decoded as AuthUser
+      const decoded = jwt.verify(token, this.JWT_SECRET) as any
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+      })
+
+      if (!user) {
+        return null
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      }
     } catch (error) {
+      console.error("Erro na verificação do token:", error)
       return null
     }
   }
 
-  private static getMockUser(username: string) {
-    if (username === "admin") {
-      return {
-        id: "mock-admin-id",
-        name: "Admin User",
-        email: "admin@colegiomatola.com",
-        username: "admin",
-        password: "$2a$10$XOPbrlUPQdwdJUpSrIF6X.LbE14qsMmKGhM1A8W9iqaG3vv1BD7WC", // hash para "admin123"
-        profileImage: "/avatar-1.jpg",
-        role: "admin",
-        status: "active",
-      }
-    } else if (username === "teacher") {
-      return {
-        id: "mock-teacher-id",
-        name: "Teacher User",
-        email: "teacher@colegiomatola.com",
-        username: "teacher",
-        password: "$2a$10$XOPbrlUPQdwdJUpSrIF6X.LbE14qsMmKGhM1A8W9iqaG3vv1BD7WC", // hash para "teacher123"
-        profileImage: "/teacher-gabriel.jpg",
-        role: "teacher",
-        status: "active",
-      }
-    } else if (username === "student") {
-      return {
-        id: "mock-student-id",
-        name: "Student User",
-        email: "student@colegiomatola.com",
-        username: "student",
-        password: "$2a$10$XOPbrlUPQdwdJUpSrIF6X.LbE14qsMmKGhM1A8W9iqaG3vv1BD7WC", // hash para "student123"
-        profileImage: "/avatar-2.jpg",
-        role: "student",
-        status: "active",
-        class: "10A",
-        grade: "10",
-      }
+  static async hashPassword(password: string): Promise<string> {
+    try {
+      return await bcrypt.hash(password, 12)
+    } catch (error) {
+      console.error("Erro ao hash da senha:", error)
+      return password // Fallback para desenvolvimento
     }
-
-    return null
   }
 }
