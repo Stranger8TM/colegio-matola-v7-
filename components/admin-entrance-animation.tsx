@@ -1,74 +1,66 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
-export default function AdminEntranceAnimation() {
-  const [showAnimation, setShowAnimation] = useState(true)
-  const router = useRouter()
+export function AdminEntranceAnimation() {
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAnimation(false)
-    }, 2500)
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval)
+          return 100
+        }
+        return prev + 2
+      })
+    }, 50)
 
-    return () => clearTimeout(timer)
+    return () => clearInterval(interval)
   }, [])
 
-  if (!showAnimation) return null
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900">
-      <div className="relative w-full max-w-md">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-            className="text-4xl font-bold text-white mb-2"
-          >
-            Painel Administrativo
-          </motion.div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 to-purple-900">
+      {/* Logo animado */}
+      <div className="mb-8 relative">
+        <div className="w-24 h-24 bg-yellow-500 rounded-2xl flex items-center justify-center text-blue-900 font-bold text-3xl shadow-2xl transform hover:scale-110 transition-transform duration-300">
+          CPM
+        </div>
+        <div className="absolute -inset-4 bg-yellow-400 rounded-3xl opacity-20 animate-ping"></div>
+      </div>
 
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.7 }}
-            className="text-xl text-yellow-300"
-          >
-            Colégio Privado da Matola
-          </motion.div>
-        </motion.div>
+      {/* Título */}
+      <h1 className="text-4xl font-bold text-white mb-2 text-center">Colégio Privado da Matola</h1>
+      <p className="text-xl text-blue-200 mb-8 text-center">Painel Administrativo</p>
 
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.8, duration: 0.7 }}
-          className="h-1 bg-yellow-400 mt-6"
-        />
+      {/* Barra de progresso */}
+      <div className="w-80 bg-gray-700 rounded-full h-2 mb-4">
+        <div
+          className="bg-yellow-500 h-2 rounded-full transition-all duration-300 ease-out"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
-          className="mt-6 text-center text-white"
-        >
-          Carregando recursos...
-        </motion.div>
+      {/* Texto de carregamento */}
+      <p className="text-blue-200 text-sm">
+        {progress < 30 && "Inicializando sistema..."}
+        {progress >= 30 && progress < 60 && "Carregando dados..."}
+        {progress >= 60 && progress < 90 && "Preparando interface..."}
+        {progress >= 90 && "Quase pronto!"}
+      </p>
 
-        <motion.div
-          initial={{ width: "0%" }}
-          animate={{ width: "100%" }}
-          transition={{ delay: 1.5, duration: 1 }}
-          className="h-1 bg-blue-400 mt-4"
-        />
+      {/* Indicadores de carregamento */}
+      <div className="flex space-x-2 mt-6">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="w-3 h-3 bg-yellow-500 rounded-full animate-bounce"
+            style={{ animationDelay: `${i * 0.2}s` }}
+          ></div>
+        ))}
       </div>
     </div>
   )
 }
+
+export default AdminEntranceAnimation

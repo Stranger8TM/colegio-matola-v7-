@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -27,7 +26,6 @@ import {
 } from "lucide-react"
 import Admin3DBackground from "@/components/admin-3d-background"
 import AdminEntranceAnimation from "@/components/admin-entrance-animation"
-import { motion } from "framer-motion"
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -139,7 +137,9 @@ export default function AdminDashboard() {
         <aside className="hidden lg:flex lg:flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-10">
           <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 px-4">
             <div className="flex items-center space-x-2">
-              <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded" />
+              <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center text-blue-900 font-bold">
+                CPM
+              </div>
               <div>
                 <h2 className="text-lg font-bold text-blue-900 dark:text-blue-400">Colégio Matola</h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Painel Administrativo</p>
@@ -273,7 +273,9 @@ export default function AdminDashboard() {
                     <line x1="4" x2="20" y1="18" y2="18" />
                   </svg>
                 </Button>
-                <Image src="/logo.png" alt="Logo" width={32} height={32} className="rounded lg:hidden" />
+                <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center text-blue-900 font-bold text-sm lg:hidden">
+                  CPM
+                </div>
               </div>
               <div className="flex-1 px-2 mx-2 lg:ml-6 lg:mr-6">
                 <div className="relative">
@@ -309,12 +311,7 @@ export default function AdminDashboard() {
           {/* Main Content Area */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-100 dark:bg-gray-900">
             {activeTab === "dashboard" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
                   <div className="flex items-center space-x-2">
@@ -373,57 +370,11 @@ export default function AdminDashboard() {
                       </p>
                     </CardContent>
                   </Card>
-                  <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        <span>Turmas Ativas</span>
-                        <BookOpen className="h-5 w-5 text-green-600" />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-green-800 dark:text-green-400">{stats.activeClasses}</div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        <span className="text-green-600 dark:text-green-400">↑ 3%</span> desde o último trimestre
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        <span>Cursos Oferecidos</span>
-                        <BookOpen className="h-5 w-5 text-indigo-600" />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-indigo-800 dark:text-indigo-400">
-                        {stats.totalCourses}
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        <span className="text-blue-600 dark:text-blue-400">→ Estável</span> desde o último ano
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center justify-between">
-                        <span>Receita Mensal</span>
-                        <DollarSign className="h-5 w-5 text-emerald-600" />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-emerald-800 dark:text-emerald-400">
-                        {stats.monthlyRevenue}
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        <span className="text-green-600 dark:text-green-400">↑ 8%</span> desde o mês anterior
-                      </p>
-                    </CardContent>
-                  </Card>
                 </div>
 
-                {/* Recent Activities and Quick Actions */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <Card className="border-0 shadow-md lg:col-span-2">
+                {/* Recent Activities */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="border-0 shadow-md">
                     <CardHeader>
                       <CardTitle>Atividades Recentes</CardTitle>
                       <CardDescription>Últimas ações realizadas no sistema</CardDescription>
@@ -444,11 +395,6 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                         ))}
-                      </div>
-                      <div className="mt-4 text-center">
-                        <Button variant="link" className="text-blue-600 dark:text-blue-400">
-                          Ver todas as atividades
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -480,238 +426,35 @@ export default function AdminDashboard() {
                           </div>
                         ))}
                       </div>
-                      <div className="mt-4 text-center">
-                        <Button variant="outline" className="w-full">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Ver Calendário Completo
-                        </Button>
-                      </div>
                     </CardContent>
                   </Card>
                 </div>
-
-                {/* Students and Teachers */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card className="border-0 shadow-md">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>Alunos Recentes</CardTitle>
-                        <CardDescription>Últimos alunos matriculados</CardDescription>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Ver Todos
-                      </Button>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {students.slice(0, 4).map((student) => (
-                          <div key={student.id} className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Avatar>
-                                <AvatarImage src={student.photo || "/placeholder.svg"} alt={student.name} />
-                                <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{student.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{student.class}</p>
-                              </div>
-                            </div>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full ${
-                                student.status === "Ativo"
-                                  ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                  : "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300"
-                              }`}
-                            >
-                              {student.status}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-0 shadow-md">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>Professores</CardTitle>
-                        <CardDescription>Corpo docente da escola</CardDescription>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => setActiveTab("teachers")}>
-                        Ver Todos
-                      </Button>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {[
-                          { id: 1, name: "Prof. Gabriel Matola", subject: "Matemática", photo: "/teacher-gabriel.jpg" },
-                          { id: 2, name: "Profa. Maria Joaquim", subject: "Português", photo: "/teacher-maria.jpg" },
-                          { id: 3, name: "Prof. António Mabjaia", subject: "Física", photo: "/avatar-3.jpg" },
-                          { id: 4, name: "Profa. Carla Sitoe", subject: "Biologia", photo: "/avatar-4.jpg" },
-                        ].map((teacher) => (
-                          <div key={teacher.id} className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Avatar>
-                                <AvatarImage src={teacher.photo || "/placeholder.svg"} alt={teacher.name} />
-                                <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{teacher.name}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{teacher.subject}</p>
-                              </div>
-                            </div>
-                            <Button variant="ghost" size="sm">
-                              <FileText className="h-4 w-4" />
-                              <span className="sr-only">Ver perfil</span>
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </motion.div>
+              </div>
             )}
 
-            {activeTab === "students" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
+            {/* Outras abas */}
+            {activeTab !== "dashboard" && (
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Alunos</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Aluno
-                    </Button>
-                  </div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 capitalize">
+                    {activeTab === "students" && "Gestão de Alunos"}
+                    {activeTab === "teachers" && "Gestão de Professores"}
+                    {activeTab === "courses" && "Gestão de Cursos"}
+                    {activeTab === "calendar" && "Calendário Escolar"}
+                    {activeTab === "documents" && "Documentos"}
+                    {activeTab === "reports" && "Relatórios"}
+                    {activeTab === "settings" && "Configurações"}
+                    {activeTab === "logs" && "Logs do Sistema"}
+                  </h1>
                 </div>
-                {/* Conteúdo da aba de alunos */}
-                <p>Conteúdo da gestão de alunos será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "teachers" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Professores</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Professor
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de professores */}
-                <p>Conteúdo da gestão de professores será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "courses" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestão de Cursos</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Curso
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de cursos */}
-                <p>Conteúdo da gestão de cursos será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "calendar" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Calendário Escolar</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Evento
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de calendário */}
-                <p>Conteúdo do calendário escolar será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "reports" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Relatórios</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Exportar Relatórios
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de relatórios */}
-                <p>Conteúdo de relatórios será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "settings" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Configurações</h1>
-                </div>
-                {/* Conteúdo da aba de configurações */}
-                <p>Conteúdo de configurações será implementado em breve.</p>
-              </motion.div>
-            )}
-
-            {activeTab === "logs" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Logs do Sistema</h1>
-                  <div className="flex items-center space-x-2">
-                    <Button className="bg-blue-800 hover:bg-blue-700">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Exportar Logs
-                    </Button>
-                  </div>
-                </div>
-                {/* Conteúdo da aba de logs */}
-                <p>Conteúdo de logs do sistema será implementado em breve.</p>
-              </motion.div>
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Conteúdo da seção "{activeTab}" será implementado em breve.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </div>
         </div>
