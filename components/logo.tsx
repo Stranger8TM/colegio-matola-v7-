@@ -1,52 +1,52 @@
 "use client"
-import Link from "next/link"
 import { motion } from "framer-motion"
 
 interface LogoProps {
-  variant?: "default" | "white" | "compact"
   size?: "sm" | "md" | "lg"
+  variant?: "default" | "white"
   withText?: boolean
+  className?: string
 }
 
-export function Logo({ variant = "default", size = "md", withText = true }: LogoProps) {
+export function Logo({ size = "md", variant = "default", withText = true, className = "" }: LogoProps) {
   const sizeClasses = {
-    sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-12 w-12",
+    sm: "w-8 h-8",
+    md: "w-12 h-12",
+    lg: "w-16 h-16",
   }
 
   const textSizeClasses = {
-    sm: "text-lg",
-    md: "text-xl",
+    sm: "text-sm",
+    md: "text-lg",
     lg: "text-2xl",
   }
 
+  const colorClasses = {
+    default: "bg-blue-600 text-white",
+    white: "bg-white text-blue-600",
+  }
+
   const textColorClasses = {
-    default: "text-blue-800 dark:text-blue-400",
+    default: "text-gray-900",
     white: "text-white",
-    compact: "text-blue-800 dark:text-blue-400",
   }
 
   return (
-    <Link href="/" className="flex items-center">
+    <div className={`flex items-center gap-3 ${className}`}>
       <motion.div
-        className={`relative ${sizeClasses[size]} bg-yellow-500 rounded-xl flex items-center justify-center text-blue-900 font-bold overflow-hidden`}
+        className={`${sizeClasses[size]} ${colorClasses[variant]} rounded-lg flex items-center justify-center font-bold shadow-lg`}
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.2 }}
       >
-        <span className="font-bold">CPM</span>
+        CPM
       </motion.div>
-
       {withText && (
-        <motion.span
-          className={`ml-2 font-bold ${textSizeClasses[size]} ${textColorClasses[variant]}`}
-          initial={{ opacity: 0, x: -5 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className={`${textColorClasses[variant]} font-bold ${textSizeClasses[size]}`}>
           Colégio Privado da Matola
-        </motion.span>
+        </div>
       )}
-    </Link>
+    </div>
   )
 }
+
+export default Logo
