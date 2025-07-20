@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { useRouter } from "next/navigation"
 
 const loadingSteps = [
   { text: "Inicializando sistema...", progress: 0 },
@@ -18,9 +17,10 @@ export function AdminEntranceAnimation() {
   const [currentStep, setCurrentStep] = useState(0)
   const [progress, setProgress] = useState(0)
   const [showLogo, setShowLogo] = useState(false)
-  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     setShowLogo(true)
 
     const stepInterval = setInterval(() => {
@@ -48,6 +48,20 @@ export function AdminEntranceAnimation() {
       clearInterval(progressInterval)
     }
   }, [])
+
+  if (!mounted) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+        <div className="text-center">
+          <div className="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center text-blue-900 font-bold text-4xl shadow-2xl mb-8">
+            CPM
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">Colégio Privado da Matola</h1>
+          <p className="text-xl text-blue-200">Painel Administrativo</p>
+        </div>
+      </div>
+    )
+  }
 
   const logoVariants = {
     hidden: { scale: 0, rotate: -180, opacity: 0 },
@@ -96,17 +110,6 @@ export function AdminEntranceAnimation() {
     },
   }
 
-  const progressVariants = {
-    hidden: { scaleX: 0 },
-    visible: {
-      scaleX: progress / 100,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -121,8 +124,8 @@ export function AdminEntranceAnimation() {
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: typeof window !== "undefined" ? Math.random() * window.innerWidth : Math.random() * 1920,
+              y: typeof window !== "undefined" ? Math.random() * window.innerHeight : Math.random() * 1080,
               opacity: 0,
             }}
             animate={{
@@ -204,13 +207,15 @@ export function AdminEntranceAnimation() {
           <p className="text-xl text-blue-200 font-medium">Painel Administrativo</p>
         </motion.div>
 
-        {/* Barra de progresso avançada */}
+        {/* Barra de progresso */}
         <motion.div variants={itemVariants} className="mb-6">
           <div className="relative w-full bg-gray-700/50 rounded-full h-3 overflow-hidden backdrop-blur-sm">
             <motion.div
-              variants={progressVariants}
               className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full relative overflow-hidden"
-              style={{ originX: 0 }}
+              style={{ width: `${progress}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
             >
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50"

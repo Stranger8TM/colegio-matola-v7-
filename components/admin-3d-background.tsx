@@ -1,10 +1,18 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
+import dynamic from "next/dynamic"
 import { useRef, useMemo } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Environment, Float, PerspectiveCamera, Sparkles, Text, MeshDistortMaterial } from "@react-three/drei"
-import { motion } from "framer-motion"
 import type * as THREE from "three"
+
+// Componente 3D carregado dinamicamente apenas no cliente
+const Dynamic3DScene = dynamic(() => import("./admin-3d-scene"), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-gradient-to-br from-blue-900/20 to-purple-900/20" />,
+})
 
 function AdminDashboard3D({ rotation = [0, 0, 0] }) {
   const modelRef = useRef<THREE.Group>(null!)
@@ -218,6 +226,26 @@ function DataStream() {
 }
 
 export function Admin3DBackground() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="fixed inset-0 z-[-1] opacity-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+          {/* Fallback estático para SSR */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-blue-200 dark:bg-blue-800 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute top-1/3 right-20 w-24 h-24 bg-purple-200 dark:bg-purple-800 rounded-full opacity-30"></div>
+          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-yellow-200 dark:bg-yellow-800 rounded-full opacity-15 animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-20 h-20 bg-green-200 dark:bg-green-800 rounded-full opacity-25"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -256,5 +284,3 @@ export function Admin3DBackground() {
     </motion.div>
   )
 }
-
-export default Admin3DBackground

@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,9 +27,37 @@ import {
   Activity,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import Admin3DBackground from "@/components/admin-3d-background"
-import AdminEntranceAnimation from "@/components/admin-entrance-animation"
-import MotivationalMessage from "@/components/motivational-message"
+import NextDynamic from "next/dynamic"
+
+// Componentes carregados dinamicamente para evitar problemas de SSR
+const Admin3DBackground = NextDynamic(() => import("@/components/admin-3d-background"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-[-1] bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-blue-900" />
+  ),
+})
+
+const AdminEntranceAnimation = NextDynamic(() => import("@/components/admin-entrance-animation"), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+      <div className="text-center">
+        <div className="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center text-blue-900 font-bold text-4xl shadow-2xl mb-8">
+          CPM
+        </div>
+        <h1 className="text-4xl font-bold text-white mb-2">Colégio Privado da Matola</h1>
+        <p className="text-xl text-blue-200">Painel Administrativo</p>
+      </div>
+    </div>
+  ),
+})
+
+const MotivationalMessage = NextDynamic(() => import("@/components/motivational-message"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-4xl mx-auto mb-8 h-32 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg animate-pulse" />
+  ),
+})
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -35,6 +65,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [searchQuery, setSearchQuery] = useState("")
   const [showAnimation, setShowAnimation] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
   // Dados simulados
   const stats = {
@@ -84,14 +115,6 @@ export default function AdminDashboard() {
     },
   ]
 
-  const students = [
-    { id: 1, name: "Ana Maria Silva", class: "10ª Classe", status: "Ativo", photo: "/avatar-1.jpg" },
-    { id: 2, name: "Carlos Mendes", class: "12ª Classe", status: "Ativo", photo: "/avatar-2.jpg" },
-    { id: 3, name: "Beatriz Fonseca", class: "9ª Classe", status: "Ativo", photo: "/avatar-3.jpg" },
-    { id: 4, name: "Daniel Machava", class: "11ª Classe", status: "Ativo", photo: "/avatar-4.jpg" },
-    { id: 5, name: "Eduardo Tembe", class: "8ª Classe", status: "Pendente", photo: "/avatar-5.jpg" },
-  ]
-
   const upcomingEvents = [
     { id: 1, name: "Reunião de Professores", date: "15/05/2023", time: "14:00", location: "Sala de Conferências" },
     { id: 2, name: "Feira de Ciências", date: "22/05/2023", time: "09:00", location: "Pátio Central" },
@@ -99,6 +122,8 @@ export default function AdminDashboard() {
   ]
 
   useEffect(() => {
+    setMounted(true)
+
     const timer = setTimeout(() => {
       setLoading(false)
     }, 1000)
@@ -155,6 +180,20 @@ export default function AdminDashboard() {
         ease: "easeOut",
       },
     },
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+        <div className="text-center">
+          <div className="w-32 h-32 mx-auto bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center text-blue-900 font-bold text-4xl shadow-2xl mb-8">
+            CPM
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">Colégio Privado da Matola</h1>
+          <p className="text-xl text-blue-200">Painel Administrativo</p>
+        </div>
+      </div>
+    )
   }
 
   if (loading || showAnimation) {
@@ -239,7 +278,7 @@ export default function AdminDashboard() {
                 { id: "reports", icon: BarChart3, label: "Relatórios" },
                 { id: "settings", icon: Settings, label: "Configurações" },
                 { id: "logs", icon: Activity, label: "Logs do Sistema" },
-              ].map((item, index) => (
+              ].map((item) => (
                 <motion.div key={item.id} variants={itemVariants}>
                   <Button
                     variant={activeTab === item.id ? "default" : "ghost"}
@@ -249,8 +288,6 @@ export default function AdminDashboard() {
                         : "hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => setActiveTab(item.id)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                   >
                     <item.icon className="mr-2 h-5 w-5" />
                     {item.label}
@@ -270,10 +307,8 @@ export default function AdminDashboard() {
             >
               <Button
                 variant="outline"
-                className="w-full justify-start hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200"
+                className="w-full justify-start hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 bg-transparent"
                 onClick={() => router.push("/")}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
               >
                 <LogOut className="mr-2 h-5 w-5" />
                 Sair
@@ -340,24 +375,20 @@ export default function AdminDashboard() {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="flex items-center space-x-3"
               >
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    <motion.span
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                      className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-600"
-                    />
-                  </Button>
-                </motion.div>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  <motion.span
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                    className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-600"
+                  />
+                </Button>
 
                 <div className="flex items-center">
-                  <motion.div whileHover={{ scale: 1.05 }}>
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="/avatar-1.jpg" alt="Admin" />
-                      <AvatarFallback>AD</AvatarFallback>
-                    </Avatar>
-                  </motion.div>
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/avatar-1.jpg" alt="Admin" />
+                    <AvatarFallback>AD</AvatarFallback>
+                  </Avatar>
                   <div className="ml-2 hidden md:block">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Administrador</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">admin@escolaprivada.co.mz</p>
@@ -387,12 +418,10 @@ export default function AdminDashboard() {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                       Dashboard
                     </h1>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nova Admissão
-                      </Button>
-                    </motion.div>
+                    <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nova Admissão
+                    </Button>
                   </motion.div>
 
                   {/* Stats Cards */}
@@ -455,12 +484,9 @@ export default function AdminDashboard() {
                           <CardHeader className="pb-2">
                             <CardTitle className="text-lg flex items-center justify-between">
                               <span className="text-gray-700 dark:text-gray-200">{stat.title}</span>
-                              <motion.div
-                                whileHover={{ scale: 1.1, rotate: 5 }}
-                                className={`p-2 rounded-lg bg-gradient-to-r ${stat.gradient} text-white shadow-lg`}
-                              >
+                              <div className={`p-2 rounded-lg bg-gradient-to-r ${stat.gradient} text-white shadow-lg`}>
                                 <stat.icon className="h-5 w-5" />
-                              </motion.div>
+                              </div>
                             </CardTitle>
                           </CardHeader>
                           <CardContent>
@@ -502,11 +528,8 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.1, duration: 0.5 }}
                                 className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
-                                whileHover={{ scale: 1.02, x: 5 }}
                               >
-                                <motion.div whileHover={{ scale: 1.2, rotate: 5 }} className="flex-shrink-0 mt-1">
-                                  {activity.icon}
-                                </motion.div>
+                                <div className="flex-shrink-0 mt-1">{activity.icon}</div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {activity.description}
@@ -538,16 +561,12 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1, duration: 0.5 }}
                                 className="p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer"
-                                whileHover={{ scale: 1.02, y: -2 }}
                               >
                                 <div className="flex items-center justify-between mb-2">
                                   <h4 className="font-medium text-gray-900 dark:text-gray-100">{event.name}</h4>
-                                  <motion.span
-                                    whileHover={{ scale: 1.1 }}
-                                    className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-full"
-                                  >
+                                  <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-2 py-1 rounded-full">
                                     {event.date}
-                                  </motion.span>
+                                  </span>
                                 </div>
                                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                                   <Clock className="h-4 w-4 mr-1" />
@@ -591,12 +610,10 @@ export default function AdminDashboard() {
                       {activeTab === "settings" && "Configurações"}
                       {activeTab === "logs" && "Logs do Sistema"}
                     </h1>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Adicionar
-                      </Button>
-                    </motion.div>
+                    <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Adicionar
+                    </Button>
                   </motion.div>
 
                   <motion.div
@@ -636,7 +653,7 @@ export default function AdminDashboard() {
                           transition={{ delay: 0.8, duration: 0.5 }}
                           className="mt-6"
                         >
-                          <Button variant="outline" className="hover:bg-blue-50 hover:border-blue-200">
+                          <Button variant="outline" className="hover:bg-blue-50 hover:border-blue-200 bg-transparent">
                             Notificar quando estiver pronto
                           </Button>
                         </motion.div>
